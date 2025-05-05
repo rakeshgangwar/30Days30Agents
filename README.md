@@ -146,8 +146,14 @@ This project starts on [Start Date] and will continue for 30 consecutive days. F
 
 ## License
 
-[Choose appropriate license]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
-[Your contact information]
+Rakesh Gangwar
+Email: mail@rakeshgangwar.com
+GitHub: [github.com/rakeshgangwar](https://github.com/rakeshgangwar)
+LinkedIn: [linkedin.com/in/rakeshgangwar](https://linkedin.com/in/rakeshgangwar)
+Twitter/X: [@rakesh_gangwar1](https://x.com/rakesh_gangwar1)
+
+Feel free to reach out with questions, feedback, or collaboration opportunities related to this project!

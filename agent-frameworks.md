@@ -387,18 +387,465 @@ babyagi.run()
 
 ---
 
+## Cloudflare Agents
+
+### Overview
+Cloudflare Agents is an SDK for building and deploying always-online AI agents on Cloudflare's global network. It provides persistent state management, real-time communication, and scheduled task execution, making it ideal for creating agents that need to remain active and maintain context even when users disconnect.
+
+### Key Features
+- **Persistent State**: Built-in state management with an embedded SQL database
+- **WebSocket Support**: Real-time bidirectional communication with clients
+- **Scheduled Tasks**: Cron-like scheduling for autonomous operations
+- **AI Model Integration**: Support for various AI providers (OpenAI, Anthropic, Cloudflare Workers AI)
+- **Durable Objects**: Each agent runs on stateful, persistent compute instances
+- **Global Deployment**: Low-latency access from anywhere in the world
+- **Client Synchronization**: Automatic state synchronization between agents and clients
+
+### Best For
+- Always-online agents that need to maintain availability
+- Real-time applications requiring persistent connections
+- Agents needing to perform autonomous scheduled tasks
+- Applications requiring state persistence across user sessions
+- Agents that need to run for extended periods (minutes, hours, days)
+
+### Code Example
+```javascript
+import { Agent } from "agents";
+import { OpenAI } from "openai";
+
+export class ChatAgent extends Agent {
+  // Initial state for the agent
+  initialState = {
+    conversations: [],
+    preferences: {},
+    lastActive: null
+  };
+
+  // Handle incoming WebSocket connections
+  async onConnect(connection, ctx) {
+    // Send current state to the client
+    connection.send(JSON.stringify({
+      type: 'state',
+      state: this.state
+    }));
+  }
+
+  // Process incoming WebSocket messages
+  async onMessage(connection, message) {
+    const data = JSON.parse(message);
+    
+    if (data.type === 'query') {
+      // Update state with user message
+      this.setState({
+        ...this.state,
+        conversations: [
+          ...this.state.conversations,
+          { role: 'user', content: data.content, timestamp: new Date() }
+        ],
+        lastActive: new Date()
+      });
+      
+      // Process with AI model
+      await this.processWithAI(connection, data.content);
+    }
+  }
+
+  // Process query with AI model
+  async processWithAI(connection, query) {
+    // Connect to OpenAI
+    const openai = new OpenAI({
+      apiKey: this.env.OPENAI_API_KEY,
+    });
+
+    try {
+      // Stream the response
+      const stream = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: query }
+        ],
+        stream: true,
+      });
+
+      let fullResponse = '';
+      
+      // Stream chunks back to the client
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        if (content) {
+          fullResponse += content;
+          connection.send(JSON.stringify({ type: "chunk", content }));
+        }
+      }
+
+      // Update state with full AI response
+      this.setState({
+        ...this.state,
+        conversations: [
+          ...this.state.conversations,
+          { role: 'assistant', content: fullResponse, timestamp: new Date() }
+        ]
+      });
+
+      // Send completion message
+      connection.send(JSON.stringify({ type: "done" }));
+    } catch (error) {
+      connection.send(JSON.stringify({ type: "error", error: error.message }));
+    }
+  }
+
+  // Schedule daily task
+  async scheduleDaily() {
+    // Schedule task to run at midnight every day
+    await this.schedule("0 0 * * *", "dailySummary", {});
+  }
+
+  // Method that runs on schedule
+  async dailySummary() {
+    // Perform daily processing
+    console.log("Running daily summary for conversations");
+    
+    // Could generate summaries, send notifications, etc.
+  }
+}
+```
+
+### Resources
+- [Cloudflare Agents Documentation](https://developers.cloudflare.com/agents/)
+- [Getting Started Guide](https://developers.cloudflare.com/agents/getting-started/build-a-chat-agent)
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+
+---
+
+## LangGraph
+
+### Overview
+LangGraph is a framework built on top of LangChain that enables the creation of stateful, multi-agent applications using a graph-based approach. It excels at orchestrating complex flows with conditional logic, loops, and persistent state management.
+
+### Key Features
+- **Graph-Based Workflows**: Define agent workflows as directed graphs
+- **State Management**: Built-in state management for maintaining context
+- **Conditional Execution**: Dynamic branching based on agent outputs
+- **Human-in-the-Loop**: Easy integration of human feedback
+- **Fault Tolerance**: Resilient execution with error handling
+- **Declarative API**: Clear, declarative approach to defining workflows
+- **Tracing**: Built-in tracing for monitoring execution
+- **Memory Systems**: Both short-term and long-term memory capabilities
+
+### Best For
+- Complex, multi-step agent workflows
+- Applications requiring sophisticated conditional logic
+- Projects needing transparent reasoning steps
+- Human-AI collaboration systems
+- Systems requiring structured state management
+
+### Code Example
+```python
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, List, Annotated, Literal
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+
+# Define state schema
+class AgentState(TypedDict):
+    messages: List[dict]
+    next_step: str
+
+# Initialize model
+model = ChatOpenAI(model="gpt-3.5-turbo")
+
+# Create a graph
+graph = StateGraph(AgentState)
+
+# Define nodes for each step in the workflow
+def analyze_query(state: AgentState) -> AgentState:
+    """Analyze the user's query and determine the next step."""
+    messages = state["messages"]
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are a workflow analyzer. Determine if the user query requires research or can be answered directly."),
+        ("placeholder", "{messages}")
+    ])
+    response = model.invoke(prompt.format(messages=messages))
+    
+    if "research" in response.content.lower():
+        return {"messages": messages, "next_step": "research"}
+    else:
+        return {"messages": messages, "next_step": "answer"}
+
+def research_information(state: AgentState) -> AgentState:
+    """Research information to answer the query."""
+    messages = state["messages"]
+    # Add a message indicating research is being done
+    messages.append({"role": "system", "content": "Researching information..."})
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are a research agent. Find relevant information to answer the user's query."),
+        ("placeholder", "{messages}")
+    ])
+    response = model.invoke(prompt.format(messages=messages))
+    messages.append({"role": "system", "content": f"Research results: {response.content}"})
+    return {"messages": messages, "next_step": "answer"}
+
+def generate_answer(state: AgentState) -> AgentState:
+    """Generate a final answer based on the available information."""
+    messages = state["messages"]
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are a helpful assistant. Generate a comprehensive answer based on all available information."),
+        ("placeholder", "{messages}")
+    ])
+    response = model.invoke(prompt.format(messages=messages))
+    messages.append({"role": "assistant", "content": response.content})
+    return {"messages": messages, "next_step": "end"}
+
+# Add nodes to the graph
+graph.add_node("analyze", analyze_query)
+graph.add_node("research", research_information)
+graph.add_node("answer", generate_answer)
+
+# Define routing based on the next_step field
+def router(state: AgentState) -> str:
+    return state["next_step"]
+
+# Add conditional edges using the router
+graph.add_conditional_edges(
+    "analyze",
+    router,
+    {
+        "research": "research",
+        "answer": "answer"
+    }
+)
+
+# Connect remaining nodes to the end
+graph.add_edge("research", "answer")
+graph.add_edge("answer", END)
+
+# Compile the graph
+workflow = graph.compile()
+
+# Execute the graph with an initial state
+result = workflow.invoke({
+    "messages": [{"role": "user", "content": "What were the major AI breakthroughs in 2023?"}],
+    "next_step": "analyze"
+})
+
+print(result["messages"][-1]["content"])
+```
+
+### Resources
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
+- [GitHub Repository](https://github.com/langchain-ai/langgraph)
+- [LangGraph Examples](https://github.com/langchain-ai/langgraph/tree/main/examples)
+
+---
+
+## AutoGen
+
+### Overview
+AutoGen is a framework from Microsoft that enables the creation of conversational AI agents that can work together to solve tasks. It focuses on multi-agent conversations with built-in code generation and execution capabilities.
+
+### Key Features
+- **Multi-Agent Conversations**: Create systems of multiple agents that talk to each other
+- **Code Generation & Execution**: Built-in code interpreter for generating and running code
+- **Customizable Agents**: Highly configurable agent behaviors and personalities
+- **Human-Agent Collaboration**: Flexible human-in-the-loop interactions
+- **Group Chat Management**: Orchestrate conversations between multiple agents
+- **Workflow Orchestration**: Define complex workflows with agent interactions
+- **Studio Interface**: Visual interface for designing and monitoring agent systems
+- **Low-Code Builder**: Tools for creating agents with minimal coding
+
+### Best For
+- Multi-agent systems requiring conversational interaction
+- Projects involving code generation and execution
+- Tasks benefiting from multiple specialized agents
+- Applications needing flexible human involvement
+- Educational and collaborative AI systems
+
+### Code Example
+```python
+from autogen import AssistantAgent, UserProxyAgent, config_list_from_json
+
+# Load LLM configuration
+config_list = config_list_from_json("OAI_CONFIG_LIST")
+llm_config = {"config_list": config_list}
+
+# Create an assistant agent
+assistant = AssistantAgent(
+    name="Assistant",
+    llm_config=llm_config,
+    system_message="You are a helpful AI assistant."
+)
+
+# Create a researcher agent
+researcher = AssistantAgent(
+    name="Researcher",
+    llm_config=llm_config,
+    system_message="You are a researcher who excels at finding information and data analysis."
+)
+
+# Create a coder agent
+coder = AssistantAgent(
+    name="Coder",
+    llm_config=llm_config,
+    system_message="You are a Python programmer who writes clean, efficient code."
+)
+
+# Create a user proxy agent with code execution capability
+user_proxy = UserProxyAgent(
+    name="User",
+    human_input_mode="TERMINATE",  # Set to "ALWAYS" to require human input for all messages
+    max_consecutive_auto_reply=10,
+    code_execution_config={
+        "work_dir": "coding",
+        "use_docker": False  # Set to True to run code in a Docker container
+    }
+)
+
+# Create a group chat
+groupchat = autogen.GroupChat(
+    agents=[user_proxy, assistant, researcher, coder],
+    messages=[],
+    max_round=20
+)
+manager = autogen.GroupChatManager(groupchat=groupchat)
+
+# Start the conversation
+user_proxy.initiate_chat(
+    manager,
+    message="Create a Python script that analyzes a dataset of stock prices and visualizes the trends over time."
+)
+```
+
+### Resources
+- [AutoGen Documentation](https://microsoft.github.io/autogen/)
+- [GitHub Repository](https://github.com/microsoft/autogen)
+- [AutoGen Examples](https://github.com/microsoft/autogen/tree/main/examples)
+
+---
+
+## DSPy
+
+### Overview
+DSPy is a framework for programming with foundation models (LLMs), focused on optimizing prompts and language model programs. It provides a structured way to define, optimize, and compose language model modules based on examples and metrics.
+
+### Key Features
+- **Program Optimization**: Systematic optimization of language model programs
+- **Declarative Programming**: Express language model tasks declaratively
+- **Module Composition**: Compose optimized modules into larger programs
+- **Teleprompter**: Automatically optimize prompts based on examples
+- **Signatures**: Define clear input and output structures
+- **Imperative API**: Combine declarative and imperative programming
+- **Compilation**: Compiler-like transformations for LM programs
+- **Metrics-Driven**: Optimize based on specific evaluation metrics
+
+### Best For
+- Performance-critical applications requiring optimized prompts
+- Complex reasoning tasks needing structured decomposition
+- Projects requiring systematic prompt engineering
+- Applications where task success can be clearly measured
+- Educational and research contexts for LLM optimization
+
+### Code Example
+```python
+import dspy
+
+# Configure the language model
+dspy.settings.configure(lm=dspy.OpenAI(model="gpt-3.5-turbo"))
+
+# Define input and output types
+class Question(dspy.InputField):
+    """The question to be answered."""
+
+class Answer(dspy.OutputField):
+    """The answer to the question."""
+
+class Reasoning(dspy.OutputField):
+    """The step-by-step reasoning process."""
+
+# Define a simple question-answering module
+class QAModule(dspy.Module):
+    def __init__(self):
+        super().__init__()
+        # Create a predictor with chain-of-thought reasoning
+        self.predictor = dspy.ChainOfThought(
+            Question, 
+            Reasoning, 
+            Answer
+        )
+    
+    def forward(self, question):
+        # Use the predictor to generate an answer with reasoning
+        output = self.predictor(Question=question)
+        return {
+            "reasoning": output.Reasoning,
+            "answer": output.Answer
+        }
+
+# Create and use the module
+qa = QAModule()
+result = qa("What is the capital of France?")
+print(f"Reasoning: {result['reasoning']}")
+print(f"Answer: {result['answer']}")
+
+# Define some training examples
+examples = [
+    dspy.Example(
+        question="What is the capital of France?",
+        answer="The capital of France is Paris."
+    ),
+    dspy.Example(
+        question="What is the tallest mountain in the world?",
+        answer="The tallest mountain in the world is Mount Everest."
+    )
+]
+
+# Define a simple evaluation metric
+def accuracy_metric(example, prediction):
+    correct_answer = example.answer.lower()
+    predicted_answer = prediction.answer.lower()
+    return correct_answer in predicted_answer
+
+# Optimize the module using the Teleprompter
+teleprompter = dspy.Teleprompter(metric=accuracy_metric)
+optimized_qa = teleprompter.optimize(
+    QAModule(),
+    trainset=examples,
+    num_trials=5,
+    max_bootstrapped_demos=3
+)
+
+# Use the optimized module
+optimized_result = optimized_qa("What is the largest ocean on Earth?")
+print(f"Optimized reasoning: {optimized_result['reasoning']}")
+print(f"Optimized answer: {optimized_result['answer']}")
+```
+
+### Resources
+- [DSPy Documentation](https://dspy-docs.vercel.app/)
+- [GitHub Repository](https://github.com/stanfordnlp/dspy)
+- [DSPy Paper](https://arxiv.org/abs/2310.03714)
+
+---
+
 ## Framework Comparison
 
-| Feature | LangChain | LlamaIndex | CrewAI | AutoGPT | Semantic Kernel | BabyAGI |
-|---------|-----------|------------|--------|---------|-----------------|--------|
-| **Maturity** | High | High | Medium | Medium | High | Low |
-| **Documentation** | Extensive | Good | Growing | Basic | Extensive | Minimal |
-| **Ease of Use** | Medium | Medium | Easy | Complex | Medium | Easy |
-| **Flexibility** | Very High | High | Medium | High | High | Low |
-| **Community** | Large | Growing | Small | Large | Medium | Small |
-| **Multi-Agent** | Supported | Basic | Core Feature | Limited | Supported | No |
-| **RAG Support** | Strong | Excellent | Via LangChain | Basic | Good | Basic |
-| **Enterprise Ready** | Yes | Yes | Not Yet | No | Yes | No |
+| Feature | LangChain | LlamaIndex | CrewAI | AutoGPT | Semantic Kernel | BabyAGI | Cloudflare Agents | LangGraph | AutoGen | DSPy |
+|---------|-----------|------------|--------|---------|-----------------|---------|-------------------|-----------|---------|------|
+| **Maturity** | High | High | Medium | Medium | High | Low | Medium | Medium | Medium | Medium |
+| **Documentation** | Extensive | Good | Growing | Basic | Extensive | Minimal | Good | Good | Good | Good |
+| **Ease of Use** | Medium | Medium | Easy | Complex | Medium | Easy | Medium | Medium | Medium | Medium |
+| **Flexibility** | Very High | High | Medium | High | High | Low | High | High | High | High |
+| **Community** | Large | Growing | Small | Large | Medium | Small | Growing | Growing | Growing | Growing |
+| **Multi-Agent** | Supported | Basic | Core Feature | Limited | Supported | No | Supported | Excellent | Core Feature | No |
+| **RAG Support** | Strong | Excellent | Via LangChain | Basic | Good | Basic | Via Integration | Good | Via Integration | Good |
+| **Enterprise Ready** | Yes | Yes | Not Yet | No | Yes | No | Yes | Yes | Yes | Yes |
+| **Always-Online** | No | No | No | No | No | No | Yes | No | No | No |
+| **State Persistence** | Limited | Limited | Limited | Limited | Limited | Limited | Excellent | Excellent | Limited | No |
+| **Language** | Python | Python | Python | Python | Multi-language | Python | JavaScript | Python | Python | Python |
+| **Workflow Orchestration** | Limited | Limited | Basic | No | Basic | No | No | Excellent | Yes | Yes |
+| **Prompt Optimization** | No | No | No | No | No | No | No | No | No | Excellent |
+| **Code Interpreter** | Via Tool | Via Tool | Via Tool | Limited | Via Tool | No | No | Via Tool | Built-in | Via Tool |
+| **Human-in-the-loop** | Limited | Limited | No | Limited | Limited | No | No | Yes | Yes | No |
 
 ## Framework Selection Guide
 
@@ -438,6 +885,36 @@ babyagi.run()
 - Your project requires basic task generation and execution
 - You want to build a custom agent framework from a simple base
 
+### When to Choose Cloudflare Agents
+- You need agents that remain available 24/7
+- Your project requires persistent state across user sessions
+- You need real-time communication via WebSockets
+- You want agents that can perform scheduled tasks autonomously
+- You need global low-latency deployment
+- You prefer JavaScript/TypeScript development
+
+### When to Choose LangGraph
+- You need structured, graph-based workflow orchestration
+- Your agent requires complex conditional logic and branching
+- Your application needs robust state management
+- You want clear visualization of agent decision processes
+- You need human-in-the-loop capabilities
+- You're building on top of the LangChain ecosystem
+
+### When to Choose AutoGen
+- You need multiple agents that can have conversations with each other
+- Your application requires code generation and execution
+- You want flexible human-in-the-loop collaboration
+- You need a group chat-like interaction between specialized agents
+- Your project benefits from a visual studio interface
+
+### When to Choose DSPy
+- You need to systematically optimize prompts for performance
+- Your project requires precise definition of module interfaces
+- You have examples that can be used to optimize your agent
+- You need to implement complex reasoning with clear steps
+- You want a metrics-driven approach to improving agent performance
+
 ## Hybrid Approaches
 
 For many complex projects, combining frameworks can provide the best results:
@@ -450,8 +927,16 @@ For many complex projects, combining frameworks can provide the best results:
 
 4. **AutoGPT principles + LangChain**: Implement autonomous behavior using LangChain's agent framework
 
+5. **LangChain/LlamaIndex + Cloudflare Agents**: Implement agent logic with Python frameworks and deploy on Cloudflare for always-online capabilities
+
+6. **LangGraph + AutoGen**: Use LangGraph for workflow orchestration and AutoGen for multi-agent conversation
+
+7. **DSPy + LangChain**: Use DSPy to optimize critical prompts and LangChain for overall agent structure
+
+8. **AutoGen + Cloudflare Agents**: Design conversation flows with AutoGen and deploy on Cloudflare for persistence
+
 ## Conclusion
 
 Choosing the right framework depends on your specific project requirements, technical expertise, and the nature of the agents you want to build. For the "30 AI Agents in 30 Days" project, experimenting with different frameworks will provide valuable insights into their strengths and weaknesses.
 
-Consider starting with simpler frameworks like LangChain or LlamaIndex for the first week, then progressing to more specialized frameworks as you build more complex agents. This approach will help you develop a comprehensive understanding of the AI agent ecosystem while creating a diverse portfolio of agents.
+Consider starting with simpler frameworks like LangChain or LlamaIndex for the first week, then progressing to more specialized frameworks as you build more complex agents. For agents with complex workflows, try LangGraph; for multi-agent conversations, use AutoGen; for optimizing performance-critical components, incorporate DSPy; and for agents that need to be always available, deploy with Cloudflare Agents. This approach will help you develop a comprehensive understanding of the AI agent ecosystem while creating a diverse portfolio of agents.
