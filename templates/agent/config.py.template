@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Configuration settings for [Agent Name].
+
+This module contains all the configuration parameters and settings
+for the agent, including model parameters, API settings, and
+any other customizable options.
+"""
+
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Model settings
+MODEL_NAME = "gpt-3.5-turbo"  # Default model, can be overridden
+TEMPERATURE = 0.7  # Default temperature setting
+MAX_TOKENS = 1000  # Maximum tokens in response
+
+# API keys (loaded from environment variables)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+# Vector database settings
+VECTOR_DB_TYPE = "chroma"  # Options: chroma, pinecone, faiss, etc.
+VECTOR_DB_PATH = "./data/vectordb"  # Local path for databases like Chroma
+
+# Agent-specific settings
+AGENT_NAME = "[Agent Name]"
+AGENT_DESCRIPTION = "[Brief description of the agent]"
+
+# Prompt templates
+SYSTEM_PROMPT = """
+You are {agent_name}, an AI assistant that {agent_description}.
+
+[Additional instructions or context for the agent]
+"""
+
+# File paths
+DATA_DIR = "./data"
+LOG_DIR = "./logs"
+OUTPUT_DIR = "./output"
+
+# Create directories if they don't exist
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(LOG_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# Logging configuration
+LOG_LEVEL = "INFO"  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_FILE = os.path.join(LOG_DIR, "agent.log")
+
+# UI settings (if applicable)
+UI_THEME = "light"  # Options: light, dark
+UI_PORT = 8501  # Default port for Streamlit
+
+# Additional custom settings for this specific agent
+# [Add any agent-specific settings here]
