@@ -1,0 +1,38 @@
+# Build directories
+build/
+dist/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS specific files
+.DS_Store
+
+# PyInstaller files
+*.manifest
+
+# Icon build artifacts
+icons/*.png
+
+# Distribution / packaging
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Configuration files that might contain personal data
+*.json
+!package.json
+
+# Logs
+*.log
