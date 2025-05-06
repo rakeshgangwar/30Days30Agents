@@ -16,16 +16,55 @@ In this challenge, I'll create one new AI agent each day for 30 days. Each agent
 
 ## Project Structure
 
-Each day's agent will be organized in its own directory following this structure:
+The project is currently organized as follows:
+
+```
+/30Days30Agents/
+  ├── README.md                  # Main project documentation
+  ├── daily-progress-tracker.md  # Daily progress tracking
+  ├── references.md              # Project references and resources
+  ├── .gitignore                 # Git ignore file
+  ├── .roomodes                  # Environment configuration
+  │
+  ├── agents/                    # All 30 daily agents (currently in specification phase)
+  │   ├── Day-01-Personal-Assistant/
+  │   │   └── agent-spec.md      # Agent specifications and requirements
+  │   ├── Day-02-Research-Assistant/
+  │   │   └── agent-spec.md
+  │   ├── ...
+  │   └── Day-30-Personal-AI-Hub/
+  │       └── agent-spec.md
+  │
+  ├── guides/                    # Project guides and documentation
+  │   ├── custom-modes-guide.md
+  │   └── project-preparation.md
+  │
+  ├── templates/                 # Templates for new agent creation
+  │   └── agent/
+  │       ├── .env.template
+  │       ├── config.py.template
+  │       ├── main.py.template
+  │       ├── README.md.template
+  │       └── requirements.txt.template
+  │
+  └── toolkit/                   # Tools and frameworks documentation
+      ├── agent-frameworks.md
+      ├── mcp.md
+      ├── tools-analysis.md
+      └── tools.md
+```
+
+The project is currently in the planning and specification phase. As implementation progresses, each agent directory will be populated with the following structure:
 
 ```
 /Day-XX-AgentName/
-  ├── README.md       # Description, features, and usage instructions
-  ├── requirements.txt # Dependencies
-  ├── main.py         # Main implementation
-  ├── config.py       # Configuration settings
-  ├── utils/          # Helper functions and utilities
-  └── assets/         # Any additional resources
+  ├── README.md         # Documentation, features, and usage instructions
+  ├── agent-spec.md     # Agent specification and requirements
+  ├── requirements.txt  # Dependencies
+  ├── main.py           # Main implementation
+  ├── config.py         # Configuration settings
+  ├── utils/            # Helper functions and utilities
+  └── assets/           # Additional resources (images, datasets, etc.)
 ```
 
 ## Project Timeline and Agent Ideas
