@@ -146,7 +146,7 @@ This project starts on [Start Date] and will continue for 30 consecutive days. F
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+[License Information]
 
 ## Contact
 

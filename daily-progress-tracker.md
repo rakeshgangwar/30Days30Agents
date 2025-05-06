@@ -119,3 +119,25 @@ Brief description of what this agent does and its key features.
 ### Most Challenging Agents
 
 ### Next Steps After This Project
+
+## Success Metrics Tracking
+
+Use this section or integrate into daily entries to track progress against the defined success metrics:
+
+*   **Completion Rate:**
+    *   Update daily: Mark agent as 'Completed' or 'In Progress'.
+    *   Calculate final % at the end.
+*   **Functionality & Quality:**
+    *   Daily Check: Note if core requirements met for the day's agent.
+    *   End-of-Challenge Review: Subjective assessment (e.g., 1-5 scale).
+    *   Bug Tracking: Note any bugs found/fixed during or after development.
+*   **Learning & Skill Development:**
+    *   Daily Reflection: Note new frameworks/tools used or concepts learned.
+    *   End-of-Challenge Review: Self-assess overall skill improvement.
+*   **Documentation & Code Quality:**
+    *   Daily Check: Confirm README/spec updated.
+    *   End-of-Challenge Review: Assess overall quality.
+*   **Timeliness:**
+    *   Daily Check: Mark if completed on schedule. Note delays.
+*   **Community Engagement (If applicable):**
+    *   Note any posts shared or feedback received.
