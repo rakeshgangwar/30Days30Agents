@@ -67,6 +67,8 @@ def main():
     print("  - Setting reminders and tasks")
     print("  - Answering general knowledge questions")
     print("  - Finding recent news")
+    print("  - Searching the web for current information")
+    print("  - Finding specific news articles on topics")
     print("\nType 'exit', 'quit', or 'bye' to end the conversation.")
     print("="*50 + "\n")
 

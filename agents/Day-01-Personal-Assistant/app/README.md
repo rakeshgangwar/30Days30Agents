@@ -8,7 +8,7 @@ The Personal Assistant is a foundation agent that handles basic personal assista
 
 ## Architecture
 
-This implementation follows the architecture outlined in `../architecture.md`, featuring:
+This implementation follows the architecture outlined in `../docs/architecture.md`, featuring:
 
 - A hierarchical memory system (working, short-term, and long-term memory)
 - Intent classification and entity extraction for query understanding

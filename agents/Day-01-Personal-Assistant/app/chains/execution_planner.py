@@ -66,6 +66,8 @@ Available tools:
 - wikipedia_tool: For general knowledge queries (params: query, limit)
 - news_tool: For recent news headlines (params: query, category, country, page_size)
 - topic_news_tool: For topic-specific news (params: topic, days, page_size)
+- exa_search_tool: For searching the web for current information (params: query, num_results)
+- exa_news_search_tool: For searching recent news articles (params: query, num_results)
 - todoist_create_task: For creating reminders/tasks (params: content, due_string, priority, description)
 - todoist_list_tasks: For listing reminders/tasks (params: filter, limit)
 - todoist_complete_task: For completing reminders/tasks (params: task_id)
@@ -88,6 +90,12 @@ For WEATHER intent:
 For GENERAL_QUESTION intent:
 - Use the wikipedia_tool with the main topic as the query parameter
 - Limit results to 3 unless specified otherwise
+
+For WEB_SEARCH intent:
+- Use the exa_search_tool for general web searches
+- Use the exa_news_search_tool for news-specific searches
+- Set num_results to 5 unless specified otherwise
+- If is_news_search is true, use exa_news_search_tool instead of exa_search_tool
 
 EXAMPLES:
 
@@ -124,7 +132,39 @@ EXAMPLES:
   "missing_information": []
 }
 ```
-3. If information is missing:
+3. For a web search query:
+```json
+{
+  "steps": [
+    {
+      "tool": "exa_search_tool",
+      "parameters": {
+        "query": "latest developments in quantum computing",
+        "num_results": 5
+      }
+    }
+  ],
+  "missing_information": []
+}
+```
+
+4. For a news search query:
+```json
+{
+  "steps": [
+    {
+      "tool": "exa_news_search_tool",
+      "parameters": {
+        "query": "latest news about climate change",
+        "num_results": 5
+      }
+    }
+  ],
+  "missing_information": []
+}
+```
+
+5. If information is missing:
 ```json
 {
   "steps": [],
@@ -183,23 +223,23 @@ class ExecutionPlannerChain:
         # Ensure the plan has the required keys
         if "steps" not in execution_plan:
             execution_plan["steps"] = []
-        
+
         if "missing_information" not in execution_plan:
             execution_plan["missing_information"] = []
-        
+
         return execution_plan
-        
+
     def _convert_priority(self, priority) -> int:
         """Convert priority from various formats to integer (1-4)."""
         # If priority is already an integer, just return it (ensuring it's in the valid range)
         if isinstance(priority, int):
             return max(1, min(4, priority))  # Clamp between 1 and 4
-        
+
         # Handle string priority formats like 'p1', 'P1', '1', etc.
         if isinstance(priority, str):
             # Remove any non-alphanumeric characters
             priority = ''.join(c for c in priority if c.isalnum())
-            
+
             # Handle 'p1', 'P1' format (p1 = highest = 4, p4 = lowest = 1)
             if priority.lower().startswith('p') and len(priority) > 1:
                 try:
@@ -209,20 +249,20 @@ class ExecutionPlannerChain:
                     return max(1, min(4, 5 - num))
                 except ValueError:
                     pass  # Fall through to default
-            
+
             # Try to parse as a direct integer
             try:
                 return max(1, min(4, int(priority)))
             except ValueError:
                 pass  # Fall through to default
-        
+
         # Default to medium priority (2) if conversion fails
         return 2
-        
+
     def _format_reminder_task(self, execution_plan: Dict[str, Any]) -> Dict[str, Any]:
         """Format the task content for reminders to use proper title case."""
         steps = execution_plan.get("steps", [])
-        
+
         for i, step in enumerate(steps):
             # Check if this is a todoist_create_task step
             if isinstance(step, dict) and step.get("tool") == "todoist_create_task":
@@ -241,7 +281,7 @@ class ExecutionPlannerChain:
                             step.parameters["content"] = step.parameters["content"].capitalize()
                     else:
                         step.parameters.content = step.parameters.content.capitalize()
-        
+
         execution_plan["steps"] = steps
         return execution_plan
 
@@ -279,7 +319,7 @@ class ExecutionPlannerChain:
                     time = reminder_entities.get("time")
                     date = reminder_entities.get("date")
                     raw_priority = reminder_entities.get("priority", 2)  # Default priority
-                    
+
                     # Convert priority from string format (p1, p2, etc.) to integer (1-4)
                     priority = self._convert_priority(raw_priority)
 
@@ -345,6 +385,65 @@ class ExecutionPlannerChain:
                         ],
                         "missing_information": []
                     }
+
+                # Create a hardcoded execution plan for WEB_SEARCH intent
+                elif intent == "WEB_SEARCH":
+                    web_search_entities = entities.get("WEB_SEARCH", {})
+                    search_query = web_search_entities.get("query", query)
+                    num_results = web_search_entities.get("num_results", 5)
+                    is_news_search = web_search_entities.get("is_news_search", False)
+
+                    # Determine which tool to use based on whether it's a news search
+                    tool_name = "exa_news_search_tool" if is_news_search else "exa_search_tool"
+
+                    # Create a plan with the appropriate Exa search tool
+                    plan_dict = {
+                        "steps": [
+                            {
+                                "tool": tool_name,
+                                "parameters": {
+                                    "query": search_query,
+                                    "num_results": num_results
+                                }
+                            }
+                        ],
+                        "missing_information": []
+                    }
+
+                # Create a hardcoded execution plan for NEWS intent
+                elif intent == "NEWS":
+                    news_entities = entities.get("NEWS", {})
+                    topic = news_entities.get("topic")
+
+                    # If it's a specific news topic, use the Exa news search tool
+                    if topic:
+                        plan_dict = {
+                            "steps": [
+                                {
+                                    "tool": "exa_news_search_tool",
+                                    "parameters": {
+                                        "query": f"latest news about {topic}",
+                                        "num_results": 5
+                                    }
+                                }
+                            ],
+                            "missing_information": []
+                        }
+                    else:
+                        # Use the regular news tool for general news
+                        plan_dict = {
+                            "steps": [
+                                {
+                                    "tool": "news_tool",
+                                    "parameters": {
+                                        "category": "general",
+                                        "country": "us",
+                                        "page_size": 5
+                                    }
+                                }
+                            ],
+                            "missing_information": []
+                        }
 
                 # Default plan for other intents
                 else:

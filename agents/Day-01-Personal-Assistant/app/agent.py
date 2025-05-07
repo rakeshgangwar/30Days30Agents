@@ -36,6 +36,7 @@ from tools.weather_tool import WeatherTool, ForecastTool
 from tools.wikipedia_tool import WikipediaTool
 from tools.news_tool import NewsTool, TopicNewsTool
 from tools.todoist_tool import TodoistCreateTool, TodoistListTool, TodoistCompleteTool
+from tools.exa_search_tool import ExaSearchTool, ExaNewsSearchTool
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -119,7 +120,9 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
             "topic_news_tool": TopicNewsTool(),
             "todoist_create_task": TodoistCreateTool(),
             "todoist_list_tasks": TodoistListTool(),
-            "todoist_complete_task": TodoistCompleteTool()
+            "todoist_complete_task": TodoistCompleteTool(),
+            "exa_search_tool": ExaSearchTool(),
+            "exa_news_search_tool": ExaNewsSearchTool()
         }
 
         # Set up response template

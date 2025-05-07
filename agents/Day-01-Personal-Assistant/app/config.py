@@ -26,6 +26,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 TODOIST_API_KEY = os.getenv("TODOIST_API_KEY")
+EXA_API_KEY = os.getenv("EXA_API_KEY")
 
 # Agent-specific settings
 AGENT_NAME = "Personal Assistant"
@@ -85,6 +86,7 @@ WEATHER_API_BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"
 NEWS_API_BASE_URL = "https://newsapi.org/v2/top-headlines"
 WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php"
+EXA_API_BASE_URL = "https://api.exa.ai"  # Base URL for Exa API
 
 # Initialize defaults
 init_user_preferences()

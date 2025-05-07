@@ -41,6 +41,7 @@ dependencies = [
     # Security
     "cryptography>=44.0.3",
     "langgraph>=0.4.2",
+    "langchain-exa>=0.2.1",
 ]
 
 [project.scripts]

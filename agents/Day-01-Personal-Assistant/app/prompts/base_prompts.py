@@ -18,6 +18,8 @@ You have access to the following tools:
 2. Wikipedia API - For retrieving general knowledge
 3. News API - For getting recent news
 4. Todoist API - For setting reminders and tasks
+5. Exa Search - For searching the web for current information and general knowledge
+6. Exa News Search - For searching recent news articles on specific topics
 
 USER PREFERENCES:
 {user_preferences}
@@ -40,6 +42,7 @@ INTENT_CLASSIFICATION_PROMPT = """Analyze the following user query and determine
 - REMINDER: Setting a reminder or task
 - GENERAL_QUESTION: Asking a factual or knowledge question
 - NEWS: Requesting news information
+- WEB_SEARCH: Searching for current information on the web
 - PREFERENCE: Setting or changing user preferences
 - GREETING: General greeting or chitchat
 - UNKNOWN: Unable to determine intent
@@ -59,6 +62,7 @@ Extract the following entities as applicable for the intent:
 - REMINDER: task, time, date, priority
 - GENERAL_QUESTION: topic, specific_question
 - NEWS: topic, source, timeframe
+- WEB_SEARCH: query, num_results, is_news_search
 - PREFERENCE: setting, value
 
 Return the entities in JSON format. Include null for any entity that is not present in the query.
