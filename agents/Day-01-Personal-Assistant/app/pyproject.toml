@@ -50,6 +50,7 @@ dependencies = [
 personal-assistant = "personal_assistant.main:main"
 personal-assistant-cli = "personal_assistant.cli:main"
 personal-assistant-streamlit = "personal_assistant.streamlit_app:main"
+personal-assistant-telegram = "personal_assistant.telegram_bot:main"
 
 [build-system]
 requires = ["hatchling"]

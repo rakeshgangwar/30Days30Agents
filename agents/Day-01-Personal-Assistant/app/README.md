@@ -14,7 +14,7 @@ This implementation follows the architecture outlined in `../docs/architecture.m
 - Intent classification and entity extraction for query understanding
 - Execution planning for orchestrating tool use
 - Multiple tool integrations (Weather, Wikipedia, News, Todoist)
-- Adaptable interfaces (CLI and Streamlit)
+- Adaptable interfaces (CLI, Streamlit, and Telegram)
 
 ## Features
 
@@ -22,7 +22,10 @@ This implementation follows the architecture outlined in `../docs/architecture.m
 - Information retrieval from multiple sources (Weather API, Wikipedia, News API)
 - Basic memory to track user preferences
 - Task management through Todoist integration
-- Both command-line and web-based user interfaces
+- Multiple user interfaces:
+  - Command-line interface
+  - Web-based interface (Streamlit)
+  - Telegram bot interface
 
 ## Directory Structure
 
@@ -34,6 +37,7 @@ app/
 ├── interface_adapter.py # Interface abstraction
 ├── cli.py              # Command-line interface
 ├── streamlit_app.py    # Web interface using Streamlit
+├── telegram_bot.py     # Telegram bot interface
 ├── requirements.txt    # Dependencies
 ├── README.md           # This file
 ├── chains/             # Chain components
@@ -70,7 +74,7 @@ app/
 
    # Create a virtual environment
    uv venv
-   
+
    # Activate the virtual environment
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
@@ -92,6 +96,8 @@ app/
    WEATHER_API_KEY=your_weather_api_key
    NEWS_API_KEY=your_news_api_key
    TODOIST_API_KEY=your_todoist_api_key
+   EXA_API_KEY=your_exa_api_key
+   TELEGRAM_BOT_TOKEN=your_telegram_bot_token
    ```
 
    You can copy the .env.example file and fill in your API keys:
@@ -149,6 +155,21 @@ python -m streamlit run app.streamlit_app
 # Or run the script directly
 streamlit run streamlit_app.py
 ```
+
+#### Telegram Bot Interface
+
+```bash
+# If you've installed the package
+python -m app.telegram_bot
+
+# Or run the script directly
+python telegram_bot.py
+
+# Or use the convenience script
+./run_telegram_bot.sh
+```
+
+For detailed instructions on setting up the Telegram bot, see [docs/telegram_setup.md](docs/telegram_setup.md).
 
 ## Usage Examples
 
@@ -229,7 +250,7 @@ If you see import errors like `ModuleNotFoundError: No module named 'app'`, ensu
    # To run directly
    cd agents/Day-01-Personal-Assistant
    python -m app.main
-   
+
    # To run after installation
    personal-assistant
    ```
