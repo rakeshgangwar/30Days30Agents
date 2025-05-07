@@ -16,17 +16,16 @@ import streamlit as st
 from dotenv import load_dotenv
 
 # Import from the app package
-from app.agent import create_agent
-from app.memory import HierarchicalMemory
-from app.interface_adapter import InterfaceAdapter
-from app.config import UI_PORT, UI_THEME, init_user_preferences, USER_PREFERENCES_PATH
+from agent import create_agent
+from memory import HierarchicalMemory
+from interface_adapter import InterfaceAdapter
+from config import UI_PORT, UI_THEME, init_user_preferences, USER_PREFERENCES_PATH
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("streamlit_interface.log"),
         logging.StreamHandler(sys.stdout)
     ]
 )
