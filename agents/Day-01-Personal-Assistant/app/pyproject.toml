@@ -39,6 +39,7 @@ dependencies = [
     # Security
     "cryptography>=41.0.3",
     "langchain-community>=0.3.23",
+    "langchain-openai>=0.3.16",
 ]
 
 [project.scripts]

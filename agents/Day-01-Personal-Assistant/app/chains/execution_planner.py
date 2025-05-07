@@ -13,7 +13,7 @@ import json
 from typing import Dict, Any, List
 
 from langchain.chains import LLMChain
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 import sys

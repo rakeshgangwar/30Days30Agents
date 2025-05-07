@@ -21,7 +21,7 @@ from langchain.schema import AgentAction, AgentFinish
 from langchain.tools import BaseTool
 from langchain.callbacks.manager import CallbackManagerForChainRun
 from langchain.prompts import PromptTemplate
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 # Import local modules
 from config import MODEL_NAME, TEMPERATURE, OPENAI_API_KEY, SYSTEM_PROMPT

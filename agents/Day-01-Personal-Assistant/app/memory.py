@@ -16,7 +16,7 @@ import logging
 from typing import Dict, Any, List
 
 from langchain.memory import ConversationBufferWindowMemory, ConversationSummaryMemory
-from langchain_community.llms import OpenAI
+from langchain_openai import ChatOpenAI
 
 from config import (
     OPENAI_API_KEY,
@@ -44,7 +44,7 @@ class HierarchicalMemory:
             chat_history_window_size (int): Number of recent messages to keep in working memory
         """
         # Initialize LLM for summary generation
-        self.llm = OpenAI(
+        self.llm = ChatOpenAI(
             model_name=MODEL_NAME,
             temperature=TEMPERATURE,
             openai_api_key=OPENAI_API_KEY
