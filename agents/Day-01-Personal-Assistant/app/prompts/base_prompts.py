@@ -65,6 +65,15 @@ Extract the following entities as applicable for the intent:
 - WEB_SEARCH: query, num_results, is_news_search
 - PREFERENCE: setting, value
 
+IMPORTANT: For WEB_SEARCH intent, if the query contains pronouns like "it", "this", "that", or phrases like "latest information about it", you must replace these references with the specific topic from the previous conversation.
+
+For example:
+- If the previous conversation was about "India-Pakistan relations" and the current query is "search for the latest information", then the search query should be "latest information about India-Pakistan relations"
+- If the previous conversation was about "climate change" and the current query is "fetch latest information about it", then the search query should be "latest information about climate change"
+- If the previous conversation was about "Why did India attack Pakistan" and the current query mentions "it", then "it" refers to "India-Pakistan conflict" or "India attacking Pakistan"
+
+Always resolve pronouns and vague references to specific topics from the previous conversation.
+
 Return the entities in JSON format. Include null for any entity that is not present in the query.
 
 ENTITIES:"""

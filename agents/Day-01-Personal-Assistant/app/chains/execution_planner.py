@@ -390,7 +390,10 @@ class ExecutionPlannerChain:
                 elif intent == "WEB_SEARCH":
                     web_search_entities = entities.get("WEB_SEARCH", {})
                     search_query = web_search_entities.get("query", query)
-                    num_results = web_search_entities.get("num_results", 5)
+                    num_results = web_search_entities.get("num_results")
+                    # Ensure num_results is always an integer with a default value
+                    if num_results is None or not isinstance(num_results, int):
+                        num_results = 5
                     is_news_search = web_search_entities.get("is_news_search", False)
 
                     # Determine which tool to use based on whether it's a news search

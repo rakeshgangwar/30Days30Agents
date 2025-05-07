@@ -154,6 +154,178 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
         """Return the output keys produced by the agent."""
         return ["output"]
 
+    def _detect_sensitive_info(self, text: str) -> bool:
+        """
+        Detect if the input contains sensitive information.
+
+        This checks for common patterns of sensitive information like
+        passwords, credit card numbers, SSNs, etc.
+
+        Args:
+            text (str): The text to check
+
+        Returns:
+            bool: True if sensitive information is detected
+        """
+        # Skip empty inputs
+        if not text.strip():
+            return False
+
+        # Check for common sensitive information patterns
+        sensitive_patterns = [
+            "password is", "my password",
+            "credit card", "card number",
+            "social security", "ssn",
+            "bank account", "account number",
+            "address is", "home address",
+            "phone number", "my phone",
+            "secret", "confidential"
+        ]
+
+        text_lower = text.lower()
+        for pattern in sensitive_patterns:
+            if pattern in text_lower:
+                return True
+
+        # Check for credit card number pattern (4+ groups of 4 digits)
+        import re
+        cc_pattern = re.compile(r'\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}')
+        if cc_pattern.search(text):
+            return True
+
+        # Check for SSN pattern (XXX-XX-XXXX)
+        ssn_pattern = re.compile(r'\d{3}[- ]?\d{2}[- ]?\d{4}')
+        if ssn_pattern.search(text):
+            return True
+
+        return False
+
+    def _handle_sensitive_info(self, text: str) -> str:
+        """
+        Generate a response for input containing sensitive information.
+
+        Args:
+            text (str): The input with sensitive information
+
+        Returns:
+            str: A response about privacy and security
+        """
+        prompt = f"""
+        The user has shared what appears to be sensitive information.
+
+        Generate a friendly, helpful response that:
+        1. Does NOT repeat any of the sensitive information
+        2. Explains that you don't store or save sensitive information
+        3. Advises on privacy and security best practices
+        4. Offers to help with their task in a more secure way
+
+        Generate a response:
+        """
+
+        response = self.llm.invoke(prompt)
+
+        # Extract content from the message
+        if hasattr(response, 'content'):
+            return response.content.strip()
+        else:
+            return str(response).strip()
+
+    def _redact_sensitive_info(self, text: str) -> str:
+        """
+        Redact sensitive information from text.
+
+        Args:
+            text (str): The text containing sensitive information
+
+        Returns:
+            str: The text with sensitive information redacted
+        """
+        # Replace credit card numbers
+        import re
+        text = re.sub(r'\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}', '[REDACTED CARD NUMBER]', text)
+
+        # Replace SSNs
+        text = re.sub(r'\d{3}[- ]?\d{2}[- ]?\d{4}', '[REDACTED SSN]', text)
+
+        # Replace passwords
+        text_lower = text.lower()
+        if "password" in text_lower:
+            # Find the password part and replace it
+            password_idx = text_lower.find("password")
+            if password_idx >= 0:
+                # Look for the password value after "password is" or similar
+                after_password = text[password_idx + 8:]  # 8 = len("password")
+                # Find the first space or end of string
+                space_idx = after_password.find(" ")
+                if space_idx > 0:
+                    # Replace the password value
+                    text = text[:password_idx + 8] + " [REDACTED]" + after_password[space_idx:]
+                else:
+                    # No space found, replace the rest of the string
+                    text = text[:password_idx + 8] + " [REDACTED]"
+
+        return text
+
+    def _detect_non_english(self, text: str) -> bool:
+        """
+        Detect if the input is likely not in English.
+
+        This is a simple heuristic that checks for non-ASCII characters
+        and common non-English patterns.
+
+        Args:
+            text (str): The text to check
+
+        Returns:
+            bool: True if the text is likely not in English
+        """
+        # Skip empty inputs
+        if not text.strip():
+            return False
+
+        # Check for high percentage of non-ASCII characters
+        non_ascii_count = sum(1 for char in text if ord(char) > 127)
+        if non_ascii_count / len(text) > 0.3:  # If more than 30% non-ASCII
+            return True
+
+        # Check for common non-English characters/patterns
+        non_english_markers = ['ñ', 'ç', 'ß', 'é', 'è', 'ê', 'à', 'ù', 'ü', 'ö', 'ä',
+                              '¿', '¡', '€', '£', '¥', 'は', 'の', 'да', 'не']
+        for marker in non_english_markers:
+            if marker in text:
+                return True
+
+        return False
+
+    def _handle_non_english(self, text: str) -> str:
+        """
+        Generate a response for non-English input.
+
+        Args:
+            text (str): The non-English input
+
+        Returns:
+            str: A response acknowledging the non-English input
+        """
+        prompt = f"""
+        The user has sent a message that appears to be in a language other than English: "{text}"
+
+        Please:
+        1. Identify the likely language
+        2. If you can understand it, briefly respond to their query
+        3. Politely mention that English is preferred for best results
+
+        Generate a friendly, helpful response:
+        """
+
+        response = self.llm.invoke(prompt)
+
+        # Extract content from the message
+        if hasattr(response, 'content'):
+            return response.content.strip()
+        else:
+            return str(response).strip()
+
     def plan(
         self,
         intermediate_steps: List[tuple],
@@ -170,6 +342,58 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
             Union[AgentAction, AgentFinish]: Next action or final answer
         """
         user_input = kwargs["input"]
+
+        # Check for empty input
+        if not user_input.strip():
+            response = "I need more information to help you. Could you please provide a specific query or request?"
+
+            # Add the interaction to memory
+            if self.use_langgraph_memory:
+                self.memory.add_user_message(user_input, thread_id=self.thread_id)
+                self.memory.add_ai_message(response, thread_id=self.thread_id)
+            else:
+                self.memory.add_user_message(user_input)
+                self.memory.add_ai_message(response)
+
+            return AgentFinish(
+                return_values={"output": response},
+                log="Handled empty input"
+            )
+
+        # Check for sensitive information
+        if self._detect_sensitive_info(user_input):
+            response = self._handle_sensitive_info(user_input)
+
+            # Add the interaction to memory (with redacted input)
+            redacted_input = self._redact_sensitive_info(user_input)
+            if self.use_langgraph_memory:
+                self.memory.add_user_message(redacted_input, thread_id=self.thread_id)
+                self.memory.add_ai_message(response, thread_id=self.thread_id)
+            else:
+                self.memory.add_user_message(redacted_input)
+                self.memory.add_ai_message(response)
+
+            return AgentFinish(
+                return_values={"output": response},
+                log="Handled sensitive information"
+            )
+
+        # Check for non-English input
+        if self._detect_non_english(user_input):
+            response = self._handle_non_english(user_input)
+
+            # Add the interaction to memory
+            if self.use_langgraph_memory:
+                self.memory.add_user_message(user_input, thread_id=self.thread_id)
+                self.memory.add_ai_message(response, thread_id=self.thread_id)
+            else:
+                self.memory.add_user_message(user_input)
+                self.memory.add_ai_message(response)
+
+            return AgentFinish(
+                return_values={"output": response},
+                log="Handled non-English input"
+            )
 
         # Add user input to memory
         if self.use_langgraph_memory:
@@ -219,7 +443,12 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
         # If we have previous steps, use their results for context
         context_dict = {}
         for step, result in intermediate_steps:
-            tool_name = step.tool
+            # Handle both AgentAction objects and string tool names
+            if hasattr(step, 'tool'):
+                tool_name = step.tool
+            else:
+                # If step is a string, use it directly as the tool name
+                tool_name = step
             context_dict[tool_name] = result
 
         # If we have steps to execute, take the next action
@@ -251,7 +480,12 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
         # If we've executed all steps or there are no steps, generate a response
         result_dict = {}
         for step, result in intermediate_steps:
-            tool_name = step.tool
+            # Handle both AgentAction objects and string tool names
+            if hasattr(step, 'tool'):
+                tool_name = step.tool
+            else:
+                # If step is a string, use it directly as the tool name
+                tool_name = step
             result_dict[tool_name] = result
 
         # Generate the final response

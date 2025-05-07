@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class IntentClassificationChain(LLMChain):
     """Chain for classifying user queries into specific intents."""
-    
+
     def __init__(
         self,
         llm=None,
@@ -37,7 +37,7 @@ class IntentClassificationChain(LLMChain):
     ):
         """
         Initialize the intent classification chain.
-        
+
         Args:
             llm: The language model to use (default: OpenAI model from config)
             prompt: The prompt template to use (default: intent_classification_prompt)
@@ -49,26 +49,26 @@ class IntentClassificationChain(LLMChain):
                 temperature=0.1,  # Lower temperature for more consistent classification
                 openai_api_key=OPENAI_API_KEY
             )
-        
+
         super().__init__(llm=llm, prompt=prompt, verbose=verbose)
-    
+
     def classify_intent(self, query: str) -> str:
         """
         Classify the intent of a user query.
-        
+
         Args:
             query (str): The user's query
-            
+
         Returns:
             str: The classified intent
         """
         try:
             logger.info(f"Classifying intent for query: {query}")
-            
+
             # Use invoke instead of run to avoid recursion
             inputs = {"query": query}
             result = self.invoke(inputs)
-            
+
             # Get text output from result
             if isinstance(result, dict) and "text" in result:
                 output_text = result["text"]
@@ -81,38 +81,38 @@ class IntentClassificationChain(LLMChain):
                 intent = cleaned_output[len("INTENT:"):].strip().upper()
             else:
                 intent = cleaned_output.upper()
-            
+
             # Validate intent
             valid_intents = [
-                "WEATHER", "REMINDER", "GENERAL_QUESTION", 
-                "NEWS", "PREFERENCE", "GREETING", "UNKNOWN"
+                "WEATHER", "REMINDER", "GENERAL_QUESTION",
+                "NEWS", "WEB_SEARCH", "PREFERENCE", "GREETING", "UNKNOWN"
             ]
-            
+
             if intent not in valid_intents:
                 logger.warning(f"Invalid intent returned: {intent}. Using UNKNOWN.")
                 intent = "UNKNOWN"
-            
+
             logger.info(f"Classified intent: {intent}")
             return intent
-            
+
         except Exception as e:
             logger.error(f"Error in intent classification: {str(e)}")
             return "UNKNOWN"
-    
+
     def __call__(self, inputs: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """
         Process inputs through the chain.
-        
+
         Args:
             inputs (Dict[str, Any]): Input values
             **kwargs: Additional keyword arguments like callbacks
-            
+
         Returns:
             Dict[str, Any]: Output with classified intent
         """
         query = inputs.get("query", "")
         intent = self.classify_intent(query)
-        
+
         return {
             "query": query,
             "intent": intent

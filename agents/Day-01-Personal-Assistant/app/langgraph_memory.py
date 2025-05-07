@@ -158,6 +158,156 @@ class LangGraphMemory:
         # Return the messages for the thread
         return self.messages.get(thread_id, [])
 
+    def add(self, key: str, value: Any) -> None:
+        """
+        Add a key-value pair to memory.
+
+        Args:
+            key (str): The key to store
+            value (Any): The value to store
+        """
+        # For user_name, extract from message content
+        if key == "user_name" and isinstance(value, str) and "my name is" in value.lower():
+            # Extract name from message like "My name is John Smith"
+            parts = value.lower().split("my name is")
+            if len(parts) > 1:
+                name = parts[1].strip()
+                self.user_preferences.set(key, name)
+            else:
+                self.user_preferences.set(key, value)
+        else:
+            # Store in user preferences
+            self.user_preferences.set(key, value)
+
+    def get(self, key: str, default=None) -> Any:
+        """
+        Get a value from memory.
+
+        Args:
+            key (str): The key to retrieve
+            default: The default value to return if key doesn't exist
+
+        Returns:
+            Any: The stored value or default
+        """
+        # Check user preferences first
+        value = self.user_preferences.get(key, default)
+
+        # If not found and it's user_name, try to extract from messages
+        if value is None and key == "user_name":
+            # Try to find name in messages
+            for thread_id, messages in self.messages.items():
+                for msg in messages:
+                    if isinstance(msg, HumanMessage) and "my name is" in msg.content.lower():
+                        parts = msg.content.lower().split("my name is")
+                        if len(parts) > 1:
+                            # Extract the full name after "my name is"
+                            name_text = parts[1].strip()
+
+                            # Capitalize each word in the name
+                            name_parts = name_text.split()
+                            if name_parts:
+                                name = " ".join(part.capitalize() for part in name_parts)
+                                # Store for future use
+                                self.user_preferences.set(key, name)
+                                return name
+
+        return value
+
+    def remove(self, key: str) -> None:
+        """
+        Remove a key from memory.
+
+        Args:
+            key (str): The key to remove
+        """
+        if key in self.user_preferences.preferences:
+            del self.user_preferences.preferences[key]
+            self.user_preferences._save_preferences()
+
+    def get_all(self, key: str) -> List[Any]:
+        """
+        Get all values for a key (for keys that can have multiple values).
+
+        Args:
+            key (str): The key to retrieve all values for
+
+        Returns:
+            List[Any]: All values for the key
+        """
+        # For conversation, return all message pairs
+        if key == "conversation":
+            result = []
+            for thread_id, messages in self.messages.items():
+                # Group messages into pairs
+                i = 0
+                while i < len(messages) - 1:
+                    if isinstance(messages[i], HumanMessage) and isinstance(messages[i+1], AIMessage):
+                        result.append({
+                            "query": messages[i].content,
+                            "response": messages[i+1].content
+                        })
+                    i += 2
+            return result
+
+        # Default: return as list
+        value = self.get(key)
+        return [value] if value is not None else []
+
+    def serialize(self) -> str:
+        """
+        Serialize the memory to a string.
+
+        Returns:
+            str: Serialized memory
+        """
+        # Create a dictionary with all memory components
+        memory_dict = {
+            "messages": {
+                thread_id: [
+                    {"type": "human" if isinstance(msg, HumanMessage) else "ai",
+                     "content": msg.content}
+                    for msg in msgs
+                ]
+                for thread_id, msgs in self.messages.items()
+            },
+            "conversation_summary": self.conversation_summary,
+            "user_preferences": self.user_preferences.get_all()
+        }
+
+        # Serialize to JSON
+        return json.dumps(memory_dict)
+
+    def deserialize(self, serialized: str) -> None:
+        """
+        Deserialize memory from a string.
+
+        Args:
+            serialized (str): Serialized memory
+        """
+        try:
+            memory_dict = json.loads(serialized)
+
+            # Restore messages
+            self.messages = {}
+            for thread_id, msgs in memory_dict.get("messages", {}).items():
+                self.messages[thread_id] = []
+                for msg in msgs:
+                    if msg["type"] == "human":
+                        self.messages[thread_id].append(HumanMessage(content=msg["content"]))
+                    else:
+                        self.messages[thread_id].append(AIMessage(content=msg["content"]))
+
+            # Restore conversation summary
+            self.conversation_summary = memory_dict.get("conversation_summary", "")
+
+            # Restore user preferences
+            for key, value in memory_dict.get("user_preferences", {}).items():
+                self.user_preferences.set(key, value)
+
+        except Exception as e:
+            logger.error(f"Error deserializing memory: {str(e)}")
+
     def get_relevant_context(self, query: str, thread_id: str = "default", intent: str = None) -> Dict[str, Any]:
         """
         Get relevant context for a query from all memory layers.
