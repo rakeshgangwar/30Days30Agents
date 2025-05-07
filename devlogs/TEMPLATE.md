@@ -1,7 +1,11 @@
 # Day [X]: [Project Name/Component/Utility]
 
-**Date:** YYYY-MM-DD
-**Type:** [Agent/Utility/Shared Component/Research]
+**Date:** YYYY-MM-DD  
+**Type:** [Agent/Utility/Shared Component/Research]  
+
+## Naming Convention
+- Devlog files should follow the format: `day[X]_[project_name]_[task_name].md`
+  - Example: `day1_personal_assistant_init.md` for Day 1's Personal Assistant project.
 
 ## Today's Goals
 - [ ] Goal 1
