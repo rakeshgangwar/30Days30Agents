@@ -13,15 +13,14 @@ import sys
 import logging
 from dotenv import load_dotenv
 
-from app.agent import create_agent
-from app.config import init_user_preferences
+from agent import create_agent
+from config import init_user_preferences
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("personal_assistant.log"),
         logging.StreamHandler(sys.stdout)
     ]
 )

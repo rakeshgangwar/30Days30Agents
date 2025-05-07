@@ -74,9 +74,13 @@ class IntentClassificationChain(LLMChain):
                 output_text = result["text"]
             else:
                 output_text = str(result)
-            
-            # Clean the result
-            intent = output_text.strip().upper()
+
+            # Further clean the result to handle potential "INTENT: " prefix
+            cleaned_output = output_text.strip()
+            if cleaned_output.upper().startswith("INTENT:"):
+                intent = cleaned_output[len("INTENT:"):].strip().upper()
+            else:
+                intent = cleaned_output.upper()
             
             # Validate intent
             valid_intents = [
