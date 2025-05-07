@@ -211,6 +211,20 @@ Areas for improvement:
 - Better handling of ambiguous queries with clarification dialogs
 - Centralized logging and monitoring infrastructure
 
+## Development Tools
+For the implementation of the Personal Assistant agent, the following AI coding assistants were used:
+
+1. **RooCode** was the primary development tool, used with multiple LLM backends:
+   - **Claude 3.7 Sonnet**: Primary model used for most architecture design and implementation
+   - **Gemini 2.5 Pro**: Used for alternative perspectives and approaches, particularly for tool integration
+   - **GPT 4.1**: Leveraged for targeted problem-solving and debugging edge cases
+
+2. **Supplementary Tools**: For cases where RooCode didn't fully address requirements:
+   - **Windsurf**: Used for specialized code optimization and complex memory management patterns
+   - **Augment Code**: Leveraged for writing test cases
+
+The multi-model approach provided different perspectives and strengths throughout development. Claude 3.7 Sonnet demonstrated strong reasoning capabilities for architectural decisions, while Gemini 2.5 Pro offered valuable alternative implementation approaches, and GPT 4.1 excelled at debugging and handling edge cases.
+|
 ## Time Spent
 - Development: 5 hours
 - Research: 1 hour
