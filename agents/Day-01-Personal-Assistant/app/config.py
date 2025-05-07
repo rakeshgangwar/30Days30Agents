@@ -57,6 +57,7 @@ DEFAULT_USER_PREFERENCES = {
 DATA_DIR = "./data"
 LOG_DIR = "./logs"
 USER_PREFERENCES_PATH = os.path.join(DATA_DIR, "user_preferences.json")
+MEMORY_DB_PATH = os.path.join(DATA_DIR, "memory.sqlite")
 
 # Create directories if they don't exist
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -68,7 +69,7 @@ def init_user_preferences():
     if not os.path.exists(USER_PREFERENCES_PATH):
         with open(USER_PREFERENCES_PATH, 'w') as f:
             json.dump(DEFAULT_USER_PREFERENCES, f, indent=2)
-        
+
         print(f"Initialized user preferences at {USER_PREFERENCES_PATH}")
 
 # Logging configuration

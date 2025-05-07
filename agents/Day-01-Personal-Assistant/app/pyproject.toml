@@ -40,6 +40,7 @@ dependencies = [
     "aiohttp>=3.11.18",
     # Security
     "cryptography>=44.0.3",
+    "langgraph>=0.4.2",
 ]
 
 [project.scripts]
