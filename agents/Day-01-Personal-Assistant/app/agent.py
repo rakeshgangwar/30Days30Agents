@@ -207,8 +207,18 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
             next_step_index = len(intermediate_steps)
             next_step = steps[next_step_index]
             
-            tool_name = next_step.get("tool")
-            tool_params = next_step.get("parameters", {})
+            # Handle both dictionary format and Pydantic model format
+            if hasattr(next_step, 'get'):
+                # It's a dictionary
+                tool_name = next_step.get("tool")
+                tool_params = next_step.get("parameters", {})
+            else:
+                # It's a Pydantic model or other object
+                tool_name = getattr(next_step, "tool", None)
+                tool_params = getattr(next_step, "parameters", {})
+                # Convert any Pydantic models to dictionaries
+                if hasattr(tool_params, "dict") and callable(tool_params.dict):
+                    tool_params = tool_params.dict()
             
             # Execute the tool
             return AgentAction(
