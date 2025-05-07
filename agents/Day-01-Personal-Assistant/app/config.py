@@ -27,6 +27,7 @@ WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 TODOIST_API_KEY = os.getenv("TODOIST_API_KEY")
 EXA_API_KEY = os.getenv("EXA_API_KEY")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Agent-specific settings
 AGENT_NAME = "Personal Assistant"
