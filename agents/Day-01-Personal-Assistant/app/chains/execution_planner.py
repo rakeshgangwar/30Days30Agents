@@ -74,7 +74,7 @@ SPECIFIC INSTRUCTIONS FOR COMMON INTENTS:
 
 For REMINDER intent:
 - Use the todoist_create_task tool
-- The "content" parameter should contain the main task description
+- The "content" parameter should contain the main task description formatted as a proper sentence (capitalize first word)
 - The "due_string" parameter should be formatted as a natural language date/time (e.g., "today at 7pm", "tomorrow at 3pm", "next monday at 9am")
 - Priority can be set from 1-4 (4 is highest)
 - Additional details can go in the "description" parameter
@@ -178,6 +178,73 @@ class ExecutionPlannerChain:
         self.prompt = prompt
         self.verbose = verbose
 
+    def _validate_execution_plan(self, execution_plan: Dict[str, Any], intent: str, entities: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate the execution plan and ensure it has the correct structure."""
+        # Ensure the plan has the required keys
+        if "steps" not in execution_plan:
+            execution_plan["steps"] = []
+        
+        if "missing_information" not in execution_plan:
+            execution_plan["missing_information"] = []
+        
+        return execution_plan
+        
+    def _convert_priority(self, priority) -> int:
+        """Convert priority from various formats to integer (1-4)."""
+        # If priority is already an integer, just return it (ensuring it's in the valid range)
+        if isinstance(priority, int):
+            return max(1, min(4, priority))  # Clamp between 1 and 4
+        
+        # Handle string priority formats like 'p1', 'P1', '1', etc.
+        if isinstance(priority, str):
+            # Remove any non-alphanumeric characters
+            priority = ''.join(c for c in priority if c.isalnum())
+            
+            # Handle 'p1', 'P1' format (p1 = highest = 4, p4 = lowest = 1)
+            if priority.lower().startswith('p') and len(priority) > 1:
+                try:
+                    # Extract the number part
+                    num = int(priority[1:])
+                    # Convert p1->4, p2->3, p3->2, p4->1
+                    return max(1, min(4, 5 - num))
+                except ValueError:
+                    pass  # Fall through to default
+            
+            # Try to parse as a direct integer
+            try:
+                return max(1, min(4, int(priority)))
+            except ValueError:
+                pass  # Fall through to default
+        
+        # Default to medium priority (2) if conversion fails
+        return 2
+        
+    def _format_reminder_task(self, execution_plan: Dict[str, Any]) -> Dict[str, Any]:
+        """Format the task content for reminders to use proper title case."""
+        steps = execution_plan.get("steps", [])
+        
+        for i, step in enumerate(steps):
+            # Check if this is a todoist_create_task step
+            if isinstance(step, dict) and step.get("tool") == "todoist_create_task":
+                parameters = step.get("parameters", {})
+                if "content" in parameters and parameters["content"]:
+                    # Format the content in title case (capitalize each word)
+                    parameters["content"] = parameters["content"].capitalize()
+                    step["parameters"] = parameters
+                    steps[i] = step
+            # Handle Pydantic model format
+            elif hasattr(step, "tool") and step.tool == "todoist_create_task":
+                if hasattr(step, "parameters") and hasattr(step.parameters, "content") and step.parameters.content:
+                    # Format the content in title case
+                    if isinstance(step.parameters, dict):
+                        if "content" in step.parameters:
+                            step.parameters["content"] = step.parameters["content"].capitalize()
+                    else:
+                        step.parameters.content = step.parameters.content.capitalize()
+        
+        execution_plan["steps"] = steps
+        return execution_plan
+
     def plan_execution(self, query: str, intent: str, entities: Dict[str, Any]) -> Dict[str, Any]:
         """
         Plan the execution steps based on intent and entities.
@@ -211,7 +278,10 @@ class ExecutionPlannerChain:
                     task = reminder_entities.get("task")
                     time = reminder_entities.get("time")
                     date = reminder_entities.get("date")
-                    priority = reminder_entities.get("priority", 2)  # Default priority
+                    raw_priority = reminder_entities.get("priority", 2)  # Default priority
+                    
+                    # Convert priority from string format (p1, p2, etc.) to integer (1-4)
+                    priority = self._convert_priority(raw_priority)
 
                     # Create a plan with todoist_create_task
                     plan_dict = {
@@ -219,7 +289,7 @@ class ExecutionPlannerChain:
                             {
                                 "tool": "todoist_create_task",
                                 "parameters": {
-                                    "content": task,
+                                    "content": task.capitalize() if task else None,  # Apply sentence case formatting
                                     "due_string": f"{date} at {time}" if date and time else (date or time or "today"),
                                     "priority": priority,
                                     "description": ""
