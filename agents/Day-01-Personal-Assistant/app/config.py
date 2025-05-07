@@ -81,6 +81,7 @@ UI_PORT = 8501  # Default port for Streamlit
 
 # Tool-specific settings
 WEATHER_API_BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"
 NEWS_API_BASE_URL = "https://newsapi.org/v2/top-headlines"
 WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php"
 
