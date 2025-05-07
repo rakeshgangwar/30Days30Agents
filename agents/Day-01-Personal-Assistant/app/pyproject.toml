@@ -1,0 +1,80 @@
+[project]
+name = "personal_assistant"
+version = "0.1.0"
+description = "A foundation agent that handles basic personal assistance tasks such as setting reminders, answering questions, and providing information"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "30Days30Agents" }
+]
+
+dependencies = [
+    # Core dependencies
+    "python-dotenv>=1.0.0",
+    "langchain>=0.0.267",
+    
+    # LLM provider
+    "openai>=1.3.0",
+    
+    # Vector database (optional for future expansion)
+    "chromadb>=0.4.15",
+    
+    # UI
+    "streamlit>=1.26.0",
+    
+    # Telegram integration (for future use)
+    "python-telegram-bot>=20.4",
+    
+    # Utilities
+    "requests>=2.31.0",
+    "pydantic>=2.3.0",
+    "pytest>=7.4.0",
+    "tqdm>=4.66.1",
+    
+    # Logging and monitoring
+    "logging>=0.4.9.6",
+    
+    # Date and time handling
+    "pytz>=2023.3",
+    
+    # File handling
+    "python-magic>=0.4.27",
+    
+    # API clients
+    "todoist-api-python>=2.1.3",
+    
+    # Async
+    "aiohttp>=3.8.5",
+    
+    # Security
+    "cryptography>=41.0.3",
+]
+
+[project.scripts]
+personal-assistant = "personal_assistant.main:main"
+personal-assistant-cli = "personal_assistant.cli:main"
+personal-assistant-streamlit = "personal_assistant.streamlit_app:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Explicitly tell hatch what to include in the package
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
