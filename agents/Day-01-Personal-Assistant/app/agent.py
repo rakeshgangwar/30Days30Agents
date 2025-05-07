@@ -13,6 +13,7 @@ import logging
 import json
 import os
 from typing import Dict, Any, List, Optional, Union
+import copy
 
 from langchain.agents import AgentExecutor, BaseSingleActionAgent
 from langchain.memory import ConversationBufferMemory
@@ -20,7 +21,7 @@ from langchain.schema import AgentAction, AgentFinish
 from langchain.tools import BaseTool
 from langchain.callbacks.manager import CallbackManagerForChainRun
 from langchain.prompts import PromptTemplate
-from langchain.llms import OpenAI
+from langchain_community.chat_models import ChatOpenAI
 
 # Import local modules
 from config import MODEL_NAME, TEMPERATURE, OPENAI_API_KEY, SYSTEM_PROMPT
@@ -50,6 +51,14 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
     4. Maintains conversation context
     5. Formats responses for the user
     """
+    verbose: bool = False
+    llm: Any = None
+    memory: Any = None
+    intent_chain: Any = None
+    entity_chain: Any = None
+    planner_chain: Any = None
+    tools: Dict[str, BaseTool] = {}
+    response_template: Any = None
     
     def __init__(
         self,
@@ -65,11 +74,12 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
             llm: Language model for response generation
             verbose (bool): Whether to log detailed output
         """
+        super().__init__()
         self.verbose = verbose
         
         # Set up language model
         if llm is None:
-            self.llm = OpenAI(
+            self.llm = ChatOpenAI(
                 model_name=MODEL_NAME,
                 temperature=TEMPERATURE,
                 openai_api_key=OPENAI_API_KEY
@@ -251,8 +261,14 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
         Generate a friendly request for this information:
         """
         
-        # Get clarification from LLM
-        clarification = self.llm(clarification_prompt).strip()
+        # Get clarification from LLM using invoke
+        response = self.llm.invoke(clarification_prompt)
+        
+        # Extract content from the message
+        if hasattr(response, 'content'):
+            clarification = response.content.strip()
+        else:
+            clarification = str(response).strip()
         
         # Log the clarification
         logger.info(f"Generated clarification: {clarification}")
@@ -276,18 +292,43 @@ class PersonalAssistantAgent(BaseSingleActionAgent):
         Returns:
             str: A user-friendly response
         """
-        # Convert context to string
-        context_str = json.dumps(context, indent=2)
-        results_str = json.dumps(results, indent=2)
+        # Convert context to string with custom serialization
+        def make_json_serializable(obj):
+            """Make an object JSON serializable by converting non-serializable objects to strings."""
+            if hasattr(obj, 'to_dict'):
+                return obj.to_dict()
+            elif hasattr(obj, '__dict__'):
+                return str(obj)
+            elif isinstance(obj, dict):
+                return {k: make_json_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [make_json_serializable(i) for i in obj]
+            else:
+                return str(obj) if not isinstance(obj, (str, int, float, bool, type(None))) else obj
         
-        # Run the response template
-        response = self.llm(
-            self.response_template.format(
-                query=query,
-                context=context_str,
-                result=results_str
-            )
-        ).strip()
+        # Create serializable copies
+        serializable_context = make_json_serializable(copy.deepcopy(context))
+        serializable_results = make_json_serializable(copy.deepcopy(results))
+        
+        # Convert to string
+        context_str = json.dumps(serializable_context, indent=2)
+        results_str = json.dumps(serializable_results, indent=2)
+        
+        # Format the prompt
+        prompt_text = self.response_template.format(
+            query=query,
+            context=context_str,
+            result=results_str
+        )
+        
+        # Use invoke instead of direct call
+        llm_response = self.llm.invoke(prompt_text)
+        
+        # Extract content from the message
+        if hasattr(llm_response, 'content'):
+            response = llm_response.content.strip()
+        else:
+            response = str(llm_response).strip()
         
         # Log the response
         logger.info(f"Generated response: {response}")
@@ -353,7 +394,7 @@ if __name__ == "__main__":
             break
         
         try:
-            response = agent_executor.run(input=user_input)
+            response = agent_executor.invoke({"input": user_input})["output"]
             print(f"\n{response}\n")
         except Exception as e:
             print(f"\nI'm sorry, I encountered an error: {str(e)}")

@@ -29,8 +29,8 @@ class WeatherInput(BaseModel):
 class WeatherTool(BaseTool):
     """Tool for fetching weather information."""
     
-    name = "weather_tool"
-    description = "Useful for getting weather information for a specific location"
+    name: str = "weather_tool"
+    description: str = "Useful for getting weather information for a specific location"
     args_schema: Type[BaseModel] = WeatherInput
     
     def _run(self, location: str, units: str = "metric") -> Dict[str, Any]:
@@ -110,8 +110,8 @@ class ForecastInput(BaseModel):
 class ForecastTool(BaseTool):
     """Tool for fetching weather forecasts."""
     
-    name = "forecast_tool"
-    description = "Useful for getting weather forecast for the next few days"
+    name: str = "forecast_tool"
+    description: str = "Useful for getting weather forecast for the next few days"
     args_schema: Type[BaseModel] = ForecastInput
     
     def _run(self, location: str, days: int = 5, units: str = "metric") -> Dict[str, Any]:

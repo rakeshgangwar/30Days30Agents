@@ -1,0 +1,8 @@
+{
+  "default_location": "New York",
+  "temperature_unit": "celsius",
+  "news_topics": [
+    "technology",
+    "science"
+  ]
+}

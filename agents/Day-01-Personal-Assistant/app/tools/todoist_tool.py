@@ -36,9 +36,11 @@ class TodoistTaskInput(BaseModel):
 class TodoistCreateTool(BaseTool):
     """Tool for creating tasks in Todoist."""
     
-    name = "todoist_create_task"
-    description = "Useful for creating reminders and tasks with optional due dates and priorities"
+    name: str = "todoist_create_task"
+    description: str = "Useful for creating reminders and tasks with optional due dates and priorities"
     args_schema: Type[BaseModel] = TodoistTaskInput
+    api_token: str = None
+    headers: Dict[str, str] = None
     
     def __init__(self, api_token: str = TODOIST_API_KEY):
         """
@@ -147,9 +149,11 @@ class TodoistListInput(BaseModel):
 class TodoistListTool(BaseTool):
     """Tool for listing tasks from Todoist."""
     
-    name = "todoist_list_tasks"
-    description = "Useful for retrieving upcoming or filtered tasks/reminders"
+    name: str = "todoist_list_tasks"
+    description: str = "Useful for retrieving upcoming or filtered tasks/reminders"
     args_schema: Type[BaseModel] = TodoistListInput
+    api_token: str = None
+    headers: Dict[str, str] = None
     
     def __init__(self, api_token: str = TODOIST_API_KEY):
         """
@@ -242,9 +246,11 @@ class TodoistCompleteInput(BaseModel):
 class TodoistCompleteTool(BaseTool):
     """Tool for completing tasks in Todoist."""
     
-    name = "todoist_complete_task"
-    description = "Useful for marking tasks or reminders as completed"
+    name: str = "todoist_complete_task"
+    description: str = "Useful for marking tasks or reminders as completed"
     args_schema: Type[BaseModel] = TodoistCompleteInput
+    api_token: str = None
+    headers: Dict[str, str] = None
     
     def __init__(self, api_token: str = TODOIST_API_KEY):
         """

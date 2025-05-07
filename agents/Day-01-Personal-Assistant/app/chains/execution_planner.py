@@ -13,7 +13,7 @@ import json
 from typing import Dict, Any, List
 
 from langchain.chains import LLMChain
-from langchain.llms import OpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 import sys
@@ -91,7 +91,7 @@ class ExecutionPlannerChain(LLMChain):
             )
         
         if llm is None:
-            llm = OpenAI(
+            llm = ChatOpenAI(
                 model_name=MODEL_NAME,
                 temperature=0.2,  # Low temperature for structured output
                 openai_api_key=OPENAI_API_KEY
@@ -114,36 +114,72 @@ class ExecutionPlannerChain(LLMChain):
         try:
             logger.info(f"Planning execution for query: {query}, intent: {intent}")
             
+            # Special handling for GREETING intent
+            if intent == "GREETING":
+                # For greetings, we don't need a complex execution plan
+                return {
+                    "steps": [],
+                    "missing_information": []
+                }
+            
             # Format entities as string for the prompt
             entities_str = json.dumps(entities, indent=2)
             
-            # Run the chain
-            result = self.run(
-                query=query,
-                intent=intent,
-                entities=entities_str
-            )
+            # Use invoke instead of run to avoid recursion
+            inputs = {
+                "query": query,
+                "intent": intent,
+                "entities": entities_str
+            }
+            result = self.invoke(inputs)
             
-            # Parse the JSON result
+            # Get text output from result
+            if isinstance(result, dict) and "text" in result:
+                result_text = result["text"]
+            else:
+                result_text = str(result)
+                
             try:
-                plan = json.loads(result)
+                # Clean up the result text to handle markdown code blocks
+                cleaned_text = result_text
+                if "```json" in result_text:
+                    # Extract JSON from markdown code block
+                    cleaned_text = result_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in result_text:
+                    # Extract from generic code block
+                    cleaned_text = result_text.split("```")[1].split("```")[0].strip()
+                
+                # Ensure the JSON has the required structure
+                if not cleaned_text.strip().startswith("{"):
+                    cleaned_text = "{" + cleaned_text
+                if not cleaned_text.strip().endswith("}"):
+                    cleaned_text = cleaned_text + "}"
+                
+                plan = json.loads(cleaned_text)
+                
+                # Ensure the plan has the required keys
+                if "steps" not in plan:
+                    plan["steps"] = []
+                if "missing_information" not in plan:
+                    plan["missing_information"] = []
                 logger.info(f"Generated execution plan with {len(plan.get('steps', []))} steps")
                 return plan
             except json.JSONDecodeError as e:
                 logger.error(f"Error parsing execution plan result: {str(e)}")
-                logger.error(f"Raw result: {result}")
+                logger.error(f"Raw result: {result_text}")
                 return {"steps": [], "missing_information": ["Failed to generate a valid execution plan"]}
             
         except Exception as e:
             logger.error(f"Error in execution planning: {str(e)}")
             return {"steps": [], "missing_information": [f"Error: {str(e)}"]}
     
-    def __call__(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def __call__(self, inputs: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """
         Process inputs through the chain.
         
         Args:
             inputs (Dict[str, Any]): Input values with query, intent, and entities
+            **kwargs: Additional keyword arguments like callbacks
             
         Returns:
             Dict[str, Any]: Output with execution plan

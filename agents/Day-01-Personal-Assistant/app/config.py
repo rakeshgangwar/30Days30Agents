@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Model settings
-MODEL_NAME = "gpt-3.5-turbo"  # Default model as specified in agent-spec.md
+MODEL_NAME = "gpt-4o-mini"  # Default model as specified in agent-spec.md
 TEMPERATURE = 0.7  # Default temperature setting
 MAX_TOKENS = 1000  # Maximum tokens in response
 

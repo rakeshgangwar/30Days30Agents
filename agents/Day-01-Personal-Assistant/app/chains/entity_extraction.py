@@ -13,7 +13,7 @@ import json
 from typing import Dict, Any, List
 
 from langchain.chains import LLMChain
-from langchain.llms import OpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 import sys
@@ -45,7 +45,7 @@ class EntityExtractionChain(LLMChain):
             verbose: Whether to log detailed output
         """
         if llm is None:
-            llm = OpenAI(
+            llm = ChatOpenAI(
                 model_name=MODEL_NAME,
                 temperature=0.1,  # Lower temperature for more consistent extraction
                 openai_api_key=OPENAI_API_KEY
@@ -67,17 +67,33 @@ class EntityExtractionChain(LLMChain):
         try:
             logger.info(f"Extracting entities for query: {query}, intent: {intent}")
             
-            # Run the chain
-            result = self.run(query=query, intent=intent)
+            # Use invoke instead of run to avoid recursion
+            inputs = {"query": query, "intent": intent}
+            result = self.invoke(inputs)
+            
+            # Get text output from result
+            if isinstance(result, dict) and "text" in result:
+                result_text = result["text"]
+            else:
+                result_text = str(result)
             
             # Parse the JSON result
             try:
-                entities = json.loads(result)
+                # Clean up the result text to handle markdown code blocks
+                cleaned_text = result_text
+                if "```json" in result_text:
+                    # Extract JSON from markdown code block
+                    cleaned_text = result_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in result_text:
+                    # Extract from generic code block
+                    cleaned_text = result_text.split("```")[1].split("```")[0].strip()
+                
+                entities = json.loads(cleaned_text)
                 logger.info(f"Extracted entities: {entities}")
                 return entities
             except json.JSONDecodeError as e:
                 logger.error(f"Error parsing entity extraction result: {str(e)}")
-                logger.error(f"Raw result: {result}")
+                logger.error(f"Raw result: {result_text}")
                 # Return empty entities dictionary
                 return self._get_default_entities(intent)
             
@@ -127,12 +143,13 @@ class EntityExtractionChain(LLMChain):
         else:
             return {}
     
-    def __call__(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def __call__(self, inputs: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """
         Process inputs through the chain.
         
         Args:
             inputs (Dict[str, Any]): Input values with query and intent
+            **kwargs: Additional keyword arguments like callbacks
             
         Returns:
             Dict[str, Any]: Output with extracted entities

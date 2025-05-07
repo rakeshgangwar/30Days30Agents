@@ -28,8 +28,8 @@ class WikipediaInput(BaseModel):
 class WikipediaTool(BaseTool):
     """Tool for fetching information from Wikipedia."""
     
-    name = "wikipedia_tool"
-    description = "Useful for getting factual information about people, places, events, concepts, etc."
+    name: str = "wikipedia_tool"
+    description: str = "Useful for getting factual information about people, places, events, concepts, etc."
     args_schema: Type[BaseModel] = WikipediaInput
     
     def _run(self, query: str, limit: int = 1) -> Dict[str, Any]:

@@ -16,7 +16,7 @@ import logging
 from typing import Dict, Any, List
 
 from langchain.memory import ConversationBufferWindowMemory, ConversationSummaryMemory
-from langchain.llms import OpenAI
+from langchain_community.llms import OpenAI
 
 from config import (
     OPENAI_API_KEY,

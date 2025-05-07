@@ -12,7 +12,7 @@ import logging
 from typing import Dict, Any, List
 
 from langchain.chains import LLMChain
-from langchain.llms import OpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 import sys
@@ -44,7 +44,7 @@ class IntentClassificationChain(LLMChain):
             verbose: Whether to log detailed output
         """
         if llm is None:
-            llm = OpenAI(
+            llm = ChatOpenAI(
                 model_name=MODEL_NAME,
                 temperature=0.1,  # Lower temperature for more consistent classification
                 openai_api_key=OPENAI_API_KEY
@@ -65,11 +65,18 @@ class IntentClassificationChain(LLMChain):
         try:
             logger.info(f"Classifying intent for query: {query}")
             
-            # Run the chain
-            result = self.run(query=query)
+            # Use invoke instead of run to avoid recursion
+            inputs = {"query": query}
+            result = self.invoke(inputs)
+            
+            # Get text output from result
+            if isinstance(result, dict) and "text" in result:
+                output_text = result["text"]
+            else:
+                output_text = str(result)
             
             # Clean the result
-            intent = result.strip().upper()
+            intent = output_text.strip().upper()
             
             # Validate intent
             valid_intents = [
@@ -88,12 +95,13 @@ class IntentClassificationChain(LLMChain):
             logger.error(f"Error in intent classification: {str(e)}")
             return "UNKNOWN"
     
-    def __call__(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def __call__(self, inputs: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """
         Process inputs through the chain.
         
         Args:
             inputs (Dict[str, Any]): Input values
+            **kwargs: Additional keyword arguments like callbacks
             
         Returns:
             Dict[str, Any]: Output with classified intent

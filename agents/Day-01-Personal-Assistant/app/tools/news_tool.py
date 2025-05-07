@@ -32,8 +32,8 @@ class NewsInput(BaseModel):
 class NewsTool(BaseTool):
     """Tool for fetching news articles."""
     
-    name = "news_tool"
-    description = "Useful for getting recent news headlines or articles on specific topics"
+    name: str = "news_tool"
+    description: str = "Useful for getting recent news headlines or articles on specific topics"
     args_schema: Type[BaseModel] = NewsInput
     
     def _run(
@@ -158,8 +158,8 @@ class TopicNewsInput(BaseModel):
 class TopicNewsTool(BaseTool):
     """Tool for fetching news articles on specific topics."""
     
-    name = "topic_news_tool"
-    description = "Useful for getting news articles about a specific topic"
+    name: str = "topic_news_tool"
+    description: str = "Useful for getting news articles about a specific topic"
     args_schema: Type[BaseModel] = TopicNewsInput
     
     def _run(self, topic: str, days: int = 7, page_size: int = 5) -> Dict[str, Any]:
