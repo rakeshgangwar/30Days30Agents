@@ -134,40 +134,60 @@ class WebBrowsingTool:
         Returns:
             Dictionary with page title, content, and metadata
         """
-        # Note: In a real implementation, we would use Playwright here.
-        # For the boilerplate, we'll simulate the behavior with a stub.
         try:
-            # This is a stub method. In a real implementation, this would use Playwright.
-            logger.info(f"Fetching {url} with Playwright (stub)")
+            from playwright.sync_api import sync_playwright
+            import os
 
-            # Simulate network delay
-            time.sleep(0.1)
-            logger.debug("Simulated network delay completed")
+            logger.info(f"Fetching {url} with Playwright")
 
-            # Extract domain from URL for a more realistic title
-            import re
-            domain = re.sub(r'^https?://(www\.)?', '', url)
-            domain = domain.split('/')[0]  # Get just the domain part
+            # Get timeout from environment or use default
+            timeout = int(os.getenv("PLAYWRIGHT_TIMEOUT", "60000"))
+            user_agent = os.getenv("USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
 
-            # Create a more realistic title based on the URL
-            page_title = f"{domain.capitalize()} - Information Page"
-            if "wikipedia" in domain.lower():
-                page_title = f"Wikipedia - {domain.split('.')[-2].capitalize()}"
-            elif "github" in domain.lower():
-                page_title = f"GitHub - Repository Page"
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                context = browser.new_context(
+                    user_agent=user_agent,
+                    viewport={"width": 1280, "height": 1080}
+                )
+                page = context.new_page()
 
-            # Return a dummy response with a more realistic title
-            response = {
-                "title": page_title,
-                "content": f"<html><head><title>{page_title}</title></head>"
-                          f"<body><h1>Content for {url}</h1><p>This is a stub response.</p></body></html>",
-                "url": url,
-                "fetched_at": datetime.now().isoformat(),
-                "method": "playwright"
-            }
+                try:
+                    logger.info(f"Navigating to {url} with timeout {timeout}ms")
+                    response = page.goto(url, wait_until="networkidle", timeout=timeout)
 
-            logger.info(f"Successfully fetched content with Playwright, title: '{response['title']}'")
-            return response
+                    if response is None:
+                        logger.error(f"Failed to get response from {url}")
+                        browser.close()
+                        return {}
+
+                    if response.status >= 400:
+                        logger.error(f"Received error status code {response.status} from {url}")
+                        browser.close()
+                        return {}
+
+                    # Extract the main content
+                    title = page.title()
+                    content = page.content()
+
+                    logger.info(f"Successfully fetched content with Playwright, title: '{title}'")
+
+                    response = {
+                        "title": title,
+                        "content": content,
+                        "url": url,
+                        "fetched_at": datetime.now().isoformat(),
+                        "method": "playwright",
+                        "status_code": response.status
+                    }
+
+                    browser.close()
+                    return response
+
+                except Exception as e:
+                    logger.error(f"Error during page navigation or content extraction: {e}")
+                    browser.close()
+                    raise e
 
         except Exception as e:
             logger.error(f"Error fetching {url} with Playwright: {e}")
@@ -184,40 +204,97 @@ class WebBrowsingTool:
         Returns:
             Dictionary with page title, content, and metadata
         """
-        # Note: In a real implementation, we would use requests here.
-        # For the boilerplate, we'll simulate the behavior with a stub.
         try:
-            # This is a stub method. In a real implementation, this would use requests.
-            logger.info(f"Fetching {url} with requests (stub)")
+            import requests
+            from bs4 import BeautifulSoup
+            import os
 
-            # Simulate network delay
-            time.sleep(0.1)
-            logger.debug("Simulated network delay completed")
+            logger.info(f"Fetching {url} with requests")
 
-            # Extract domain from URL for a more realistic title
-            import re
-            domain = re.sub(r'^https?://(www\.)?', '', url)
-            domain = domain.split('/')[0]  # Get just the domain part
+            # Get user agent from environment or use default
+            user_agent = os.getenv("USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
 
-            # Create a more realistic title based on the URL
-            page_title = f"{domain.capitalize()} - Information Page"
-            if "wikipedia" in domain.lower():
-                page_title = f"Wikipedia - {domain.split('.')[-2].capitalize()}"
-            elif "github" in domain.lower():
-                page_title = f"GitHub - Repository Page"
-
-            # Return a dummy response with a more realistic title
-            response = {
-                "title": page_title,
-                "content": f"<html><head><title>{page_title}</title></head>"
-                          f"<body><h1>Content for {url}</h1><p>This is a stub response.</p></body></html>",
-                "url": url,
-                "fetched_at": datetime.now().isoformat(),
-                "method": "requests"
+            # Set up headers
+            headers = {
+                "User-Agent": user_agent,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+                "Cache-Control": "max-age=0"
             }
 
-            logger.info(f"Successfully fetched content with requests, title: '{response['title']}'")
-            return response
+            # Make the request with a timeout
+            response = requests.get(url, headers=headers, timeout=30)
+
+            # Check if the request was successful
+            if response.status_code >= 400:
+                logger.error(f"Received error status code {response.status_code} from {url}")
+                return {}
+
+            # Get the content type
+            content_type = response.headers.get('Content-Type', '').lower()
+
+            # Handle different content types
+            if 'text/html' in content_type or 'application/xhtml+xml' in content_type:
+                # Parse HTML with BeautifulSoup to extract title
+                soup = BeautifulSoup(response.text, 'html.parser')
+                title = soup.title.string if soup.title else url
+
+                result = {
+                    "title": title,
+                    "content": response.text,
+                    "url": url,
+                    "fetched_at": datetime.now().isoformat(),
+                    "method": "requests",
+                    "status_code": response.status_code,
+                    "content_type": content_type
+                }
+
+                logger.info(f"Successfully fetched HTML content with requests, title: '{title}'")
+                return result
+
+            elif 'application/json' in content_type:
+                # Handle JSON content
+                try:
+                    json_data = response.json()
+                    title = json_data.get('title', url) if isinstance(json_data, dict) else url
+
+                    # Convert JSON to HTML for consistent processing
+                    html_content = f"<html><head><title>{title}</title></head><body><pre>{response.text}</pre></body></html>"
+
+                    result = {
+                        "title": title,
+                        "content": html_content,
+                        "url": url,
+                        "fetched_at": datetime.now().isoformat(),
+                        "method": "requests",
+                        "status_code": response.status_code,
+                        "content_type": content_type,
+                        "json_data": json_data
+                    }
+
+                    logger.info(f"Successfully fetched JSON content with requests")
+                    return result
+
+                except Exception as json_error:
+                    logger.error(f"Error parsing JSON from {url}: {json_error}")
+                    # Fall back to treating it as text
+
+            # For other content types (text, pdf, etc.), return as is
+            result = {
+                "title": url,
+                "content": response.text,
+                "url": url,
+                "fetched_at": datetime.now().isoformat(),
+                "method": "requests",
+                "status_code": response.status_code,
+                "content_type": content_type
+            }
+
+            logger.info(f"Successfully fetched content with requests, content type: {content_type}")
+            return result
 
         except Exception as e:
             logger.error(f"Error fetching {url} with requests: {e}")

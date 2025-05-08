@@ -181,13 +181,22 @@ def display_research_results():
     # Display report
     if "report" in research and "report_text" in research["report"]:
         st.markdown(research["report"]["report_text"])
+
+        # Check if the report already contains a Sources section
+        report_has_sources_section = "## Sources" in research["report"]["report_text"]
+
+        # Only display sources separately if not already in the report
+        if not report_has_sources_section:
+            st.subheader("Sources")
+            for idx, source in enumerate(research.get("sources", []), 1):
+                st.markdown(f"{idx}. [{source['title']}]({source['url']})")
     else:
         st.warning("No report was generated.")
 
-    # Display sources
-    st.subheader("Sources")
-    for idx, source in enumerate(research.get("sources", []), 1):
-        st.markdown(f"{idx}. [{source['title']}]({source['url']})")
+        # If no report, still show sources
+        st.subheader("Sources")
+        for idx, source in enumerate(research.get("sources", []), 1):
+            st.markdown(f"{idx}. [{source['title']}]({source['url']})")
 
     # Display any errors
     if errors > 0 and "intermediate_steps" in research:
@@ -219,10 +228,18 @@ def display_research_history():
                 for finding in research["report"]["key_findings"]:
                     st.markdown(f"• {finding}")
 
-            # Display sources
-            st.subheader("Sources")
-            for idx, source in enumerate(research.get("sources", []), 1):
-                st.markdown(f"{idx}. [{source['title']}]({source['url']})")
+            # Check if we need to display sources separately
+            display_sources = True
+            if "report" in research and "report_text" in research["report"]:
+                # Only display sources separately if not already in the report
+                if "## Sources" in research["report"]["report_text"]:
+                    display_sources = False
+
+            # Display sources if needed
+            if display_sources:
+                st.subheader("Sources")
+                for idx, source in enumerate(research.get("sources", []), 1):
+                    st.markdown(f"{idx}. [{source['title']}]({source['url']})")
 
 
 def main():
@@ -294,7 +311,7 @@ def main():
         st.header("Welcome to Research Assistant!")
         st.info("Please configure your API keys in the sidebar to get started.")
         return
-    
+
     # Check if we have research results to display
     has_results = len(st.session_state.research_history) > 0
 
@@ -302,12 +319,12 @@ def main():
     if has_results:
         # Side-by-side layout when results are available
         input_col, report_col = st.columns([1, 1])
-        
+
         with input_col:
             # Display research form in left column
             if not st.session_state.research_in_progress:
                 display_research_form()
-        
+
         with report_col:
             # Add a container class for styling
             st.markdown('<div class="report-container"></div>', unsafe_allow_html=True)
