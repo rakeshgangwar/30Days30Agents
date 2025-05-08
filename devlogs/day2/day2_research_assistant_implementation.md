@@ -14,6 +14,16 @@
 The Research Assistant agent has been successfully implemented with a modular architecture using LangGraph for workflow orchestration. The agent can conduct comprehensive web research on user-specified topics, synthesize information from multiple sources, and provide summarized findings with citations. It features a Streamlit interface for user interaction and a command-line interface for programmatic use. The implementation leverages multiple LLM models optimized for different phases of the research process, with smaller models for analysis and larger models for synthesis.
 
 ## Technical Details
+### Development Approach
+The Research Assistant was developed using a test-driven development (TDD) approach. This methodology involved:
+
+1. **Writing Tests First**: Before implementing each component, tests were written to define the expected behavior.
+2. **Implementing Functionality**: Code was then written to pass the tests.
+3. **Refactoring**: Once tests passed, code was refactored for better organization and performance.
+4. **Integration Testing**: Components were tested together to ensure proper interaction.
+
+This approach ensured that each component met its requirements and worked correctly with other components. It also facilitated easier debugging and maintenance as the project evolved.
+
 ### Implementation
 The Research Assistant implementation follows a modular architecture consisting of several key components:
 

@@ -36,9 +36,20 @@ The Research Assistant follows a modular architecture built around a LangGraph w
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-## 3. Implementation Details
+## 3. Development Approach
 
-### 3.1 Core Agent (`core/agent.py`)
+The Research Assistant was developed using a test-driven development (TDD) approach. This methodology involved:
+
+1. **Writing Tests First**: Before implementing each component, tests were written to define the expected behavior.
+2. **Implementing Functionality**: Code was then written to pass the tests.
+3. **Refactoring**: Once tests passed, code was refactored for better organization and performance.
+4. **Integration Testing**: Components were tested together to ensure proper interaction.
+
+This approach ensured that each component met its requirements and worked correctly with other components. It also facilitated easier debugging and maintenance as the project evolved.
+
+## 4. Implementation Details
+
+### 4.1 Core Agent (`core/agent.py`)
 
 The `ResearchAssistant` class serves as the main entry point and coordinates all components:
 
@@ -70,7 +81,7 @@ class ResearchAssistant:
         ...
 ```
 
-### 3.2 LangGraph Workflow (`core/langgraph_workflow.py`)
+### 4.2 LangGraph Workflow (`core/langgraph_workflow.py`)
 
 The research workflow is implemented as a LangGraph state machine:
 
@@ -100,60 +111,60 @@ class ResearchGraph:
         return research_graph.compile()
 ```
 
-### 3.3 Input Processing (`components/input_processing.py`)
+### 4.3 Input Processing (`components/input_processing.py`)
 
 Handles the initial analysis of research queries:
 
 - `QueryAnalyzer`: Breaks down research queries into structured elements
 - `SearchQueryFormulator`: Creates effective search queries from the analysis
 
-### 3.4 Research Workflow (`components/research_workflow.py`)
+### 4.4 Research Workflow (`components/research_workflow.py`)
 
 Manages the research strategy and execution:
 
 - `ResearchStrategyPlanner`: Determines the research approach based on query analysis
 - `ResearchEvaluator`: Assesses research progress and determines when sufficient information has been gathered
 
-### 3.5 Tool Integration
+### 4.5 Tool Integration
 
-#### 3.5.1 Search Tools (`tools/search_tools.py`)
+#### 4.5.1 Search Tools (`tools/search_tools.py`)
 
 - `WebSearchTool`: Abstracts different search engines (Exa, SerpAPI)
 - `SearchHistory`: Tracks search history to prevent redundant searches
 
-#### 3.5.2 Browsing Tools (`tools/browsing_tools.py`)
+#### 4.5.2 Browsing Tools (`tools/browsing_tools.py`)
 
 - `WebBrowsingTool`: Fetches content from web pages
 - `ContentExtractionTool`: Extracts relevant information from web content
 - `DocumentCache`: Caches web pages to minimize redundant requests
 
-#### 3.5.3 Document Loaders (`tools/document_loaders.py`)
+#### 4.5.3 Document Loaders (`tools/document_loaders.py`)
 
 - `DocumentLoaderManager`: Provides a unified interface for loading documents from different sources and formats
 
-### 3.6 Knowledge Processing (`components/knowledge_processing.py`)
+### 4.6 Knowledge Processing (`components/knowledge_processing.py`)
 
 - `ResearchRepository`: Stores and organizes research findings
 - `InformationSynthesizer`: Combines information from multiple sources
 - `SourceEvaluator`: Assesses source credibility
 - `CitationFormatter`: Standardizes source references
 
-### 3.7 Output Formatting (`components/output_formatting.py`)
+### 4.7 Output Formatting (`components/output_formatting.py`)
 
 - `ResearchSummaryGenerator`: Creates a structured summary of research findings
 - `KeyFindingsExtractor`: Identifies and extracts key findings from research
 - `ResearchReportGenerator`: Generates the final research report
 
-### 3.8 Error Handling (`components/error_handling.py`)
+### 4.8 Error Handling (`components/error_handling.py`)
 
 - `SearchFailureHandler`: Manages search API errors
 - `ContentAccessRetrier`: Handles website access issues
 - `FallbackInformationSources`: Provides alternative sources when primary sources fail
 - `ErrorLogger`: Logs errors for debugging and improvement
 
-## 4. User Interfaces
+## 5. User Interfaces
 
-### 4.1 Streamlit Interface (`interface/streamlit_app.py`)
+### 5.1 Streamlit Interface (`interface/streamlit_app.py`)
 
 The primary user interface is implemented using Streamlit:
 
@@ -162,7 +173,7 @@ The primary user interface is implemented using Streamlit:
 - Displays research results with proper formatting
 - Shows research history for previous queries
 
-### 4.2 Command Line Interface (`main.py`)
+### 5.2 Command Line Interface (`main.py`)
 
 A CLI is provided for programmatic use:
 
@@ -177,7 +188,7 @@ python main.py research "History of AI" --output research_results.md
 python main.py research "Quantum computing" --analysis-model gpt-4o-mini --synthesis-model gpt-4o
 ```
 
-## 5. Configuration (`core/config.py`)
+## 6. Configuration (`core/config.py`)
 
 The Research Assistant uses a centralized configuration system:
 
@@ -187,7 +198,7 @@ The Research Assistant uses a centralized configuration system:
 - Web browsing configuration
 - Vector store settings
 
-## 6. Research Process Flow
+## 7. Research Process Flow
 
 1. **Query Analysis**: The user's research query is analyzed to identify key topics, entities, and characteristics.
 2. **Search Query Formulation**: Multiple search queries are created to ensure comprehensive coverage.
@@ -198,7 +209,7 @@ The Research Assistant uses a centralized configuration system:
 7. **Information Synthesis**: Information from multiple sources is combined and synthesized.
 8. **Report Generation**: A final research report is generated with proper citations.
 
-## 7. Model Usage
+## 8. Model Usage
 
 The Research Assistant uses different models for different phases:
 
@@ -207,7 +218,7 @@ The Research Assistant uses different models for different phases:
 
 This approach optimizes for both cost and quality, using more expensive models only where they provide the most value.
 
-## 8. Research Depth Configuration
+## 9. Research Depth Configuration
 
 The Research Assistant supports different research depths:
 
@@ -215,7 +226,7 @@ The Research Assistant supports different research depths:
 - **Medium**: Balanced research with moderate sources (10 pages)
 - **Deep**: Comprehensive research with many sources (20 pages)
 
-## 9. Future Enhancements
+## 10. Future Enhancements
 
 - **Specialized Domain Research**: Add domain-specific models and tools for fields like medical, legal, or scientific research.
 - **Multimedia Content Analysis**: Extract information from images, charts, and videos in research sources.
@@ -226,7 +237,36 @@ The Research Assistant supports different research depths:
 - **Research Time Optimization**: Reduce research time through parallel processing, optimized API calls, and more efficient content extraction techniques.
 - **Local Model Integration**: Evaluate and integrate local LLM models (e.g., Llama 3, Mistral) to reduce API dependencies, improve privacy, and enable offline operation.
 
-## 10. Conclusion
+## 11. Testing
+
+The Research Assistant includes a comprehensive test suite to ensure reliability and correctness:
+
+### 11.1 Unit Tests
+
+Unit tests cover individual components and functions:
+
+- Tests for query analysis and search query formulation
+- Tests for web search and content extraction tools
+- Tests for information synthesis and report generation
+
+### 11.2 Integration Tests
+
+Integration tests verify that components work together correctly:
+
+- End-to-end research workflow tests
+- API integration tests for search engines and web browsing
+- Error handling and recovery tests
+
+### 11.3 Test-Driven Development
+
+The test-driven development approach ensured that:
+
+- Requirements were clearly defined before implementation
+- Edge cases were identified and handled
+- Regressions were caught early
+- Code quality remained high throughout development
+
+## 12. Conclusion
 
 The Research Assistant provides a powerful, flexible framework for conducting comprehensive web research. Its modular architecture allows for easy extension and customization, while its use of LangGraph provides a clear, structured workflow for the research process.
 
