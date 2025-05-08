@@ -24,7 +24,7 @@ sys.path.append(str(Path(__file__).parent))
 try:
     from dotenv import load_dotenv
     from core.agent import ResearchAssistant
-    from core.config import validate_config
+    from core.config import validate_config, get_llm_config
 except ImportError as e:
     logger.error(f"Import error: {e}. Please install dependencies with 'uv pip install -e .'")
     sys.exit(1)
@@ -56,6 +56,16 @@ def parse_args():
         type=int,
         default=7
     )
+    research_parser.add_argument(
+        "--analysis-model",
+        help="Model to use for analysis and extraction phases",
+        default=None
+    )
+    research_parser.add_argument(
+        "--synthesis-model",
+        help="Model to use for synthesis and report generation phases",
+        default=None
+    )
 
     # UI command
     ui_parser = subparsers.add_parser("ui", help="Launch the Streamlit UI")
@@ -78,8 +88,51 @@ def run_research(args):
         # Validate config
         validate_config()
 
-        # Create the research assistant
-        research_assistant = ResearchAssistant()
+        # Create the research assistant with specified models
+        from core.agent import ResearchAssistant
+
+        # Initialize the Research Assistant with the specified models
+        if args.analysis_model and args.synthesis_model:
+            # Create a custom Research Assistant with different models for different phases
+            logger.info(f"Using custom models - Analysis: {args.analysis_model}, Synthesis: {args.synthesis_model}")
+
+            # First initialize with the analysis model
+            research_assistant = ResearchAssistant(model_name=args.analysis_model)
+
+            # Then override the synthesis LLM with the synthesis model
+            from core.config import get_llm_config
+            llm_config = get_llm_config(phase="synthesis")
+            provider = llm_config["provider"]
+
+            # Override the model name
+            llm_config["model"] = args.synthesis_model
+
+            # Initialize the synthesis LLM
+            if provider == "openai":
+                from langchain_openai import ChatOpenAI
+                research_assistant.synthesis_llm = ChatOpenAI(
+                    api_key=llm_config["api_key"],
+                    model_name=args.synthesis_model,
+                    temperature=0.1
+                )
+            elif provider == "gemini":
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                research_assistant.synthesis_llm = ChatGoogleGenerativeAI(
+                    api_key=llm_config["api_key"],
+                    model=args.synthesis_model,
+                    temperature=0.1
+                )
+
+            # Reinitialize components that use the synthesis LLM
+            from components.knowledge_processing import InformationSynthesizer
+            from components.output_formatting import ResearchSummaryGenerator, KeyFindingsExtractor
+
+            research_assistant.synthesizer = InformationSynthesizer(research_assistant.synthesis_llm)
+            research_assistant.summary_generator = ResearchSummaryGenerator(research_assistant.synthesis_llm)
+            research_assistant.findings_extractor = KeyFindingsExtractor(research_assistant.synthesis_llm)
+        else:
+            # Create the research assistant with default models
+            research_assistant = ResearchAssistant()
 
         # Join query parts into a single string
         query = " ".join(args.query)

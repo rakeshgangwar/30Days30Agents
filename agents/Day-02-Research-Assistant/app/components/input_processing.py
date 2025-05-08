@@ -41,6 +41,12 @@ class QueryAnalyzer:
         Returns:
             Dictionary containing analysis results
         """
+        # Log which model is being used for query analysis
+        import logging
+        logger = logging.getLogger(__name__)
+        model_info = getattr(self.llm, 'model_name', getattr(self.llm, 'model', 'unknown'))
+        logger.info(f"Using model {model_info} for query analysis")
+
         response = self.llm.invoke(self.prompt_template.format(query=query))
 
         # In a real implementation, we would parse the LLM response into a structured format
@@ -146,6 +152,12 @@ class SearchQueryFormulator:
         """
         # Convert analysis dict to a readable string format
         analysis_str = "\n".join([f"{k}: {v}" for k, v in analysis.items()])
+
+        # Log which model is being used for search query formulation
+        import logging
+        logger = logging.getLogger(__name__)
+        model_info = getattr(self.llm, 'model_name', getattr(self.llm, 'model', 'unknown'))
+        logger.info(f"Using model {model_info} for search query formulation")
 
         response = self.llm.invoke(self.prompt_template.format(analysis=analysis_str))
 

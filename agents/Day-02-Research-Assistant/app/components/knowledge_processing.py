@@ -297,6 +297,12 @@ class InformationSynthesizer:
         [Identify aspects of the query that weren't fully addressed]
         """
 
+        # Log which model is being used for synthesis
+        import logging
+        logger = logging.getLogger(__name__)
+        model_info = getattr(self.llm, 'model_name', getattr(self.llm, 'model', 'unknown'))
+        logger.info(f"Using model {model_info} for information synthesis")
+
         synthesis_response = self.llm.invoke(prompt)
 
         # Convert AIMessage to string if needed

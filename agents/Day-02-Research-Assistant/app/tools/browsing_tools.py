@@ -461,6 +461,8 @@ class ContentExtractionTool:
 
         try:
             logger.info("Invoking LLM for content extraction")
+            model_info = getattr(self.llm, 'model_name', getattr(self.llm, 'model', 'unknown'))
+            logger.info(f"Using model {model_info} for content extraction")
             extracted_content = self.llm.invoke(prompt)
 
             # Handle AIMessage objects

@@ -45,6 +45,34 @@ uv pip install -e .
 pip install -e .
 ```
 
+## Model Configuration
+
+The Research Assistant now supports using different models for different phases of the research process:
+
+### Analysis Phase Models
+
+These models are used for:
+- Query analysis
+- Search query formulation
+- Research strategy planning
+- Content extraction
+- Source evaluation
+
+Default models:
+- OpenAI: `gpt-4o-mini`
+- Google Gemini: `gemini-2.0-flash`
+
+### Synthesis Phase Models
+
+These models are used for:
+- Information synthesis
+- Report generation
+- Key findings extraction
+
+Default models:
+- OpenAI: `gpt-4o`
+- Google Gemini: `gemini-2.5-pro`
+
 ## Usage
 
 The Research Assistant can be used in three ways:
@@ -74,6 +102,9 @@ python main.py research "History of artificial intelligence" --output research_r
 
 # Get JSON output
 python main.py research "Climate change impacts" --format json
+
+# Use specific models for different phases
+python main.py research "Quantum computing advances" --analysis-model gpt-4o-mini --synthesis-model gpt-4o
 ```
 
 ### 3. Programmatic API
@@ -83,8 +114,31 @@ Use the Research Assistant in your own Python code:
 ```python
 from core.agent import ResearchAssistant
 
-# Initialize the assistant
+# Initialize the assistant with default models
 assistant = ResearchAssistant()
+
+# Or specify a model for all phases
+assistant = ResearchAssistant(model_name="gpt-4o")
+
+# Or use different models for different phases
+# First initialize with the analysis model
+assistant = ResearchAssistant(model_name="gpt-4o-mini")
+
+# Then override the synthesis LLM
+from langchain_openai import ChatOpenAI
+assistant.synthesis_llm = ChatOpenAI(
+    api_key="your_openai_api_key",
+    model_name="gpt-4o",
+    temperature=0.1
+)
+
+# Reinitialize components that use the synthesis LLM
+from components.knowledge_processing import InformationSynthesizer
+from components.output_formatting import ResearchSummaryGenerator, KeyFindingsExtractor
+
+assistant.synthesizer = InformationSynthesizer(assistant.synthesis_llm)
+assistant.summary_generator = ResearchSummaryGenerator(assistant.synthesis_llm)
+assistant.findings_extractor = KeyFindingsExtractor(assistant.synthesis_llm)
 
 # Conduct research
 results = assistant.research("Your research query here")

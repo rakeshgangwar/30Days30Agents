@@ -39,8 +39,18 @@ MAX_SOURCES = 15
 DEFAULT_RESEARCH_DEPTH = "medium"  # Options: light, medium, deep
 
 # Model configuration
-DEFAULT_LLM_MODEL = "gpt-4o-mini"
-GEMINI_MODEL = "gemini-1.5-pro"
+# Models for different phases
+# Analysis and extraction phase (smaller, cheaper models)
+ANALYSIS_OPENAI_MODEL = "gpt-4o-mini"
+ANALYSIS_GEMINI_MODEL = "models/gemini-2.0-flash"  # Updated to include models/ prefix
+
+# Synthesis and report generation phase (more powerful models)
+SYNTHESIS_OPENAI_MODEL = "gpt-4o"
+SYNTHESIS_GEMINI_MODEL = "models/gemini-2.5-pro-preview-05-06"  # Updated to an available model
+
+# Default models (for backward compatibility)
+DEFAULT_LLM_MODEL = ANALYSIS_OPENAI_MODEL
+GEMINI_MODEL = ANALYSIS_GEMINI_MODEL
 
 # Web browsing configuration
 USE_PLAYWRIGHT = True
@@ -56,18 +66,38 @@ MAX_DOCUMENT_LENGTH = 10000
 EMBEDDING_MODEL = "openai"  # Options: openai, gemini
 VECTOR_STORE_TYPE = "chroma"  # Options: chroma, faiss
 
-def get_llm_config() -> Dict[str, str]:
-    """Get the LLM configuration based on available API keys."""
+def get_llm_config(phase: str = "analysis") -> Dict[str, str]:
+    """
+    Get the LLM configuration based on available API keys and the research phase.
+
+    Args:
+        phase: The research phase - either "analysis" or "synthesis"
+              "analysis" includes query analysis, search formulation, and content extraction
+              "synthesis" includes information synthesis and report generation
+
+    Returns:
+        Dictionary with LLM configuration
+    """
     if OPENAI_API_KEY:
+        if phase == "synthesis":
+            model = SYNTHESIS_OPENAI_MODEL
+        else:  # Default to analysis phase
+            model = ANALYSIS_OPENAI_MODEL
+
         return {
             "provider": "openai",
-            "model": DEFAULT_LLM_MODEL,
+            "model": model,
             "api_key": OPENAI_API_KEY
         }
     elif GOOGLE_GEMINI_API_KEY:
+        if phase == "synthesis":
+            model = SYNTHESIS_GEMINI_MODEL
+        else:  # Default to analysis phase
+            model = ANALYSIS_GEMINI_MODEL
+
         return {
             "provider": "gemini",
-            "model": GEMINI_MODEL,
+            "model": model,
             "api_key": GOOGLE_GEMINI_API_KEY
         }
     else:
@@ -91,12 +121,12 @@ def get_search_config() -> Dict[str, str]:
 def validate_config() -> None:
     """Validate the configuration and check for required API keys."""
     missing_keys = []
-    
+
     if not OPENAI_API_KEY and not GOOGLE_GEMINI_API_KEY:
         missing_keys.append("OPENAI_API_KEY or GOOGLE_GEMINI_API_KEY")
-    
+
     if not EXA_API_KEY and not SERPAPI_API_KEY:
         missing_keys.append("EXA_API_KEY or SERPAPI_API_KEY")
-    
+
     if missing_keys:
         raise ValueError(f"Missing required API keys: {', '.join(missing_keys)}")

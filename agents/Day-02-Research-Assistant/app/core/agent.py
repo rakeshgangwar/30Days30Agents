@@ -41,14 +41,18 @@ class ResearchAssistant:
         # Initialize configuration
         validate_config()
 
-        # Set up the LLM
-        self.llm = self._initialize_llm(model_name)
+        # Set up the LLMs for different phases
+        self.analysis_llm = self._initialize_llm(model_name, phase="analysis")
+        self.synthesis_llm = self._initialize_llm(model_name, phase="synthesis")
+
+        # For backward compatibility, set self.llm to the analysis LLM
+        self.llm = self.analysis_llm
 
         # Set up the research components
         self.document_cache = DocumentCache(CACHE_DIR)
         self.search_tool = self._initialize_search_tool()
         self.browsing_tool = WebBrowsingTool(use_playwright=True, cache_dir=CACHE_DIR)
-        self.extraction_tool = ContentExtractionTool(self.llm)
+        self.extraction_tool = ContentExtractionTool(self.analysis_llm)  # Use analysis LLM for extraction
         self.document_loader = DocumentLoaderManager(cache_dir=CACHE_DIR)
 
         # Initialize the repository
@@ -60,45 +64,53 @@ class ResearchAssistant:
         self.content_retrier = ContentAccessRetrier()
         self.fallback_sources = FallbackInformationSources()
 
-        # Initialize processing components
-        self.query_analyzer = QueryAnalyzer(self.llm)
-        self.search_query_formulator = SearchQueryFormulator(self.llm)
-        self.strategy_planner = ResearchStrategyPlanner(self.llm)
-        self.synthesizer = InformationSynthesizer(self.llm)
-        self.source_evaluator = SourceEvaluator(self.llm)
+        # Initialize processing components for analysis phase
+        self.query_analyzer = QueryAnalyzer(self.analysis_llm)
+        self.search_query_formulator = SearchQueryFormulator(self.analysis_llm)
+        self.strategy_planner = ResearchStrategyPlanner(self.analysis_llm)
+
+        # Initialize processing components for synthesis phase
+        self.synthesizer = InformationSynthesizer(self.synthesis_llm)
+        self.source_evaluator = SourceEvaluator(self.analysis_llm)  # Analysis LLM is sufficient for evaluation
         self.citation_formatter = CitationFormatter()
 
-        # Initialize output formatting components
-        self.summary_generator = ResearchSummaryGenerator(self.llm)
-        self.findings_extractor = KeyFindingsExtractor(self.llm)
+        # Initialize output formatting components with synthesis LLM
+        self.summary_generator = ResearchSummaryGenerator(self.synthesis_llm)
+        self.findings_extractor = KeyFindingsExtractor(self.synthesis_llm)
         self.report_generator = ResearchReportGenerator(
             self.summary_generator,
             self.findings_extractor,
             self.citation_formatter
         )
 
-        # Create the evaluator
-        self.evaluator = ResearchEvaluator(self.llm)
+        # Create the evaluator with analysis LLM
+        self.evaluator = ResearchEvaluator(self.analysis_llm)
 
         # Initialize the workflow
         self.workflow = self._initialize_workflow()
 
-    def _initialize_llm(self, model_name: Optional[str] = None):
+    def _initialize_llm(self, model_name: Optional[str] = None, phase: str = "analysis"):
         """
-        Initialize the language model based on available API keys.
+        Initialize the language model based on available API keys and research phase.
 
         Args:
             model_name: Optional model name override
+            phase: Research phase ("analysis" or "synthesis")
 
         Returns:
             Initialized language model
         """
-        llm_config = get_llm_config()
+        llm_config = get_llm_config(phase=phase)
         provider = llm_config["provider"]
 
         if model_name:
             # Override the model name if provided
             llm_config["model"] = model_name
+
+        # Log which model is being initialized
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Initializing {phase} LLM: {provider} - {llm_config['model']}")
 
         if provider == "openai" and OPENAI_API_KEY:
             return ChatOpenAI(
@@ -115,6 +127,7 @@ class ResearchAssistant:
         else:
             # Fallback to local Ollama if no API keys are available
             try:
+                logger.info("No API keys available, falling back to Ollama (llama3)")
                 return Ollama(model="llama3")
             except Exception as e:
                 raise ValueError(f"Could not initialize any LLM: {e}")
