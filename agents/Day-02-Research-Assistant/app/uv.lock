@@ -356,17 +356,32 @@ wheels = [
 ]
 
 [[package]]
+name = "chroma-hnswlib"
+version = "0.7.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/73/09/10d57569e399ce9cbc5eee2134996581c957f63a9addfa6ca657daf006b8/chroma_hnswlib-0.7.6.tar.gz", hash = "sha256:4dce282543039681160259d29fcde6151cc9106c6461e0485f57cdccd83059b7", size = 32256 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/93/ac/782b8d72de1c57b64fdf5cb94711540db99a92768d93d973174c62d45eb8/chroma_hnswlib-0.7.6-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:e87e9b616c281bfbe748d01705817c71211613c3b063021f7ed5e47173556cb7", size = 197804 },
+    { url = "https://files.pythonhosted.org/packages/32/4e/fd9ce0764228e9a98f6ff46af05e92804090b5557035968c5b4198bc7af9/chroma_hnswlib-0.7.6-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ec5ca25bc7b66d2ecbf14502b5729cde25f70945d22f2aaf523c2d747ea68912", size = 185421 },
+    { url = "https://files.pythonhosted.org/packages/d9/3d/b59a8dedebd82545d873235ef2d06f95be244dfece7ee4a1a6044f080b18/chroma_hnswlib-0.7.6-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:305ae491de9d5f3c51e8bd52d84fdf2545a4a2bc7af49765cda286b7bb30b1d4", size = 2389672 },
+    { url = "https://files.pythonhosted.org/packages/74/1e/80a033ea4466338824974a34f418e7b034a7748bf906f56466f5caa434b0/chroma_hnswlib-0.7.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:822ede968d25a2c88823ca078a58f92c9b5c4142e38c7c8b4c48178894a0a3c5", size = 2436986 },
+]
+
+[[package]]
 name = "chromadb"
-version = "1.0.8"
+version = "0.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bcrypt" },
     { name = "build" },
+    { name = "chroma-hnswlib" },
     { name = "fastapi" },
     { name = "grpcio" },
     { name = "httpx" },
     { name = "importlib-resources" },
-    { name = "jsonschema" },
     { name = "kubernetes" },
     { name = "mmh3" },
     { name = "numpy" },
@@ -389,13 +404,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/88/88/75dc5b4ba2945fcf78672446fd2234a2d5f2e5b5b3273ad9548d8a682b35/chromadb-1.0.8.tar.gz", hash = "sha256:271ed476da71f46b44d0d8e1ee63bb009e3b0d81903b973422522f5637b169f2", size = 1183015 }
+sdist = { url = "https://files.pythonhosted.org/packages/39/cd/f0f2de3f466ff514fb6b58271c14f6d22198402bb5b71b8d890231265946/chromadb-0.6.3.tar.gz", hash = "sha256:c8f34c0b704b9108b04491480a36d42e894a960429f87c6516027b5481d59ed3", size = 29297929 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b0/85/827a588726c2936747b28c10faeb4896920ce9589559437e0e7b702b2955/chromadb-1.0.8-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:fa9ec1d8ebef84e1f13793e596a6a81c8fa62366e241ed2b411d6ea6f291264b", size = 18183763 },
-    { url = "https://files.pythonhosted.org/packages/60/c9/7e29fa95e95f2b8f704fbf9108308864285d45ec5b692b909f5c9b42c92e/chromadb-1.0.8-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:88e60508cf335e243bbab9e5d3fa8eb2a08b1557623edea9bf681a30cb683a9f", size = 17423700 },
-    { url = "https://files.pythonhosted.org/packages/b8/83/3bc274ac7cd2f06fd70ef2196401f1c0d70b753fa1345bc04336440b3e85/chromadb-1.0.8-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7f65ac60a26955eec14dfd69092c3323873b4161280485c85f950e6e6fa04b43", size = 17955971 },
-    { url = "https://files.pythonhosted.org/packages/ba/8b/92bded2d3beb1238416052e39cf4cb42c2de7550d73bc48843f4eee2d722/chromadb-1.0.8-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8da0c3293b8f18bea462b7166136c99e5624e218b009bad43d8fd931c092e2c0", size = 18871103 },
-    { url = "https://files.pythonhosted.org/packages/5f/e4/82d9ab49a206a0f3030ca94b29305358a6ab61fab45e0756e23f4cc7d701/chromadb-1.0.8-cp39-abi3-win_amd64.whl", hash = "sha256:627f3dd992b30895a62154e8ae07fedf1ffd3e99bbfc339732a16202e0816d81", size = 18817415 },
+    { url = "https://files.pythonhosted.org/packages/28/8e/5c186c77bf749b6fe0528385e507e463f1667543328d76fd00a49e1a4e6a/chromadb-0.6.3-py3-none-any.whl", hash = "sha256:4851258489a3612b558488d98d09ae0fe0a28d5cad6bd1ba64b96fdc419dc0e5", size = 611129 },
 ]
 
 [[package]]
@@ -1101,6 +1112,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fc/f9/a256609096a9fc7a1b3a6300a97000091efabdf21555a97988f93d4d9258/langchain-0.3.25.tar.gz", hash = "sha256:a1d72aa39546a23db08492d7228464af35c9ee83379945535ceef877340d2a3a", size = 10225045 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ed/5c/5c0be747261e1f8129b875fa3bfea736bc5fe17652f9d5e15ca118571b6f/langchain-0.3.25-py3-none-any.whl", hash = "sha256:931f7d2d1eaf182f9f41c5e3272859cfe7f94fc1f7cef6b3e5a46024b4884c21", size = 1011008 },
+]
+
+[[package]]
+name = "langchain-chroma"
+version = "0.2.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "chromadb" },
+    { name = "langchain-core" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ee/6a/f8e26b3ce1a7958beabf2e5776695781f93e87d245e1a6a62a316af7fca4/langchain_chroma-0.2.3.tar.gz", hash = "sha256:b880f3cfe9843b5a51039cb65f7102717518ef6b3117e6f9df54202273538494", size = 15828 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4f/84/ab3afa3bb5e0792ea6ed3a5b44e5233aa6bd3313ca6a1ae58cb7e48903b1/langchain_chroma-0.2.3-py3-none-any.whl", hash = "sha256:d139f44a41f128cba5ee321a14817f0a1ffaeaed8576204baaf01f58cfe685a4", size = 11303 },
 ]
 
 [[package]]
@@ -2696,8 +2721,8 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "beautifulsoup4" },
-    { name = "chromadb" },
     { name = "langchain" },
+    { name = "langchain-chroma" },
     { name = "langchain-community" },
     { name = "langchain-exa" },
     { name = "langchain-google-genai" },
@@ -2722,9 +2747,9 @@ dev = [
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.13.4" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.7.0" },
-    { name = "chromadb", specifier = ">=1.0.8" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.12.0" },
     { name = "langchain", specifier = ">=0.3.25" },
+    { name = "langchain-chroma", specifier = ">=0.2.3" },
     { name = "langchain-community", specifier = ">=0.3.23" },
     { name = "langchain-exa", specifier = ">=0.2.1" },
     { name = "langchain-google-genai", specifier = ">=2.1.4" },

@@ -15,10 +15,10 @@ dependencies = [
     "streamlit>=1.45.0",
     "beautifulsoup4>=4.13.4",
     "playwright>=1.52.0",
-    "chromadb>=1.0.8",
     "pytest>=7.4.0",
     "langchain-google-genai>=2.1.4",
     "magicmock>=0.3",
+    "langchain-chroma>=0.2.3",
 ]
 
 [project.optional-dependencies]
