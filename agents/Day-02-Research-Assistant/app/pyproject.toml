@@ -1,0 +1,49 @@
+[project]
+name = "research-assistant"
+version = "0.1.0"
+description = "A comprehensive research assistant that conducts web research, synthesizes information, and provides summarized findings with citations"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=0.4.3",
+    "llama-index>=0.12.34",
+    "langchain>=0.3.25",
+    "langchain-community>=0.3.23",
+    "langchain-openai>=0.3.16",
+    "langchain-exa>=0.2.1",
+    "langchain-text-splitters>=0.3.8",
+    "streamlit>=1.45.0",
+    "beautifulsoup4>=4.13.4",
+    "playwright>=1.52.0",
+    "pytest>=7.4.0",
+    "langchain-google-genai>=2.1.4",
+    "magicmock>=0.3",
+    "langchain-chroma>=0.2.3",
+    "pymupdf>=1.24.0",
+    "arxiv>=2.1.0",
+    "wikipedia>=1.4.0",
+    "pubmed>=0.0.2",
+    "unstructured>=0.12.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "mypy>=1.4.1",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true

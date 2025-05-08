@@ -17,8 +17,8 @@ Conducts comprehensive web research on specified topics, synthesizes information
 - "Gather information on the history of artificial intelligence."
 
 ## Tech Stack
-- **Framework**: LangChain
-- **Model**: GPT-4
+- **Framework**: LangGraph and LlamaIndex
+- **Model**: Gemini 2.5 Pro and Gemini 2.5 Flash
 - **Tools**: SerpAPI or Google Search API, Web browsing tool (e.g., Playwright)
 - **UI**: Streamlit
 
