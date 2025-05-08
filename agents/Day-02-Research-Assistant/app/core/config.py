@@ -39,7 +39,7 @@ MAX_SOURCES = 15
 DEFAULT_RESEARCH_DEPTH = "medium"  # Options: light, medium, deep
 
 # Model configuration
-DEFAULT_LLM_MODEL = "gpt-3.5-turbo"
+DEFAULT_LLM_MODEL = "gpt-4o-mini"
 GEMINI_MODEL = "gemini-1.5-pro"
 
 # Web browsing configuration

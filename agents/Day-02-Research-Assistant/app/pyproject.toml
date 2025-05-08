@@ -19,6 +19,11 @@ dependencies = [
     "langchain-google-genai>=2.1.4",
     "magicmock>=0.3",
     "langchain-chroma>=0.2.3",
+    "pymupdf>=1.24.0",
+    "arxiv>=2.1.0",
+    "wikipedia>=1.4.0",
+    "pubmed>=0.0.2",
+    "unstructured>=0.12.5",
 ]
 
 [project.optional-dependencies]

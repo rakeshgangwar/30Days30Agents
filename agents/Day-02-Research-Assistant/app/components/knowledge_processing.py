@@ -36,8 +36,12 @@ class ResearchRepository:
     def _initialize_vector_store(self):
         """Initialize the vector store with the provided embedding model."""
         try:
+            import os
             from langchain_chroma import Chroma
             from langchain_core.embeddings import Embeddings
+
+            # Create the persist directory if it doesn't exist
+            os.makedirs(self.persist_directory, exist_ok=True)
 
             # For tests, we need to handle the case where embedding_model is a MagicMock
             if not isinstance(self.embedding_model, Embeddings) and hasattr(self.embedding_model, '__class__') and self.embedding_model.__class__.__name__ == 'MagicMock':
@@ -55,11 +59,34 @@ class ResearchRepository:
             else:
                 embedding_function = self.embedding_model
 
-            self.vector_store = Chroma(
-                persist_directory=self.persist_directory,
-                embedding_function=embedding_function
-            )
-            print(f"Vector store initialized at {self.persist_directory}")
+            # Try to initialize with a clean collection
+            try:
+                self.vector_store = Chroma(
+                    persist_directory=self.persist_directory,
+                    embedding_function=embedding_function,
+                    collection_name="research_collection"
+                )
+                print(f"Vector store initialized at {self.persist_directory}")
+            except Exception as inner_e:
+                # If that fails, try to create a new collection
+                print(f"Error initializing existing collection: {inner_e}")
+                print("Trying to create a new collection...")
+
+                import shutil
+                # Backup the old directory if it exists
+                if os.path.exists(self.persist_directory):
+                    backup_dir = f"{self.persist_directory}_backup_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+                    shutil.move(self.persist_directory, backup_dir)
+                    os.makedirs(self.persist_directory, exist_ok=True)
+
+                # Try again with a fresh directory
+                self.vector_store = Chroma(
+                    persist_directory=self.persist_directory,
+                    embedding_function=embedding_function,
+                    collection_name="research_collection"
+                )
+                print(f"New vector store created at {self.persist_directory}")
+
         except Exception as e:
             print(f"Error initializing vector store: {e}")
             print("Falling back to simple storage without embeddings")

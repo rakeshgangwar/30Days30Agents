@@ -2,9 +2,22 @@
 
 from typing import Dict, List, Any, Optional
 import os
+import time
+import logging
 
 from langchain_exa import ExaSearchResults
 from langchain_community.utilities import SerpAPIWrapper
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler("research_assistant.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("search_tools")
 
 # Add ExaSearch alias for test compatibility
 ExaSearch = ExaSearchResults
@@ -40,12 +53,26 @@ class WebSearchTool:
         Returns:
             List of search results
         """
+        logger.info(f"Performing web search for query: '{query}' using {self.search_engine} engine")
+        logger.info(f"Requesting {num_results} results")
+
+        start_time = time.time()
+
         if self.search_engine == "exa":
-            return self._search_exa(query, num_results)
+            results = self._search_exa(query, num_results)
         elif self.search_engine == "serpapi":
-            return self._search_serpapi(query, num_results)
+            results = self._search_serpapi(query, num_results)
         else:
-            raise ValueError(f"Unsupported search engine: {self.search_engine}")
+            error_msg = f"Unsupported search engine: {self.search_engine}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        end_time = time.time()
+        duration = end_time - start_time
+
+        logger.info(f"Search completed in {duration:.2f} seconds, found {len(results)} results")
+
+        return results
 
     def _search_exa(self, query: str, num_results: int = 10) -> List[Dict[str, Any]]:
         """
@@ -58,16 +85,20 @@ class WebSearchTool:
         Returns:
             List of search results
         """
+        logger.info(f"Executing Exa search for query: '{query}'")
         try:
             # Create an instance of ExaSearch/ExaSearchResults
             search_tool = ExaSearch(exa_api_key=self.api_key)
+            logger.info("Exa search tool initialized")
 
             # For test compatibility, check if we're using a mock
             if hasattr(search_tool, 'search'):
                 # This branch will be used by the tests
+                logger.info("Using test mock for Exa search")
                 response = search_tool.search(query)
             else:
                 # This branch will be used in production
+                logger.info(f"Invoking Exa search with num_results={num_results}")
                 response = search_tool.invoke({"query": query, "num_results": num_results})
 
             # ExaSearchResults.invoke() returns data in a different structure
@@ -76,33 +107,42 @@ class WebSearchTool:
 
             if isinstance(response, dict) and 'results' in response:
                 result_list = response['results']
+                logger.info(f"Received {len(result_list)} results from Exa (dict format)")
             elif isinstance(response, list):
                 result_list = response
+                logger.info(f"Received {len(result_list)} results from Exa (list format)")
             elif hasattr(response, 'results'):
                 result_list = response.results
+                logger.info(f"Received {len(result_list)} results from Exa (object format)")
             else:
-                print(f"Unexpected response format from ExaSearchResults: {type(response)}")
+                logger.error(f"Unexpected response format from ExaSearchResults: {type(response)}")
                 return []
 
             # Process each result based on its structure
-            for result in result_list:
+            for i, result in enumerate(result_list):
                 if isinstance(result, dict):
                     # If result is a dictionary
+                    title = result.get("title", "")
+                    url = result.get("url", "")
                     results.append({
-                        "title": result.get("title", ""),
-                        "url": result.get("url", ""),
+                        "title": title,
+                        "url": url,
                         "snippet": result.get("text", ""),
                         "source": "exa"
                     })
+                    logger.info(f"Result {i+1}: {title} - {url}")
                 else:
                     # If result is an object with attributes
                     try:
+                        title = getattr(result, "title", "")
+                        url = getattr(result, "url", "")
                         results.append({
-                            "title": getattr(result, "title", ""),
-                            "url": getattr(result, "url", ""),
+                            "title": title,
+                            "url": url,
                             "snippet": getattr(result, "text", ""),
                             "source": "exa"
                         })
+                        logger.info(f"Result {i+1}: {title} - {url}")
                     except AttributeError:
                         # If attributes aren't accessible, try common attribute names
                         title = getattr(result, "title", None) or getattr(result, "name", "")
@@ -118,10 +158,12 @@ class WebSearchTool:
                             "snippet": text,
                             "source": "exa"
                         })
+                        logger.info(f"Result {i+1}: {title} - {url}")
 
+            logger.info(f"Successfully processed {len(results)} results from Exa search")
             return results
         except Exception as e:
-            print(f"Error with Exa search: {e}")
+            logger.error(f"Error with Exa search: {e}")
             return self._handle_search_error(e, query, "exa")
 
     def _search_serpapi(self, query: str, num_results: int = 10) -> List[Dict[str, Any]]:
@@ -135,25 +177,38 @@ class WebSearchTool:
         Returns:
             List of search results
         """
+        logger.info(f"Executing SerpAPI search for query: '{query}'")
         try:
             search = SerpAPIWrapper(serpapi_api_key=self.api_key)
+            logger.info("SerpAPI search tool initialized")
+
             results = search.results(query, num_results=num_results)
+            logger.info("Received results from SerpAPI")
 
             # SerpAPI returns different structure, normalize it
             normalized_results = []
 
             if 'organic_results' in results:
-                for result in results['organic_results'][:num_results]:
+                organic_results = results['organic_results'][:num_results]
+                logger.info(f"Found {len(organic_results)} organic results")
+
+                for i, result in enumerate(organic_results):
+                    title = result.get("title", "")
+                    url = result.get("link", "")
                     normalized_results.append({
-                        "title": result.get("title", ""),
-                        "url": result.get("link", ""),
+                        "title": title,
+                        "url": url,
                         "snippet": result.get("snippet", ""),
                         "source": "serpapi"
                     })
+                    logger.info(f"Result {i+1}: {title} - {url}")
+            else:
+                logger.warning("No organic_results found in SerpAPI response")
 
+            logger.info(f"Successfully processed {len(normalized_results)} results from SerpAPI search")
             return normalized_results
         except Exception as e:
-            print(f"Error with SerpAPI search: {e}")
+            logger.error(f"Error with SerpAPI search: {e}")
             return self._handle_search_error(e, query, "serpapi")
 
     def _handle_search_error(self, error: Exception, query: str, engine: str) -> List[Dict[str, Any]]:
@@ -168,10 +223,33 @@ class WebSearchTool:
         Returns:
             Fallback search results or empty list
         """
-        print(f"Error in {engine} search: {error}")
+        logger.error(f"Error in {engine} search for query '{query}': {error}")
+
+        # Log the error type for debugging
+        error_type = type(error).__name__
+        logger.error(f"Error type: {error_type}")
+
+        # Try to extract more details from the error
+        if hasattr(error, 'response'):
+            try:
+                status_code = error.response.status_code
+                response_text = error.response.text
+                logger.error(f"API response status code: {status_code}")
+                logger.error(f"API response text: {response_text[:500]}...")  # Log first 500 chars
+            except:
+                logger.error("Could not extract response details from error")
 
         # Implement fallback strategies here
-        # For now, just return an empty list
+        if engine == "exa" and self.search_engine != "serpapi":
+            logger.info("Attempting fallback to SerpAPI search")
+            try:
+                if hasattr(self, 'api_key') and self.api_key:
+                    return self._search_serpapi(query)
+            except Exception as fallback_error:
+                logger.error(f"Fallback search also failed: {fallback_error}")
+
+        # For now, just return an empty list if all else fails
+        logger.warning(f"No results returned for query: '{query}'")
         return []
 
 
