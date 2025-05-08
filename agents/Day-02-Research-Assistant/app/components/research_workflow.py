@@ -56,6 +56,7 @@ class ResearchStrategyPlanner:
         ))
 
         # Parse the response to extract a structured research strategy
+        # Note: research_depth will be accessed from the state in _parse_strategy_response
         return self._parse_strategy_response(response, query, analysis)
 
     def _parse_strategy_response(
@@ -164,6 +165,53 @@ class ResearchStrategyPlanner:
             if "recent" in analysis.get("time_constraints", "").lower():
                 strategy["recency_filter"] = "last_3_years"
 
+        # Adjust strategy based on research depth
+        # Get research depth from the state if available, otherwise use default
+        import inspect
+        frame = inspect.currentframe()
+        research_depth = "medium"  # Default
+
+        # Try to get research_depth from the calling function's state parameter
+        if frame:
+            try:
+                # Look for state parameter in the caller's locals
+                frame = frame.f_back
+                if frame and 'state' in frame.f_locals:
+                    state = frame.f_locals['state']
+                    if isinstance(state, dict) and 'research_depth' in state:
+                        research_depth = state['research_depth']
+            except Exception:
+                pass  # Ignore any errors in accessing frame
+            finally:
+                del frame  # Avoid reference cycles
+
+        # Apply adjustments based on research depth
+        if research_depth == "light":
+            # Light research: fewer sources, lower coverage requirements
+            strategy["min_sources"] = max(2, strategy["min_sources"] - 1)
+            strategy["completion_criteria"]["min_sources_gathered"] = max(2, strategy["completion_criteria"]["min_sources_gathered"] - 1)
+            strategy["completion_criteria"]["coverage_of_topics"] = min(0.6, strategy["completion_criteria"]["coverage_of_topics"])
+            # Prioritize speed over depth
+            strategy["time_allocation"]["search"] = 0.4
+            strategy["time_allocation"]["browse"] = 0.3
+            strategy["time_allocation"]["synthesize"] = 0.3
+
+        elif research_depth == "deep":
+            # Deep research: more sources, higher coverage, more thorough
+            strategy["min_sources"] = max(5, strategy["min_sources"] + 2)
+            strategy["completion_criteria"]["min_sources_gathered"] = max(5, strategy["completion_criteria"]["min_sources_gathered"] + 2)
+            strategy["completion_criteria"]["coverage_of_topics"] = max(0.8, strategy["completion_criteria"]["coverage_of_topics"])
+            strategy["completion_criteria"]["information_diversity"] = True
+            # Prioritize thoroughness
+            strategy["time_allocation"]["search"] = 0.25
+            strategy["time_allocation"]["browse"] = 0.5
+            strategy["time_allocation"]["synthesize"] = 0.25
+            # Add academic sources to priorities if not already present
+            if "academic" not in strategy["source_priorities"]:
+                strategy["source_priorities"].insert(0, "academic")
+
+        # For medium depth, use the default strategy (no additional adjustments)
+
         return strategy
 
 
@@ -184,6 +232,7 @@ class ResearchState(TypedDict):
     final_report: Optional[str]
     start_time: str
     last_updated: str
+    research_depth: str
 
 
 class ResearchWorkflow:
@@ -233,12 +282,13 @@ class ResearchWorkflow:
         self.evaluator = evaluator
         self.document_loader = document_loader
 
-    def initialize_research(self, query: str) -> ResearchState:
+    def initialize_research(self, query: str, research_depth: str = "medium") -> ResearchState:
         """
         Initialize the research workflow with a query.
 
         Args:
             query: The research query
+            research_depth: Depth of research (light, medium, deep)
 
         Returns:
             Initial research state
@@ -269,7 +319,8 @@ class ResearchWorkflow:
             "next_step": "perform_search",
             "final_report": None,
             "start_time": current_time,
-            "last_updated": current_time
+            "last_updated": current_time,
+            "research_depth": research_depth
         }
 
     def perform_search(self, state: ResearchState) -> ResearchState:
@@ -457,10 +508,15 @@ class ResearchWorkflow:
         Returns:
             Updated research state
         """
+        # Get research depth to adjust synthesis parameters
+        research_depth = state.get("research_depth", "medium")
+
+        # Pass research depth to the synthesizer
         synthesized = self.synthesizer.synthesize(
             state["extracted_content"],
             state["query"],
-            state["analysis"]
+            state["analysis"],
+            research_depth=research_depth  # Pass research depth to influence synthesis detail
         )
 
         return {
@@ -480,10 +536,15 @@ class ResearchWorkflow:
         Returns:
             Updated research state
         """
+        # Get research depth to adjust report generation
+        research_depth = state.get("research_depth", "medium")
+
+        # Pass research depth to the report generator
         report = self.report_generator.generate(
             state["synthesized_information"],
             state["extracted_content"],
-            state["query"]
+            state["query"],
+            research_depth=research_depth  # Pass research depth to influence report detail
         )
 
         return {
@@ -631,17 +692,18 @@ class ResearchWorkflow:
             logger.info(f"Unknown or end step: {next_step}")
             return state
 
-    def run_workflow(self, query: str) -> Dict[str, Any]:
+    def run_workflow(self, query: str, research_depth: str = "medium") -> Dict[str, Any]:
         """
         Run the complete research workflow from query to final report.
 
         Args:
             query: The research query
+            research_depth: Depth of research (light, medium, deep)
 
         Returns:
             Dictionary with the final research report and metadata
         """
-        state = self.initialize_research(query)
+        state = self.initialize_research(query, research_depth=research_depth)
 
         while state["next_step"] != "end":
             state = self.run_step(state)
@@ -653,6 +715,7 @@ class ResearchWorkflow:
                 {"url": item["url"], "title": item["title"]}
                 for item in state["extracted_content"]
             ],
+            "research_depth": research_depth,
             "research_time": self._calculate_research_time(state)
         }
 

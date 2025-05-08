@@ -51,10 +51,10 @@ def parse_args():
         default="markdown"
     )
     research_parser.add_argument(
-        "--max-sources", "-m",
-        help="Maximum number of sources to use",
-        type=int,
-        default=7
+        "--research-depth", "-d",
+        help="Research depth (light, medium, deep)",
+        choices=["light", "medium", "deep"],
+        default="medium"
     )
     research_parser.add_argument(
         "--analysis-model",
@@ -144,7 +144,8 @@ def run_research(args):
         result = research_assistant.research(
             query=query,
             max_iterations=50,  # Increased from 20 to 50 to avoid recursion limit errors
-            return_intermediate_steps=False
+            return_intermediate_steps=False,
+            research_depth=args.research_depth
         )
 
         # Format the output

@@ -438,7 +438,7 @@ class ContentExtractionTool:
         )
 
     def extract_relevant_content(
-        self, content: str, query: str, max_length: int = 10000
+        self, content: str, query: str, max_length: int = 10000, detail_level: str = "medium"
     ) -> str:
         """
         Extract relevant content from a web page based on a query.
@@ -447,11 +447,12 @@ class ContentExtractionTool:
             content: Web page content (HTML)
             query: Research query
             max_length: Maximum length of content to process
+            detail_level: Level of detail to extract (low, medium, high)
 
         Returns:
             Extracted relevant content as a string
         """
-        logger.info(f"Extracting relevant content for query: '{query}'")
+        logger.info(f"Extracting relevant content for query: '{query}' with detail level: {detail_level}")
         logger.info(f"Original content length: {len(content)} characters")
 
         start_time = time.time()
@@ -470,6 +471,30 @@ class ContentExtractionTool:
             cleaned_text = cleaned_text[:max_length]
             logger.info(f"Truncated content length: {len(cleaned_text)} characters")
 
+        # Adjust extraction based on detail level
+        extraction_instructions = ""
+        if detail_level == "high":
+            extraction_instructions = """
+            Extract comprehensive and detailed information relevant to the query.
+            Include nuanced points, supporting evidence, and contextual information.
+            Preserve technical details, statistics, and methodology information when present.
+            Format the output as detailed paragraphs with clear section breaks where appropriate.
+            """
+        elif detail_level == "low":
+            extraction_instructions = """
+            Extract only the most essential information directly relevant to the query.
+            Focus on key points, main conclusions, and critical facts.
+            Omit background details and tangential information.
+            Format the output as concise, focused paragraphs.
+            """
+        else:  # medium (default)
+            extraction_instructions = """
+            Extract information that is directly relevant to the query.
+            Include important facts, figures, dates, or statistics.
+            Balance detail and conciseness.
+            Format the output as clear paragraphs with good structure.
+            """
+
         # Use the LLM to extract the most relevant parts
         logger.info("Preparing prompt for LLM extraction")
         prompt = f"""
@@ -478,9 +503,7 @@ class ContentExtractionTool:
         Extract the most relevant information from the following web page content:
         {cleaned_text}
 
-        Extract only information that is directly relevant to the query.
-        Format the output as plain text with clear paragraphs.
-        Include any important facts, figures, dates, or statistics.
+        {extraction_instructions}
         """
 
         try:

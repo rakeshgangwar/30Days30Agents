@@ -21,7 +21,8 @@ class ResearchSummaryGenerator:
         self.llm = llm
 
     def generate_summary(
-        self, synthesized_info: Dict[str, Any], query: str, sources: List[Dict[str, Any]]
+        self, synthesized_info: Dict[str, Any], query: str, sources: List[Dict[str, Any]],
+        research_depth: str = "medium"
     ) -> str:
         """
         Generate a research summary report.
@@ -30,6 +31,7 @@ class ResearchSummaryGenerator:
             synthesized_info: Synthesized research information
             query: Original research query
             sources: List of research sources
+            research_depth: Depth of research (light, medium, deep)
 
         Returns:
             Formatted research summary
@@ -51,6 +53,17 @@ class ResearchSummaryGenerator:
                 synthesis_parts.append(f"## {title}\n{content}")
             synthesis_text = "\n\n".join(synthesis_parts)
 
+        # Adjust report detail based on research depth
+        detail_level = "moderate"
+        word_count_guidance = "800-1200"
+
+        if research_depth == "light":
+            detail_level = "concise"
+            word_count_guidance = "400-600"
+        elif research_depth == "deep":
+            detail_level = "comprehensive"
+            word_count_guidance = "1500-2500"
+
         prompt = f"""
         RESEARCH QUERY: {query}
 
@@ -60,12 +73,14 @@ class ResearchSummaryGenerator:
         SOURCES USED:
         {sources_text}
 
-        Based on the above research, generate a comprehensive research summary that:
+        Based on the above research, generate a {detail_level} research summary that:
         1. Directly addresses the original query
         2. Is well-organized with sections and bullet points for clarity
         3. Cites sources using the [n] notation throughout the text
         4. Highlights the most important findings
         5. Provides a balanced view if conflicting information exists
+
+        The report should be approximately {word_count_guidance} words in length, appropriate for a {research_depth} research depth.
 
         FORMAT:
 
@@ -77,7 +92,7 @@ class ResearchSummaryGenerator:
         ...
 
         ## Detailed Analysis
-        [Comprehensive analysis with appropriate sections]
+        [Analysis with appropriate sections and detail level for {research_depth} research]
 
         ## Additional Information
         [Any relevant context or caveats]
@@ -284,7 +299,8 @@ class ResearchReportGenerator:
         self,
         synthesized_info: Dict[str, Any],
         extracted_content: List[Dict[str, Any]],
-        query: str
+        query: str,
+        research_depth: str = "medium"
     ) -> Dict[str, Any]:
         """
         Generate a complete research report.
@@ -293,6 +309,7 @@ class ResearchReportGenerator:
             synthesized_info: Synthesized research information
             extracted_content: Extracted content from sources
             query: Original research query
+            research_depth: Depth of research (light, medium, deep)
 
         Returns:
             Dictionary with the complete report and metadata
@@ -300,14 +317,20 @@ class ResearchReportGenerator:
         # Format citations
         formatted_citations = self.citation_formatter.format_citations(extracted_content)
 
-        # Generate the report narrative
+        # Generate the report narrative with appropriate detail level based on research depth
         report_narrative = self.summary_generator.generate_summary(
-            synthesized_info, query, extracted_content
+            synthesized_info, query, extracted_content, research_depth=research_depth
         )
 
-        # Extract key findings
+        # Extract key findings - adjust number based on research depth
+        max_findings = 3  # Default for light research
+        if research_depth == "medium":
+            max_findings = 5
+        elif research_depth == "deep":
+            max_findings = 8
+
         key_findings = self.findings_extractor.extract_key_findings(
-            synthesized_info, query
+            synthesized_info, query, max_findings=max_findings
         )
 
         # Calculate some metrics
@@ -333,6 +356,7 @@ class ResearchReportGenerator:
             "metadata": {
                 "word_count": word_count,
                 "source_count": source_count,
+                "research_depth": research_depth,
                 "generated_at": self._get_timestamp()
             }
         }

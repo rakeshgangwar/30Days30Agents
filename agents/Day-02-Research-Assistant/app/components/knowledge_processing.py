@@ -236,7 +236,8 @@ class InformationSynthesizer:
         self.llm = llm
 
     def synthesize(
-        self, extracted_contents: List[Dict[str, Any]], query: str, query_analysis: Dict[str, Any]
+        self, extracted_contents: List[Dict[str, Any]], query: str, query_analysis: Dict[str, Any],
+        research_depth: str = "medium"
     ) -> Dict[str, Any]:
         """
         Synthesize information from multiple sources.
@@ -245,6 +246,7 @@ class InformationSynthesizer:
             extracted_contents: List of extracted content items
             query: Original research query
             query_analysis: Analysis of the research query
+            research_depth: Depth of research (light, medium, deep)
 
         Returns:
             Dictionary with synthesized information
@@ -261,6 +263,13 @@ class InformationSynthesizer:
 
         combined_content = "\n\n".join(formatted_contents)
 
+        # Adjust synthesis parameters based on research depth
+        detail_level = "moderate"
+        if research_depth == "light":
+            detail_level = "concise"
+        elif research_depth == "deep":
+            detail_level = "comprehensive"
+
         # Use the LLM to synthesize
         prompt = f"""
         RESEARCH QUERY: {query}
@@ -269,12 +278,18 @@ class InformationSynthesizer:
         {combined_content}
 
         TASK:
-        Synthesize the above information into a coherent research summary that:
+        Synthesize the above information into a {detail_level} research summary that:
         1. Addresses the main aspects of the research query
         2. Integrates information from multiple sources
         3. Highlights areas of consensus among sources
         4. Notes any contradictions or disagreements between sources
         5. Identifies any gaps in the collected information
+
+        RESEARCH DEPTH: {research_depth.upper()}
+        For this {research_depth} research depth, provide a {detail_level} synthesis with:
+        - {"Brief, focused analysis of core findings" if research_depth == "light" else "Thorough analysis with moderate detail" if research_depth == "medium" else "In-depth, comprehensive analysis with extensive detail"}
+        - {"3-5 key points" if research_depth == "light" else "5-8 key points" if research_depth == "medium" else "8-12 key points"}
+        - {"Minimal technical details" if research_depth == "light" else "Moderate technical details" if research_depth == "medium" else "Extensive technical details where relevant"}
 
         FORMAT THE OUTPUT AS:
 
@@ -318,7 +333,8 @@ class InformationSynthesizer:
             "raw_synthesis": synthesis_text,
             "sections": sections,
             "source_count": len(extracted_contents),
-            "query": query
+            "query": query,
+            "research_depth": research_depth
         }
 
     def _parse_markdown_sections(self, markdown_text) -> Dict[str, str]:

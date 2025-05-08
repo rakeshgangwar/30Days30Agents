@@ -37,13 +37,13 @@ def init_session_state():
         except ValueError as e:
             st.session_state.api_error = str(e)
             st.session_state.api_configured = False
-    
+
     if "research_history" not in st.session_state:
         st.session_state.research_history = []
-    
+
     if "current_research" not in st.session_state:
         st.session_state.current_research = None
-    
+
     if "research_in_progress" not in st.session_state:
         st.session_state.research_in_progress = False
 
@@ -51,36 +51,36 @@ def init_session_state():
 def display_api_config():
     """Display API configuration form."""
     st.header("API Configuration")
-    
+
     with st.form("api_config_form"):
         openai_key = st.text_input(
-            "OpenAI API Key", 
+            "OpenAI API Key",
             value=os.environ.get("OPENAI_API_KEY", ""),
             type="password"
         )
-        
+
         exa_key = st.text_input(
-            "Exa Search API Key", 
+            "Exa Search API Key",
             value=os.environ.get("EXA_API_KEY", ""),
             type="password"
         )
-        
+
         gemini_key = st.text_input(
-            "Google Gemini API Key (Optional)", 
+            "Google Gemini API Key (Optional)",
             value=os.environ.get("GOOGLE_GEMINI_API_KEY", ""),
             type="password"
         )
-        
+
         submitted = st.form_submit_button("Save Configuration")
-        
+
         if submitted:
             # Set environment variables
             os.environ["OPENAI_API_KEY"] = openai_key
             os.environ["EXA_API_KEY"] = exa_key
-            
+
             if gemini_key:
                 os.environ["GOOGLE_GEMINI_API_KEY"] = gemini_key
-            
+
             try:
                 validate_config()
                 st.session_state.research_assistant = ResearchAssistant()
@@ -96,34 +96,23 @@ def display_api_config():
 def display_research_form():
     """Display the research query input form."""
     st.header("Research Assistant")
-    
+
     with st.form("research_form"):
         query = st.text_area("Enter your research query:", height=100)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            research_depth = st.selectbox(
-                "Research Depth:",
-                options=["Light", "Medium", "Deep"],
-                index=1
-            )
-        
-        with col2:
-            max_sources = st.slider(
-                "Maximum Sources:",
-                min_value=3,
-                max_value=15,
-                value=7
-            )
-        
+
+        research_depth = st.selectbox(
+            "Research Depth:",
+            options=["Light", "Medium", "Deep"],
+            index=1
+        )
+
         submitted = st.form_submit_button("Start Research")
-        
+
         if submitted and query:
             st.session_state.research_in_progress = True
             st.session_state.current_research = {
                 "query": query,
                 "depth": research_depth,
-                "max_sources": max_sources,
                 "start_time": time.time()
             }
 
@@ -132,32 +121,34 @@ def conduct_research():
     """Conduct research based on the current query."""
     if not st.session_state.current_research:
         return
-    
+
     query = st.session_state.current_research["query"]
-    
+    research_depth = st.session_state.current_research["depth"]
+
     try:
-        with st.spinner(f"Researching: {query}"):
-            # Conduct the research
+        with st.spinner(f"Researching: {query} (Depth: {research_depth})"):
+            # Conduct the research with the specified depth
             research_result = st.session_state.research_assistant.research(
                 query=query,
                 max_iterations=20,
-                return_intermediate_steps=True
+                return_intermediate_steps=True,
+                research_depth=research_depth
             )
-            
+
             # Calculate duration
             duration = time.time() - st.session_state.current_research["start_time"]
             research_result["metadata"]["duration_seconds"] = duration
-            
+
             # Add to history
             st.session_state.research_history.append(research_result)
-            
+
             # Clear current research
             st.session_state.current_research = None
             st.session_state.research_in_progress = False
-            
+
             # Rerun to update UI
             st.rerun()
-            
+
     except Exception as e:
         st.error(f"Research error: {str(e)}")
         logger.error(f"Research error: {str(e)}", exc_info=True)
@@ -170,12 +161,12 @@ def display_research_results():
     if not st.session_state.research_history:
         st.info("No research results yet. Enter a query to get started.")
         return
-    
+
     # Get the most recent research
     research = st.session_state.research_history[-1]
-    
+
     st.header(f"Research: {research['query']}")
-    
+
     # Display metadata
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -186,18 +177,18 @@ def display_research_results():
     with col3:
         errors = research["metadata"].get("error_count", 0)
         st.metric("Errors", errors)
-    
+
     # Display report
     if "report" in research and "report_text" in research["report"]:
         st.markdown(research["report"]["report_text"])
     else:
         st.warning("No report was generated.")
-    
+
     # Display sources
     st.subheader("Sources")
     for idx, source in enumerate(research.get("sources", []), 1):
         st.markdown(f"{idx}. [{source['title']}]({source['url']})")
-    
+
     # Display any errors
     if errors > 0 and "intermediate_steps" in research:
         with st.expander("Errors"):
@@ -209,9 +200,9 @@ def display_research_history():
     """Display research history."""
     if not st.session_state.research_history:
         return
-    
+
     st.header("Research History")
-    
+
     for idx, research in enumerate(reversed(st.session_state.research_history)):
         with st.expander(f"Research {len(st.session_state.research_history) - idx}: {research['query']}"):
             # Display metadata
@@ -221,13 +212,13 @@ def display_research_history():
             with col2:
                 duration = research["metadata"].get("duration_seconds", 0)
                 st.metric("Research Time", f"{duration:.1f}s")
-            
+
             # Display key findings
             if "report" in research and "key_findings" in research["report"]:
                 st.subheader("Key Findings")
                 for finding in research["report"]["key_findings"]:
                     st.markdown(f"• {finding}")
-            
+
             # Display sources
             st.subheader("Sources")
             for idx, source in enumerate(research.get("sources", []), 1):
@@ -241,7 +232,7 @@ def main():
         page_icon="🔍",
         layout="wide"
     )
-    
+
     # Custom CSS
     st.markdown("""
         <style>
@@ -253,64 +244,64 @@ def main():
         }
         </style>
     """, unsafe_allow_html=True)
-    
+
     # Initialize session state
     init_session_state()
-    
+
     # Sidebar
     with st.sidebar:
         st.title("Research Assistant")
         st.markdown("---")
-        
+
         # API Configuration
         if not st.session_state.api_configured:
             st.warning("API Keys not configured or invalid.")
-            
+
             if "api_error" in st.session_state and st.session_state.api_error:
                 st.error(st.session_state.api_error)
-            
+
             display_api_config()
         else:
             st.success("API Keys configured")
-            
+
             if st.button("Update API Keys"):
                 display_api_config()
-        
+
         st.markdown("---")
-        
+
         # About
         st.markdown("""
             ### About
-            
+
             This Research Assistant helps you conduct comprehensive web research on any topic.
-            
+
             It:
             - Searches the web for relevant information
             - Extracts key content from web pages
             - Synthesizes information from multiple sources
             - Generates a comprehensive research report with citations
-            
+
             Enter your research query to get started!
         """)
-    
+
     # Main content
     if not st.session_state.api_configured:
         st.header("Welcome to Research Assistant!")
         st.info("Please configure your API keys in the sidebar to get started.")
         return
-    
+
     # Display research form
     if not st.session_state.research_in_progress and not st.session_state.current_research:
         display_research_form()
-    
+
     # Conduct research if in progress
     if st.session_state.research_in_progress and st.session_state.current_research:
         conduct_research()
-    
+
     # Display results
     if st.session_state.research_history:
         display_research_results()
-    
+
     # Display history
     if len(st.session_state.research_history) > 1:
         display_research_history()

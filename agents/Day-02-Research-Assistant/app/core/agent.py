@@ -190,7 +190,8 @@ class ResearchAssistant:
         )
 
     def research(
-        self, query: str, max_iterations: int = 50, return_intermediate_steps: bool = False
+        self, query: str, max_iterations: int = 50, return_intermediate_steps: bool = False,
+        research_depth: str = None
     ) -> Dict[str, Any]:
         """
         Conduct research on a query.
@@ -199,16 +200,26 @@ class ResearchAssistant:
             query: The research query
             max_iterations: Maximum number of iterations (default increased to 50)
             return_intermediate_steps: Whether to return intermediate steps
+            research_depth: Depth of research (light, medium, deep)
 
         Returns:
             Research results
         """
+        # Use default research depth from config if not specified
+        from core.config import DEFAULT_RESEARCH_DEPTH
+        if research_depth is None:
+            research_depth = DEFAULT_RESEARCH_DEPTH
+
+        # Normalize research depth to lowercase
+        research_depth = research_depth.lower()
+
         try:
             # Run the workflow with increased recursion limit
-            # Note: The run method doesn't accept a config parameter directly
+            # Pass the research depth to the workflow
             result = self.workflow.run(
                 query,
-                max_iterations=max_iterations
+                max_iterations=max_iterations,
+                research_depth=research_depth
             )
         except Exception as e:
             import logging

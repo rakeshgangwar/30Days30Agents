@@ -78,18 +78,8 @@ def get_llm_config(phase: str = "analysis") -> Dict[str, str]:
     Returns:
         Dictionary with LLM configuration
     """
-    if OPENAI_API_KEY:
-        if phase == "synthesis":
-            model = SYNTHESIS_OPENAI_MODEL
-        else:  # Default to analysis phase
-            model = ANALYSIS_OPENAI_MODEL
-
-        return {
-            "provider": "openai",
-            "model": model,
-            "api_key": OPENAI_API_KEY
-        }
-    elif GOOGLE_GEMINI_API_KEY:
+    # Prioritize Gemini over OpenAI
+    if GOOGLE_GEMINI_API_KEY:
         if phase == "synthesis":
             model = SYNTHESIS_GEMINI_MODEL
         else:  # Default to analysis phase
@@ -99,6 +89,17 @@ def get_llm_config(phase: str = "analysis") -> Dict[str, str]:
             "provider": "gemini",
             "model": model,
             "api_key": GOOGLE_GEMINI_API_KEY
+        }
+    elif OPENAI_API_KEY:
+        if phase == "synthesis":
+            model = SYNTHESIS_OPENAI_MODEL
+        else:  # Default to analysis phase
+            model = ANALYSIS_OPENAI_MODEL
+
+        return {
+            "provider": "openai",
+            "model": model,
+            "api_key": OPENAI_API_KEY
         }
     else:
         raise ValueError("No valid LLM API key found in environment variables.")

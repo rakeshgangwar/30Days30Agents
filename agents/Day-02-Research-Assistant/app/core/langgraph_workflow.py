@@ -24,6 +24,7 @@ class ResearchState(TypedDict):
     start_time: str
     last_updated: str
     errors: List[Dict[str, Any]]
+    research_depth: str
 
 
 class ResearchGraph:
@@ -175,6 +176,11 @@ class ResearchGraph:
         """
         query = state["query"]
 
+        # Log the research depth being used
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Analyzing query with research depth: {state.get('research_depth', 'medium')}")
+
         try:
             # Analyze the query
             analysis = self.query_analyzer.analyze(query)
@@ -182,7 +188,7 @@ class ResearchGraph:
             # Formulate search queries
             search_queries = self.search_query_formulator.formulate_queries(analysis)
 
-            # Create research strategy
+            # Create research strategy (research_depth is accessed from state in _parse_strategy_response)
             strategy = self.strategy_planner.create_strategy(query, analysis)
 
             # Update the state
@@ -267,9 +273,22 @@ class ResearchGraph:
                 if not any(bp["url"] == result["url"] for bp in state["browsed_pages"])
             ]
 
+            # Determine how many pages to browse based on research depth
+            research_depth = state.get("research_depth", "medium")
+
+            # Set pages to browse according to specified values
+            if research_depth == "light":
+                pages_to_browse = 5  # Light: 5 pages
+            elif research_depth == "medium":
+                pages_to_browse = 10  # Medium: 10 pages
+            elif research_depth == "deep":
+                pages_to_browse = 20  # Deep: 20 pages
+            else:
+                pages_to_browse = 10  # Default to medium if unknown depth
+
             # Browse top N unvisited pages
             browsed_pages = []
-            for url in new_urls[:3]:  # Process 3 at a time
+            for url in new_urls[:pages_to_browse]:
                 try:
                     page_content = self.browsing_tool.fetch_content(url)
                     if page_content:
@@ -292,10 +311,27 @@ class ResearchGraph:
                     query_type = state["analysis"].get("query_type", "")
                     domain = state["analysis"].get("domain", "")
 
+                    # Get research depth to adjust document loading
+                    research_depth = state.get("research_depth", "medium")
+
+                    # Set document limits based on research depth
+                    arxiv_limit = 1  # Default for light
+                    pubmed_limit = 1  # Default for light
+                    wiki_limit = 1    # Default for light
+
+                    if research_depth == "medium":
+                        arxiv_limit = 3
+                        pubmed_limit = 2
+                        wiki_limit = 2
+                    elif research_depth == "deep":
+                        arxiv_limit = 5
+                        pubmed_limit = 4
+                        wiki_limit = 3
+
                     # For academic or scientific queries, use Arxiv and PubMed
                     if query_type in ["factual", "academic", "scientific"] or domain in ["science", "medicine", "research"]:
                         # Load from Arxiv
-                        arxiv_docs = self.document_loader.load_from_arxiv(query, max_docs=2)
+                        arxiv_docs = self.document_loader.load_from_arxiv(query, max_docs=arxiv_limit)
 
                         # Add to browsed pages
                         for doc in arxiv_docs:
@@ -311,7 +347,7 @@ class ResearchGraph:
 
                         # Load from PubMed for medical/biological topics
                         if domain in ["medicine", "biology", "health"]:
-                            pubmed_docs = self.document_loader.load_from_pubmed(query, max_docs=2)
+                            pubmed_docs = self.document_loader.load_from_pubmed(query, max_docs=pubmed_limit)
                             for doc in pubmed_docs:
                                 url = doc.get("url", "")
                                 if url and not any(bp["url"] == url for bp in updated_browsed_pages):
@@ -325,7 +361,7 @@ class ResearchGraph:
 
                     # For general knowledge queries, use Wikipedia
                     if query_type in ["factual", "exploratory", "general"]:
-                        wiki_docs = self.document_loader.load_from_wikipedia(query, max_docs=1)
+                        wiki_docs = self.document_loader.load_from_wikipedia(query, max_docs=wiki_limit)
                         for doc in wiki_docs:
                             url = doc.get("url", "")
                             if url and not any(bp["url"] == url for bp in updated_browsed_pages):
@@ -378,19 +414,40 @@ class ResearchGraph:
                 if not any(ec["url"] == page["url"] for ec in state["extracted_content"])
             ]
 
+            # Get research depth to adjust extraction parameters
+            research_depth = state.get("research_depth", "medium")
+
             extracted_content = []
             for page in new_pages:
                 try:
-                    extracted = self.extraction_tool.extract_relevant_content(
-                        page["content"],
-                        state["query"]
-                    )
+                    # For deep research, we'll extract more detailed content
+                    if research_depth == "deep":
+                        # Try to extract more comprehensive information
+                        extracted = self.extraction_tool.extract_relevant_content(
+                            page["content"],
+                            state["query"],
+                            detail_level="high"
+                        )
+                    elif research_depth == "light":
+                        # For light research, extract just the essentials
+                        extracted = self.extraction_tool.extract_relevant_content(
+                            page["content"],
+                            state["query"],
+                            detail_level="low"
+                        )
+                    else:
+                        # Medium depth (default)
+                        extracted = self.extraction_tool.extract_relevant_content(
+                            page["content"],
+                            state["query"]
+                        )
 
                     if extracted:
                         extracted_content.append({
                             "url": page["url"],
                             "title": page["title"],
                             "extracted_text": extracted,
+                            "research_depth": research_depth,  # Store the depth used for extraction
                             "timestamp": datetime.now().isoformat()
                         })
                 except Exception as e:
@@ -434,6 +491,17 @@ class ResearchGraph:
             sources_gathered = len(state["extracted_content"])
             min_sources = state["strategy"].get("min_sources", 3)
 
+            # Get research depth to adjust evaluation criteria
+            research_depth = state.get("research_depth", "medium")
+
+            # Adjust minimum sources based on research depth
+            if research_depth == "light":
+                # For light research, we can be more lenient
+                min_sources = max(2, min_sources - 1)
+            elif research_depth == "deep":
+                # For deep research, we need more sources
+                min_sources = max(5, min_sources)
+
             # 2. Have we searched all queries?
             all_queries_searched = state["current_query_index"] >= len(state["search_queries"]) - 1
 
@@ -443,6 +511,12 @@ class ResearchGraph:
                 state["query"],
                 state["analysis"]
             ) if sources_gathered > 0 else False
+
+            # For deep research, we're more strict about information sufficiency
+            if research_depth == "deep" and information_sufficient:
+                # For deep research, we want more comprehensive coverage
+                # Only consider it sufficient if we have more than the minimum sources
+                information_sufficient = sources_gathered >= min_sources + 1
 
             # Handle different scenarios
             if sources_gathered == 0 and all_queries_searched:
@@ -506,10 +580,15 @@ class ResearchGraph:
             Updated research state
         """
         try:
+            # Get research depth to adjust synthesis parameters
+            research_depth = state.get("research_depth", "medium")
+
+            # Pass research depth to the synthesizer
             synthesized = self.synthesizer.synthesize(
                 state["extracted_content"],
                 state["query"],
-                state["analysis"]
+                state["analysis"],
+                research_depth=research_depth  # Pass research depth to influence synthesis detail
             )
 
             return {
@@ -547,10 +626,15 @@ class ResearchGraph:
             Updated research state
         """
         try:
+            # Get research depth to adjust report generation
+            research_depth = state.get("research_depth", "medium")
+
+            # Pass research depth to the report generator
             report = self.report_generator.generate(
                 state["synthesized_information"],
                 state["extracted_content"],
-                state["query"]
+                state["query"],
+                research_depth=research_depth  # Pass research depth to influence report detail
             )
 
             return {
@@ -597,6 +681,9 @@ class ResearchGraph:
         """
         current_time = datetime.now().isoformat()
 
+        # Import default research depth from config
+        from core.config import DEFAULT_RESEARCH_DEPTH
+
         return {
             "query": query,
             "analysis": {},
@@ -612,22 +699,27 @@ class ResearchGraph:
             "final_report": None,
             "start_time": current_time,
             "last_updated": current_time,
-            "errors": []
+            "errors": [],
+            "research_depth": DEFAULT_RESEARCH_DEPTH  # Default research depth
         }
 
-    def run(self, query: str, max_iterations: int = 50) -> Dict[str, Any]:
+    def run(self, query: str, max_iterations: int = 50, research_depth: str = "medium") -> Dict[str, Any]:
         """
         Run the research workflow from start to finish.
 
         Args:
             query: The research query
             max_iterations: Maximum number of iterations to prevent infinite loops (default: 50)
+            research_depth: Depth of research (light, medium, deep) (default: medium)
 
         Returns:
             Final research state
         """
-        # Initialize the research state
+        # Initialize the research state with research depth
         state = self.initialize_state(query)
+
+        # Add research depth to the state
+        state["research_depth"] = research_depth
 
         # Compile the graph
         workflow = self.graph.compile()
@@ -635,7 +727,7 @@ class ResearchGraph:
         # Set a higher recursion limit to avoid errors
         import logging
         logger = logging.getLogger(__name__)
-        logger.info(f"Running research workflow with recursion_limit={max_iterations}")
+        logger.info(f"Running research workflow with recursion_limit={max_iterations}, research_depth={research_depth}")
 
         # Run the workflow
         try:
