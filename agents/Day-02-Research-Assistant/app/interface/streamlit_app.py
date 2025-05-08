@@ -242,6 +242,11 @@ def main():
         .stProgress > div > div {
             background-color: #4CAF50;
         }
+        .report-container {
+            border-left: 1px solid #ddd;
+            padding-left: 20px;
+            height: 100%;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -289,21 +294,38 @@ def main():
         st.header("Welcome to Research Assistant!")
         st.info("Please configure your API keys in the sidebar to get started.")
         return
+    
+    # Check if we have research results to display
+    has_results = len(st.session_state.research_history) > 0
 
-    # Display research form
-    if not st.session_state.research_in_progress and not st.session_state.current_research:
-        display_research_form()
+    # Layout changes based on whether we have results
+    if has_results:
+        # Side-by-side layout when results are available
+        input_col, report_col = st.columns([1, 1])
+        
+        with input_col:
+            # Display research form in left column
+            if not st.session_state.research_in_progress:
+                display_research_form()
+        
+        with report_col:
+            # Add a container class for styling
+            st.markdown('<div class="report-container"></div>', unsafe_allow_html=True)
+            # Display results in right column
+            display_research_results()
+    else:
+        # Centered layout when no results yet
+        # Display research form centered
+        if not st.session_state.research_in_progress:
+            display_research_form()
 
     # Conduct research if in progress
     if st.session_state.research_in_progress and st.session_state.current_research:
         conduct_research()
 
-    # Display results
-    if st.session_state.research_history:
-        display_research_results()
-
-    # Display history
+    # Display history below everything
     if len(st.session_state.research_history) > 1:
+        st.markdown("---")
         display_research_history()
 
 
