@@ -333,8 +333,20 @@ class MockBrowsingTool:
 
     def fetch_content(self, url):
         """Return mock content for a URL."""
+        # Extract domain from URL for a more realistic title
+        import re
+        domain = re.sub(r'^https?://(www\.)?', '', url)
+        domain = domain.split('/')[0]  # Get just the domain part
+
+        # Create a more realistic title based on the URL
+        page_title = f"{domain.capitalize()} - Information Page"
+        if "wikipedia" in domain.lower():
+            page_title = f"Wikipedia - {domain.split('.')[-2].capitalize()}"
+        elif "github" in domain.lower():
+            page_title = f"GitHub - Repository Page"
+
         return {
-            "title": f"Page title for {url}",
+            "title": page_title,
             "content": f"<html><body><h1>Content for {url}</h1><p>This is a detailed article about artificial intelligence, machine learning, and neural networks. The field has seen significant advancements in recent years.</p></body></html>",
             "url": url,
             "fetched_at": datetime.now().isoformat()

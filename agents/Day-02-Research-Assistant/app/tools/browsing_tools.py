@@ -144,10 +144,22 @@ class WebBrowsingTool:
             time.sleep(0.1)
             logger.debug("Simulated network delay completed")
 
-            # Return a dummy response
+            # Extract domain from URL for a more realistic title
+            import re
+            domain = re.sub(r'^https?://(www\.)?', '', url)
+            domain = domain.split('/')[0]  # Get just the domain part
+
+            # Create a more realistic title based on the URL
+            page_title = f"{domain.capitalize()} - Information Page"
+            if "wikipedia" in domain.lower():
+                page_title = f"Wikipedia - {domain.split('.')[-2].capitalize()}"
+            elif "github" in domain.lower():
+                page_title = f"GitHub - Repository Page"
+
+            # Return a dummy response with a more realistic title
             response = {
-                "title": f"Page title for {url}",
-                "content": f"<html><head><title>Page title for {url}</title></head>"
+                "title": page_title,
+                "content": f"<html><head><title>{page_title}</title></head>"
                           f"<body><h1>Content for {url}</h1><p>This is a stub response.</p></body></html>",
                 "url": url,
                 "fetched_at": datetime.now().isoformat(),
@@ -182,10 +194,22 @@ class WebBrowsingTool:
             time.sleep(0.1)
             logger.debug("Simulated network delay completed")
 
-            # Return a dummy response
+            # Extract domain from URL for a more realistic title
+            import re
+            domain = re.sub(r'^https?://(www\.)?', '', url)
+            domain = domain.split('/')[0]  # Get just the domain part
+
+            # Create a more realistic title based on the URL
+            page_title = f"{domain.capitalize()} - Information Page"
+            if "wikipedia" in domain.lower():
+                page_title = f"Wikipedia - {domain.split('.')[-2].capitalize()}"
+            elif "github" in domain.lower():
+                page_title = f"GitHub - Repository Page"
+
+            # Return a dummy response with a more realistic title
             response = {
-                "title": f"Page title for {url}",
-                "content": f"<html><head><title>Page title for {url}</title></head>"
+                "title": page_title,
+                "content": f"<html><head><title>{page_title}</title></head>"
                           f"<body><h1>Content for {url}</h1><p>This is a stub response.</p></body></html>",
                 "url": url,
                 "fetched_at": datetime.now().isoformat(),
