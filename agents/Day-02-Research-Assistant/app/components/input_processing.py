@@ -47,12 +47,12 @@ class QueryAnalyzer:
         # For the boilerplate, we'll simulate the extraction with a simple parsing function
         return self._parse_analysis_response(response, query)
     
-    def _parse_analysis_response(self, response: str, original_query: str) -> Dict[str, Any]:
+    def _parse_analysis_response(self, response, original_query: str) -> Dict[str, Any]:
         """
         Parse the LLM response into a structured format.
         
         Args:
-            response: Raw LLM response
+            response: Raw LLM response (string or AIMessage)
             original_query: The original query for fallback
             
         Returns:
@@ -61,7 +61,13 @@ class QueryAnalyzer:
         # This is a simplified parsing function
         # In production, you would implement a more robust parser
         
-        lines = response.strip().split('\n')
+        # Convert AIMessage to string if needed
+        if hasattr(response, 'content'):
+            response_text = response.content
+        else:
+            response_text = str(response)
+        
+        lines = response_text.strip().split('\n')
         analysis = {
             "original_query": original_query,
             "topics": [],
@@ -146,18 +152,24 @@ class SearchQueryFormulator:
         # Parse the response to extract search queries
         return self._extract_queries(response)
     
-    def _extract_queries(self, response: str) -> List[str]:
+    def _extract_queries(self, response) -> List[str]:
         """
         Extract search queries from the LLM response.
         
         Args:
-            response: Raw LLM response
+            response: Raw LLM response (string or AIMessage)
             
         Returns:
             List of search queries
         """
+        # Convert AIMessage to string if needed
+        if hasattr(response, 'content'):
+            response_text = response.content
+        else:
+            response_text = str(response)
+        
         queries = []
-        lines = response.strip().split('\n')
+        lines = response_text.strip().split('\n')
         
         for line in lines:
             # Looking for lines with patterns like "1. query" or "1) query"

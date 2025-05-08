@@ -55,20 +55,26 @@ class ResearchStrategyPlanner:
         return self._parse_strategy_response(response, query, analysis)
     
     def _parse_strategy_response(
-        self, response: str, query: str, analysis: Dict[str, Any]
+        self, response, query: str, analysis: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Parse the LLM response into a structured strategy.
         
         Args:
-            response: Raw LLM response
+            response: Raw LLM response (string or AIMessage)
             query: The original query
             analysis: The query analysis
             
         Returns:
             Dictionary with structured strategy
         """
-        lines = response.strip().split('\n')
+        # Convert AIMessage to string if needed
+        if hasattr(response, 'content'):
+            response_text = response.content
+        else:
+            response_text = str(response)
+            
+        lines = response_text.strip().split('\n')
         
         # Default strategy values
         strategy = {

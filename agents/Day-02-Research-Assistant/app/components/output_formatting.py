@@ -86,8 +86,13 @@ class ResearchSummaryGenerator:
         [Sources formatted as already provided]
         """
         
-        summary = self.llm.invoke(prompt)
-        return summary
+        summary_response = self.llm.invoke(prompt)
+        
+        # Convert AIMessage to string if needed
+        if hasattr(summary_response, 'content'):
+            return summary_response.content
+        else:
+            return str(summary_response)
     
     def format_for_display(
         self, report: str, query: str, research_metadata: Dict[str, Any]
@@ -213,9 +218,15 @@ class KeyFindingsExtractor:
         
         response = self.llm.invoke(prompt)
         
+        # Convert AIMessage to string if needed
+        if hasattr(response, 'content'):
+            response_text = response.content
+        else:
+            response_text = str(response)
+        
         # Parse the bullet points
         findings = []
-        for line in response.split('\n'):
+        for line in response_text.split('\n'):
             line = line.strip()
             if line.startswith('*') or line.startswith('-') or (line.startswith(str(len(findings) + 1)) and '.' in line):
                 # Remove bullet point markers and numbers

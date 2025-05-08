@@ -252,33 +252,45 @@ class InformationSynthesizer:
         [Identify aspects of the query that weren't fully addressed]
         """
         
-        synthesis = self.llm.invoke(prompt)
+        synthesis_response = self.llm.invoke(prompt)
+        
+        # Convert AIMessage to string if needed
+        if hasattr(synthesis_response, 'content'):
+            synthesis_text = synthesis_response.content
+        else:
+            synthesis_text = str(synthesis_response)
         
         # Parse the synthesis into sections
-        sections = self._parse_markdown_sections(synthesis)
+        sections = self._parse_markdown_sections(synthesis_text)
         
         return {
-            "raw_synthesis": synthesis,
+            "raw_synthesis": synthesis_text,
             "sections": sections,
             "source_count": len(extracted_contents),
             "query": query
         }
     
-    def _parse_markdown_sections(self, markdown_text: str) -> Dict[str, str]:
+    def _parse_markdown_sections(self, markdown_text) -> Dict[str, str]:
         """
         Parse a Markdown string into sections.
         
         Args:
-            markdown_text: Markdown text to parse
+            markdown_text: Markdown text to parse (string or AIMessage)
             
         Returns:
             Dictionary with section names as keys and content as values
         """
+        # Convert to string if needed
+        if hasattr(markdown_text, 'content'):
+            text_to_parse = markdown_text.content
+        else:
+            text_to_parse = str(markdown_text)
+            
         sections = {}
         current_section = "preamble"
         current_content = []
         
-        for line in markdown_text.split('\n'):
+        for line in text_to_parse.split('\n'):
             if line.startswith('## '):
                 # Save the previous section
                 if current_content:
@@ -345,14 +357,20 @@ class SourceEvaluator:
             Then provide an overall credibility score from 1-5.
             """
             
-            evaluation = self.llm.invoke(prompt)
+            evaluation_response = self.llm.invoke(prompt)
+            
+            # Convert AIMessage to string if needed
+            if hasattr(evaluation_response, 'content'):
+                evaluation_text = evaluation_response.content
+            else:
+                evaluation_text = str(evaluation_response)
             
             # Parse the evaluation to extract ratings
-            credibility_score = self._extract_score(evaluation)
+            credibility_score = self._extract_score(evaluation_text)
             
             evaluations.append({
                 "source": source,
-                "evaluation": evaluation,
+                "evaluation": evaluation_text,
                 "credibility_score": credibility_score
             })
         

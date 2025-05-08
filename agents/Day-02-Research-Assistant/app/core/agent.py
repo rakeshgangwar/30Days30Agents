@@ -276,13 +276,19 @@ class ResearchEvaluator:
             topic_coverage = {}
             
             for topic in topics:
+                topic_str = topic.lower() if isinstance(topic, str) else str(topic).lower()
                 covered = False
                 for item in extracted_content:
-                    if topic.lower() in item.get("extracted_text", "").lower():
+                    extracted_text = item.get("extracted_text", "")
+                    extracted_text_str = (
+                        extracted_text.lower() if isinstance(extracted_text, str)
+                        else str(extracted_text).lower()
+                    )
+                    if topic_str in extracted_text_str:
                         covered = True
                         break
                 
-                topic_coverage[topic] = covered
+                topic_coverage[topic_str] = covered
             
             # Calculate the coverage percentage
             coverage_percentage = sum(1 for covered in topic_coverage.values() if covered) / len(topic_coverage)

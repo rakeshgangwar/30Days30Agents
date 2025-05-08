@@ -3,7 +3,7 @@
 from typing import Dict, List, Any, Optional
 import os
 
-from langchain_exa import ExaSearch
+from langchain_exa import ExaSearchResults
 from langchain_community.utilities import SerpAPIWrapper
 
 
@@ -56,18 +56,59 @@ class WebSearchTool:
             List of search results
         """
         try:
-            search_tool = ExaSearch(api_key=self.api_key)
-            results = search_tool.search(query, num_results=num_results)
+            search_tool = ExaSearchResults(exa_api_key=self.api_key)
+            response = search_tool.invoke({"query": query, "num_results": num_results})
             
-            return [
-                {
-                    "title": result.title,
-                    "url": result.url,
-                    "snippet": result.text,
-                    "source": "exa"
-                }
-                for result in results
-            ]
+            # ExaSearchResults.invoke() returns data in a different structure
+            # It returns a list of results or a response object with a 'results' attribute
+            results = []
+            
+            if isinstance(response, dict) and 'results' in response:
+                result_list = response['results']
+            elif isinstance(response, list):
+                result_list = response
+            elif hasattr(response, 'results'):
+                result_list = response.results
+            else:
+                print(f"Unexpected response format from ExaSearchResults: {type(response)}")
+                return []
+            
+            # Process each result based on its structure
+            for result in result_list:
+                if isinstance(result, dict):
+                    # If result is a dictionary
+                    results.append({
+                        "title": result.get("title", ""),
+                        "url": result.get("url", ""),
+                        "snippet": result.get("text", ""),
+                        "source": "exa"
+                    })
+                else:
+                    # If result is an object with attributes
+                    try:
+                        results.append({
+                            "title": getattr(result, "title", ""),
+                            "url": getattr(result, "url", ""),
+                            "snippet": getattr(result, "text", ""),
+                            "source": "exa"
+                        })
+                    except AttributeError:
+                        # If attributes aren't accessible, try common attribute names
+                        title = getattr(result, "title", None) or getattr(result, "name", "")
+                        url = getattr(result, "url", None) or getattr(result, "link", "")
+                        text = (
+                            getattr(result, "text", None) or
+                            getattr(result, "snippet", None) or
+                            getattr(result, "content", "")
+                        )
+                        results.append({
+                            "title": title,
+                            "url": url,
+                            "snippet": text,
+                            "source": "exa"
+                        })
+            
+            return results
         except Exception as e:
             print(f"Error with Exa search: {e}")
             return []
