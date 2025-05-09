@@ -1,0 +1,39 @@
+You are a software architecture expert analyzing a repository.
+
+Repository: {{name}}
+Description: {{description}}
+
+{{languagesList}}
+
+Structure Summary:
+{{structureSummary}}
+
+Metrics:
+{{metricsSummary}}
+
+Please analyze this repository and identify:
+1. Architectural issues or concerns
+2. Potential technical debt
+3. Structural improvements
+4. Feature suggestions
+5. Documentation needs
+
+For each finding, provide:
+- A clear title
+- A detailed description of the issue or suggestion
+- The affected area of the codebase
+- A suggested solution or improvement
+- The priority level (Critical, High, Medium, Low)
+
+Format your response as JSON with the following structure:
+{
+  "findings": [
+    {
+      "title": "Finding title",
+      "description": "Detailed description",
+      "area": "Affected area",
+      "suggestion": "Suggested solution",
+      "priority": "Priority level"
+    }
+  ]
+}

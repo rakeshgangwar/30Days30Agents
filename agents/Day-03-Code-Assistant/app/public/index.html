@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Assistant - Talk to Your Repo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-center text-gray-800">Code Assistant</h1>
+            <p class="text-center text-gray-600">Talk to your repository and create issues</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Select Repository</h2>
+            <div id="repo-status" class="hidden mb-4 p-3 rounded-md text-center"></div>
+            <div id="repo-connected" class="hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="font-medium" id="connected-repo-name"></span>
+                        <span class="text-sm text-green-600 ml-2">Connected</span>
+                    </div>
+                    <button id="change-repo-btn" class="text-sm text-blue-600 hover:text-blue-800">Change Repository</button>
+                </div>
+            </div>
+            <form id="repo-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="repo-type" class="block text-sm font-medium text-gray-700 mb-1">Repository Type</label>
+                        <select id="repo-type" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="github">GitHub Repository</option>
+                            <option value="local">Local Repository</option>
+                        </select>
+                    </div>
+                    <div id="local-path-container" class="hidden">
+                        <label for="local-path" class="block text-sm font-medium text-gray-700 mb-1">Repository Path</label>
+                        <input type="text" id="local-path" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="/path/to/repository">
+                    </div>
+                    <div id="github-owner-container">
+                        <label for="github-owner" class="block text-sm font-medium text-gray-700 mb-1">GitHub Owner</label>
+                        <input type="text" id="github-owner" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="username or organization">
+                    </div>
+                    <div id="github-repo-container">
+                        <label for="github-repo" class="block text-sm font-medium text-gray-700 mb-1">Repository Name</label>
+                        <input type="text" id="github-repo" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="repository-name">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">Connect to Repository</button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Talk to Your Repository</h2>
+                <div id="chat-container" class="mb-4">
+                    <div id="chat-messages" class="h-80 overflow-y-auto p-4 border border-gray-200 rounded-md mb-4">
+                        <div class="text-center text-gray-500 italic">
+                            Select a repository to start the conversation
+                        </div>
+                    </div>
+                    <form id="chat-form" class="flex">
+                        <input type="text" id="chat-input" class="flex-grow px-3 py-2 border border-gray-300 rounded-l-md" placeholder="Ask a question about your repository..." disabled>
+                        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-r-md hover:bg-blue-700 transition" disabled>Send</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Issue Management</h2>
+
+                <!-- AI Analysis Section -->
+                <div>
+                    <h3 class="text-lg font-medium mb-2">AI Analysis</h3>
+                    <p class="text-gray-600 mb-3">Analyze the repository to automatically identify potential issues.</p>
+                    <button id="analyze-repo-btn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition mb-4" disabled>Analyze Repository</button>
+
+                    <!-- Analysis Results -->
+                    <div id="analysis-results" class="hidden">
+                        <h4 class="font-medium mb-2">Analysis Results</h4>
+                        <div class="mb-3">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium">Found <span id="findings-count">0</span> potential issues</span>
+                                <button id="select-all-btn" class="text-sm text-indigo-600 hover:text-indigo-800">Select All</button>
+                            </div>
+                            <div id="findings-list" class="max-h-80 overflow-y-auto border border-gray-200 rounded-md p-2">
+                                <!-- Findings will be added here dynamically -->
+                            </div>
+                        </div>
+                        <button id="create-selected-issues-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition">Create Selected Issues</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

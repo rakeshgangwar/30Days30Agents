@@ -1,0 +1,77 @@
+# Default configuration for Repository Analysis and Issue Creation Agent
+
+repository:
+  owner: "rakeshgangwar"
+  repo: "digi-persona"
+  branch: main
+  depth: 1
+  includePatterns:
+    - "**/*"
+  excludePatterns:
+    - "node_modules/**"
+    - ".git/**"
+    - "dist/**"
+    - "build/**"
+    - "**/*.min.js"
+    - "**/*.bundle.js"
+    - "**/vendor/**"
+    - "**/__pycache__/**"
+    - "**/venv/**"
+    - "**/env/**"
+
+analysis:
+  maxFilesToAnalyze: 100
+  maxFileSizeKB: 1000
+  includeLanguages:
+    - javascript
+    - typescript
+    - python
+    - java
+    - go
+    - ruby
+    - c
+    - cpp
+    - csharp
+  excludeLanguages: []
+  analysisDepth: medium
+  enabledAnalyzers:
+    - structure
+    - complexity
+    - duplication
+    - security
+    - performance
+
+ai:
+  provider: openai
+  model: gpt-4
+  temperature: 0.2
+  maxTokens: 2000
+  promptTemplate: default
+
+issue:
+  createIssues: true
+  maxIssuesToCreate: 10
+  labelPrefix: ai-analysis
+  priorityThreshold: Low
+  issueTemplate: default
+  dryRun: false
+
+# Define configuration profiles for different use cases
+profiles:
+  security:
+    analysis:
+      enabledAnalyzers:
+        - security
+        - vulnerability
+    issue:
+      labelPrefix: ai-security
+      priorityThreshold: Medium
+  
+  quick:
+    analysis:
+      maxFilesToAnalyze: 20
+      analysisDepth: light
+    ai:
+      model: gpt-3.5-turbo
+    issue:
+      maxIssuesToCreate: 5

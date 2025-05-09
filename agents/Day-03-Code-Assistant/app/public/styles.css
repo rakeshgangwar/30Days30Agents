@@ -1,0 +1,195 @@
+/* Custom styles for the Code Assistant UI */
+
+/* Chat message styling */
+.message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    max-width: 80%;
+}
+
+.user-message {
+    background-color: #e9f5ff;
+    margin-left: auto;
+    border-top-right-radius: 0;
+}
+
+.bot-message {
+    background-color: #f0f0f0;
+    margin-right: auto;
+    border-top-left-radius: 0;
+}
+
+.system-message {
+    background-color: #fffde7;
+    width: 100%;
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+/* Repository summary styling */
+.repo-summary {
+    background-color: #f8f9fa;
+    border-left: 4px solid #4299e1;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.repo-summary h3 {
+    margin-top: 0;
+    color: #2c5282;
+}
+
+/* Code block styling */
+pre {
+    background-color: #f8f9fa;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: monospace;
+}
+
+code {
+    font-family: monospace;
+    background-color: #f1f1f1;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+}
+
+/* Loading indicator */
+.loading {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Recent repositories list */
+.recent-repos {
+    margin-top: 1rem;
+}
+
+.recent-repo-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.recent-repo-item:hover {
+    background-color: #f0f0f0;
+}
+
+.recent-repo-icon {
+    margin-right: 0.5rem;
+    color: #4a5568;
+}
+
+/* Findings list */
+.finding-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s;
+}
+
+.finding-item:last-child {
+    border-bottom: none;
+}
+
+.finding-item:hover {
+    background-color: #f7fafc;
+}
+
+.finding-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.finding-title {
+    font-weight: 600;
+    flex-grow: 1;
+    margin-left: 0.5rem;
+}
+
+.finding-priority {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.priority-critical {
+    background-color: #FEE2E2;
+    color: #B91C1C;
+}
+
+.priority-high {
+    background-color: #FEF3C7;
+    color: #B45309;
+}
+
+.priority-medium {
+    background-color: #E0F2FE;
+    color: #0369A1;
+}
+
+.priority-low {
+    background-color: #ECFDF5;
+    color: #047857;
+}
+
+.finding-details {
+    margin-left: 1.75rem;
+    font-size: 0.875rem;
+    color: #4B5563;
+}
+
+.finding-area {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+.finding-suggestion {
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* Repository status */
+.status-connecting {
+    background-color: #EFF6FF;
+    color: #1E40AF;
+    border: 1px solid #BFDBFE;
+}
+
+.status-connected {
+    background-color: #ECFDF5;
+    color: #047857;
+    border: 1px solid #A7F3D0;
+}
+
+.status-error {
+    background-color: #FEF2F2;
+    color: #B91C1C;
+    border: 1px solid #FECACA;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .message {
+        max-width: 90%;
+    }
+}
