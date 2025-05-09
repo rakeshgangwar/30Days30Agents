@@ -8,6 +8,7 @@
     "talk": "node src/cli.js talk",
     "analyze": "node src/cli.js analyze",
     "configure": "node src/cli.js configure",
+    "web": "node src/server.js",
     "test": "jest",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
@@ -34,9 +35,12 @@
   "dependencies": {
     "@octokit/graphql": "^7.0.2",
     "@octokit/rest": "^18.12.0",
+    "body-parser": "^1.20.2",
     "chardet": "^1.5.1",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "glob": "^8.1.0",
     "hnswlib-node": "^3.0.0",
     "iconv-lite": "^0.6.3",
@@ -44,6 +48,7 @@
     "js-yaml": "^4.1.0",
     "openai": "^4.98.0",
     "simple-git": "^3.17.0",
+    "socket.io": "^4.7.2",
     "web-tree-sitter": "^0.20.7",
     "yargs": "^17.7.1"
   },

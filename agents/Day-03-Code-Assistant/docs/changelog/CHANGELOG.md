@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Web Interface
+- Added a responsive web interface for interacting with repositories
+- Implemented real-time communication using Socket.IO
+- Created a chat interface for the "Talk to Your Repository" feature
+- Added AI-powered issue creation with review and selection
+- Implemented batch issue creation from AI analysis findings
+- Added priority-based styling for issue findings
+- Created detailed documentation for the web interface
+
+#### Talk to Your Repository
+- Implemented conversational interface for repository interaction
+- Added repository summary generation
+- Integrated vector database for semantic code search
+- Implemented context-aware responses to user questions
+- Added conversation history tracking
+- Created detailed documentation for the feature
+
 #### Issue Management System
 - Implemented GitHub API integration using Octokit REST client
 - Added issue creation functionality with proper error handling
@@ -82,6 +99,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added component testing scripts
 
 ### Changed
+- Added Express.js server to serve the web interface
+- Implemented Socket.IO for real-time communication
+- Enhanced the main application to support web-based interactions
 - Improved the code structure with better separation of concerns
 - Enhanced error handling throughout the application
 - Updated the mock implementations to better reflect real functionality
