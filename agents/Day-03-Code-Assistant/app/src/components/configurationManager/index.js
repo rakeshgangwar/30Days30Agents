@@ -16,34 +16,34 @@ class ConfigurationManager {
     this.config = null;
     this.credentials = null;
   }
-  
+
   async initialize() {
     // Load configuration
     await this.loadConfiguration();
-    
+
     // Load credentials
     await this.loadCredentials();
-    
+
     // Apply environment variables
     this.applyEnvironmentVariables();
-    
+
     // Validate configuration
     this.validateConfiguration();
-    
+
     return {
       config: this.config,
       hasCredentials: !!this.credentials
     };
   }
-  
+
   async loadConfiguration() {
     const configFilePath = path.join(this.configPath, this.configFile);
-    
+
     try {
       // Load configuration file
       const fileContent = await fs.readFile(configFilePath, 'utf8');
       const fileExt = path.extname(configFilePath).toLowerCase();
-      
+
       // Parse based on file extension
       if (fileExt === '.json') {
         this.config = JSON.parse(fileContent);
@@ -57,7 +57,7 @@ class ConfigurationManager {
       this.config = this.createDefaultConfig();
       await this.saveConfiguration();
     }
-    
+
     // Apply profile if specified
     if (this.profileName !== 'default' && this.config.profiles && this.config.profiles[this.profileName]) {
       this.config = {
@@ -65,17 +65,17 @@ class ConfigurationManager {
         ...this.config.profiles[this.profileName]
       };
     }
-    
+
     return this.config;
   }
-  
+
   async saveConfiguration() {
     const configFilePath = path.join(this.configPath, this.configFile);
-    
+
     try {
       const fileExt = path.extname(configFilePath).toLowerCase();
       let fileContent;
-      
+
       // Serialize based on file extension
       if (fileExt === '.json') {
         fileContent = JSON.stringify(this.config, null, 2);
@@ -84,10 +84,10 @@ class ConfigurationManager {
       } else {
         throw new Error(`Unsupported configuration file format: ${fileExt}`);
       }
-      
+
       // Ensure directory exists
       await fs.mkdir(path.dirname(configFilePath), { recursive: true });
-      
+
       // Write file
       await fs.writeFile(configFilePath, fileContent, 'utf8');
       return true;
@@ -96,14 +96,14 @@ class ConfigurationManager {
       return false;
     }
   }
-  
+
   async loadCredentials() {
     const credentialsFilePath = path.join(this.configPath, this.credentialsFile);
-    
+
     try {
       const fileContent = await fs.readFile(credentialsFilePath, 'utf8');
       const fileExt = path.extname(credentialsFilePath).toLowerCase();
-      
+
       // Parse based on file extension
       if (fileExt === '.json') {
         this.credentials = JSON.parse(fileContent);
@@ -112,9 +112,9 @@ class ConfigurationManager {
       } else {
         throw new Error(`Unsupported credentials file format: ${fileExt}`);
       }
-      
+
       // Decrypt credentials if needed
-      
+
       return this.credentials;
     } catch (error) {
       console.warn(`Could not load credentials file: ${error.message}`);
@@ -122,18 +122,18 @@ class ConfigurationManager {
       return null;
     }
   }
-  
+
   async saveCredentials(credentials) {
     const credentialsFilePath = path.join(this.configPath, this.credentialsFile);
-    
+
     try {
       this.credentials = credentials;
-      
+
       // Encrypt credentials if needed
-      
+
       const fileExt = path.extname(credentialsFilePath).toLowerCase();
       let fileContent;
-      
+
       // Serialize based on file extension
       if (fileExt === '.json') {
         fileContent = JSON.stringify(this.credentials, null, 2);
@@ -142,10 +142,10 @@ class ConfigurationManager {
       } else {
         throw new Error(`Unsupported credentials file format: ${fileExt}`);
       }
-      
+
       // Ensure directory exists
       await fs.mkdir(path.dirname(credentialsFilePath), { recursive: true });
-      
+
       // Write file
       await fs.writeFile(credentialsFilePath, fileContent, 'utf8');
       return true;
@@ -154,75 +154,133 @@ class ConfigurationManager {
       return false;
     }
   }
-  
+
   applyEnvironmentVariables() {
+    // Load environment variables
+    require('dotenv').config();
+
     // Apply environment variables to configuration
     if (process.env.REPO_OWNER) {
       if (!this.config.repository) this.config.repository = {};
       this.config.repository.owner = process.env.REPO_OWNER;
     }
-    
+
     if (process.env.REPO_NAME) {
       if (!this.config.repository) this.config.repository = {};
       this.config.repository.repo = process.env.REPO_NAME;
     }
-    
+
     if (process.env.REPO_BRANCH) {
       if (!this.config.repository) this.config.repository = {};
       this.config.repository.branch = process.env.REPO_BRANCH;
     }
-    
+
+    // Apply analysis environment variables
+    if (process.env.ANALYSIS_MAX_FILES) {
+      if (!this.config.analysis) this.config.analysis = {};
+      this.config.analysis.maxFilesToAnalyze = parseInt(process.env.ANALYSIS_MAX_FILES, 10);
+    }
+
+    if (process.env.ANALYSIS_MAX_FILE_SIZE) {
+      if (!this.config.analysis) this.config.analysis = {};
+      this.config.analysis.maxFileSizeKB = parseInt(process.env.ANALYSIS_MAX_FILE_SIZE, 10);
+    }
+
+    if (process.env.ANALYSIS_DEPTH) {
+      if (!this.config.analysis) this.config.analysis = {};
+      this.config.analysis.analysisDepth = process.env.ANALYSIS_DEPTH;
+    }
+
+    // Apply AI environment variables
+    if (process.env.AI_PROVIDER) {
+      if (!this.config.ai) this.config.ai = {};
+      this.config.ai.provider = process.env.AI_PROVIDER;
+    }
+
+    if (process.env.AI_MODEL) {
+      if (!this.config.ai) this.config.ai = {};
+      this.config.ai.model = process.env.AI_MODEL;
+    }
+
+    if (process.env.AI_TEMPERATURE) {
+      if (!this.config.ai) this.config.ai = {};
+      this.config.ai.temperature = parseFloat(process.env.AI_TEMPERATURE);
+    }
+
+    // Apply issue environment variables
+    if (process.env.ISSUE_CREATE) {
+      if (!this.config.issue) this.config.issue = {};
+      this.config.issue.createIssues = process.env.ISSUE_CREATE === 'true';
+    }
+
+    if (process.env.ISSUE_MAX) {
+      if (!this.config.issue) this.config.issue = {};
+      this.config.issue.maxIssuesToCreate = parseInt(process.env.ISSUE_MAX, 10);
+    }
+
+    if (process.env.ISSUE_PRIORITY) {
+      if (!this.config.issue) this.config.issue = {};
+      this.config.issue.priorityThreshold = process.env.ISSUE_PRIORITY;
+    }
+
+    if (process.env.ISSUE_DRY_RUN) {
+      if (!this.config.issue) this.config.issue = {};
+      this.config.issue.dryRun = process.env.ISSUE_DRY_RUN === 'true';
+    }
+
     // Apply environment variables to credentials
     if (!this.credentials) {
       this.credentials = {};
     }
-    
+
     if (process.env.GITHUB_TOKEN) {
       this.credentials.githubToken = process.env.GITHUB_TOKEN;
     }
-    
+
     if (process.env.OPENAI_API_KEY) {
       this.credentials.openaiApiKey = process.env.OPENAI_API_KEY;
     }
+
+    console.log('Environment variables applied to configuration');
   }
-  
+
   validateConfiguration() {
     // Validate repository configuration
     if (!this.config.repository) {
       this.config.repository = {};
     }
-    
+
     if (!this.config.repository.branch) {
       this.config.repository.branch = 'main';
     }
-    
+
     // Validate analysis configuration
     if (!this.config.analysis) {
       this.config.analysis = {};
     }
-    
-    if (!this.config.analysis.analysisDepth || 
+
+    if (!this.config.analysis.analysisDepth ||
         !['light', 'medium', 'deep'].includes(this.config.analysis.analysisDepth)) {
       this.config.analysis.analysisDepth = 'medium';
     }
-    
+
     // Validate AI configuration
     if (!this.config.ai) {
       this.config.ai = {};
     }
-    
-    if (this.config.ai.temperature === undefined || 
-        this.config.ai.temperature < 0 || 
+
+    if (this.config.ai.temperature === undefined ||
+        this.config.ai.temperature < 0 ||
         this.config.ai.temperature > 1) {
       this.config.ai.temperature = 0.2;
     }
-    
+
     // Validate issue configuration
     if (!this.config.issue) {
       this.config.issue = {};
     }
   }
-  
+
   createDefaultConfig() {
     return {
       repository: {
@@ -266,11 +324,11 @@ class ConfigurationManager {
       profiles: {}
     };
   }
-  
+
   getConfig() {
     return this.config;
   }
-  
+
   getCredentials() {
     return this.credentials;
   }

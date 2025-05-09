@@ -1,8 +1,8 @@
 # Default configuration for Repository Analysis and Issue Creation Agent
 
 repository:
-  owner: ""
-  repo: ""
+  owner: "rakeshgangwar"
+  repo: "digi-persona"
   branch: main
   depth: 1
   includePatterns:
