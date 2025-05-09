@@ -49,7 +49,8 @@ class CodeAnalysisEngine {
       { name: 'cpp', file: 'tree-sitter-cpp.wasm' },
       { name: 'csharp', file: 'tree-sitter-c_sharp.wasm' },
       { name: 'php', file: 'tree-sitter-php.wasm' },
-      { name: 'rust', file: 'tree-sitter-rust.wasm' }
+      { name: 'rust', file: 'tree-sitter-rust.wasm' },
+      { name: 'markdown', file: 'tree-sitter-markdown.wasm' }
     ];
 
     // Check if parsers directory exists
@@ -850,7 +851,45 @@ class CodeAnalysisEngine {
     };
 
     // Count some typical patterns in the code to create a mock structure
-    if (language === 'javascript' || language === 'typescript') {
+    if (language === 'markdown') {
+      // Extract headings as "classes"
+      const headingMatches = content.match(/^#+\s+(.+)$/gm) || [];
+      headingMatches.forEach((match, index) => {
+        const level = match.match(/^#+/)[0].length;
+        const name = match.replace(/^#+\s+/, '');
+        const lineNumber = this.getLineNumberForMatch(content, match, index);
+        structure.classes.push({
+          name: `H${level}: ${name}`,
+          line: lineNumber,
+          text: match
+        });
+      });
+
+      // Extract code blocks as "functions"
+      const codeBlockMatches = content.match(/```[\s\S]+?```/g) || [];
+      codeBlockMatches.forEach((match, index) => {
+        const language = match.match(/```(\w*)/)[1] || 'text';
+        const lineNumber = this.getLineNumberForMatch(content, match, index);
+        structure.functions.push({
+          name: `Code Block (${language})`,
+          line: lineNumber,
+          text: match.split('\n')[0] + '...'
+        });
+      });
+
+      // Extract links as "methods"
+      const linkMatches = content.match(/\[([^\]]+)\]\(([^)]+)\)/g) || [];
+      linkMatches.forEach((match, index) => {
+        const text = match.match(/\[([^\]]+)\]/)[1];
+        const url = match.match(/\]\(([^)]+)\)/)[1];
+        const lineNumber = this.getLineNumberForMatch(content, match, index);
+        structure.methods.push({
+          name: `Link: ${text}`,
+          line: lineNumber,
+          text: `${text} -> ${url}`
+        });
+      });
+    } else if (language === 'javascript' || language === 'typescript') {
       // Match class declarations
       const classMatches = content.match(/class\s+(\w+)/g) || [];
       classMatches.forEach((match, index) => {

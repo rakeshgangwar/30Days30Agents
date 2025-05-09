@@ -2,6 +2,7 @@
 // This component creates, formats, and submits GitHub issues
 
 const { Octokit } = require('@octokit/rest');
+const { graphql } = require('@octokit/graphql');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -80,8 +81,16 @@ class IssueManagementSystem {
         return false;
       }
 
+      // Initialize REST API client
       this.octokit = new Octokit({
         auth: config.token
+      });
+
+      // Initialize GraphQL API client
+      this.graphqlWithAuth = graphql.defaults({
+        headers: {
+          authorization: `token ${config.token}`
+        }
       });
 
       this.githubInitialized = true;
@@ -389,13 +398,29 @@ class IssueManagementSystem {
     }
 
     try {
-      // Search for open issues with similar titles
-      const response = await this.octokit.search.issuesAndPullRequests({
-        q: `repo:${owner}/${repo} is:issue is:open "${title.substring(0, 50)}"`
+      // Use GraphQL API to get open issues
+      const query = `
+        query GetOpenIssues($owner: String!, $repo: String!) {
+          repository(owner: $owner, name: $repo) {
+            issues(states: OPEN, first: 100) {
+              nodes {
+                title
+              }
+            }
+          }
+        }
+      `;
+
+      const response = await this.graphqlWithAuth(query, {
+        owner,
+        repo
       });
 
+      // Get the list of open issues
+      const openIssues = response.repository.issues.nodes;
+
       // Check if any issues have very similar titles
-      return response.data.items.some(issue => {
+      return openIssues.some(issue => {
         const similarity = this.calculateTitleSimilarity(issue.title, title);
         return similarity > 0.8; // 80% similarity threshold
       });
