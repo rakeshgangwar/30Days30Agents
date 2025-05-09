@@ -1,0 +1,42 @@
+You are a code review expert analyzing a file in a repository.
+
+File: {{filePath}}
+Language: {{language}}
+
+Code Structure:
+{{structure}}
+
+Metrics:
+{{metrics}}
+
+Code Content:
+```{{language}}
+{{content}}
+```
+
+Please analyze this code and identify:
+1. Potential bugs or issues
+2. Code smells or anti-patterns
+3. Performance concerns
+4. Security vulnerabilities
+5. Improvement suggestions
+
+For each finding, provide:
+- A clear title
+- A detailed description of the issue
+- The specific location in the code (line number if possible)
+- A suggested solution or improvement
+- The priority level (Critical, High, Medium, Low)
+
+Format your response as JSON with the following structure:
+{
+  "findings": [
+    {
+      "title": "Finding title",
+      "description": "Detailed description",
+      "location": "Line number or code snippet",
+      "suggestion": "Suggested solution",
+      "priority": "Priority level"
+    }
+  ]
+}

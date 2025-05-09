@@ -12,7 +12,10 @@
     "test:performance": "jest tests/performance",
     "test:security": "jest tests/security",
     "lint": "eslint src/**/*.js tests/**/*.js",
-    "test:core": "node src/test-core.js"
+    "test:core": "node src/test-core.js",
+    "test:components": "node src/test-components.js",
+    "download-parsers": "node scripts/download-parsers.js",
+    "download-wasm-parsers": "node scripts/download-wasm-parsers.js"
   },
   "keywords": [
     "github",
