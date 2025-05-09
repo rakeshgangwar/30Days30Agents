@@ -15,6 +15,8 @@
     "test:core": "node src/test-core.js",
     "test:components": "node src/test-components.js",
     "test:openai": "node scripts/test-openai.js",
+    "test:github": "node scripts/test-github-integration.js",
+    "test:template": "node scripts/test-issue-template.js",
     "download-parsers": "node scripts/download-parsers.js",
     "download-wasm-parsers": "node scripts/download-wasm-parsers.js"
   },
