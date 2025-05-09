@@ -62,6 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added fallback to mock responses when OpenAI API is unavailable
 - Enhanced error handling and logging
 - Improved response processing with fallback text extraction
+- Updated OpenAI integration to use the latest SDK (v4.x)
+- Added detailed documentation for OpenAI integration
 
 #### Infrastructure
 - Created scripts for downloading Tree-sitter WASM parsers
@@ -75,6 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced ConfigurationManager to support all environment variables from .env file
 - Updated test script to use a default repository when none is specified
 - Improved repository cloning with automatic detection of existing repositories
+- Updated OpenAI integration to use the latest SDK (v4.x)
+- Improved OpenAI API calls with better error handling and response processing
 
 ### Fixed
 - Fixed parser compatibility issues for certain languages

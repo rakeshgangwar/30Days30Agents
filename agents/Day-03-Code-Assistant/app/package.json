@@ -14,6 +14,7 @@
     "lint": "eslint src/**/*.js tests/**/*.js",
     "test:core": "node src/test-core.js",
     "test:components": "node src/test-components.js",
+    "test:openai": "node scripts/test-openai.js",
     "download-parsers": "node scripts/download-parsers.js",
     "download-wasm-parsers": "node scripts/download-wasm-parsers.js"
   },
@@ -34,7 +35,7 @@
     "iconv-lite": "^0.6.3",
     "isbinaryfile": "^5.0.0",
     "js-yaml": "^4.1.0",
-    "openai": "^3.2.1",
+    "openai": "^4.98.0",
     "simple-git": "^3.17.0",
     "web-tree-sitter": "^0.20.7",
     "yargs": "^17.7.1"

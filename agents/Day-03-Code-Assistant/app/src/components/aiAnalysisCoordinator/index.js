@@ -1,7 +1,7 @@
 // AI Analysis Coordinator Component
 // This component coordinates AI model interactions for code analysis
 
-const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -536,11 +536,9 @@ class AIInteractor {
 
   initializeOpenAI(config) {
     try {
-      const configuration = new Configuration({
+      this.openaiApi = new OpenAI({
         apiKey: config.apiKey
       });
-
-      this.openaiApi = new OpenAIApi(configuration);
       this.openaiInitialized = true;
       return true;
     } catch (error) {
@@ -573,17 +571,17 @@ class AIInteractor {
 
       // Call OpenAI API
       console.log(`Calling OpenAI API with model: ${requestOptions.model}`);
-      const response = await this.openaiApi.createChatCompletion(requestOptions);
+      const response = await this.openaiApi.chat.completions.create(requestOptions);
 
       // Extract and return the response content
-      if (response.data &&
-          response.data.choices &&
-          response.data.choices.length > 0 &&
-          response.data.choices[0].message) {
+      if (response &&
+          response.choices &&
+          response.choices.length > 0 &&
+          response.choices[0].message) {
         return {
           success: true,
-          response: response.data.choices[0].message.content,
-          usage: response.data.usage
+          response: response.choices[0].message.content,
+          usage: response.usage
         };
       } else {
         throw new Error('Invalid response format from OpenAI API');
