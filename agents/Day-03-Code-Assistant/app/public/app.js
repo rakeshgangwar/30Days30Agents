@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const findingsList = document.getElementById('findings-list');
     const selectAllBtn = document.getElementById('select-all-btn');
     const createSelectedIssuesBtn = document.getElementById('create-selected-issues-btn');
+    const repoStatus = document.getElementById('repo-status');
+    const repoConnected = document.getElementById('repo-connected');
+    const connectedRepoName = document.getElementById('connected-repo-name');
+    const changeRepoBtn = document.getElementById('change-repo-btn');
 
     // State
     let currentRepository = null;
@@ -37,8 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     socket.on('repo-connected', (data) => {
+        // Hide connecting status
+        showRepoStatus('', '');
+
         if (data.success) {
             sessionId = data.sessionId;
+
+            // Show connected UI
+            showConnectedRepository();
 
             // Enable chat and issue forms
             enableForms();
@@ -46,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Display repository summary
             displayRepositorySummary(data.summary);
         } else {
+            showRepoStatus('Error connecting to repository', 'error');
             addSystemMessage(`Error: ${data.error}`);
         }
     });
@@ -74,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
     analyzeRepoBtn.addEventListener('click', handleAnalyzeRepo);
     selectAllBtn.addEventListener('click', handleSelectAllFindings);
     createSelectedIssuesBtn.addEventListener('click', handleCreateSelectedIssues);
+    changeRepoBtn.addEventListener('click', handleChangeRepository);
 
     // Initialize UI
     toggleRepoInputs();
@@ -104,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Clear previous messages
         chatMessages.innerHTML = '';
-        addSystemMessage('Connecting to repository...');
 
         // Get form data
         const repoType = repoTypeSelect.value;
@@ -113,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (repoType === 'local') {
             const localPath = document.getElementById('local-path').value.trim();
             if (!localPath) {
-                addSystemMessage('Error: Please enter a valid repository path');
+                showRepoStatus('Error: Please enter a valid repository path', 'error');
                 return;
             }
             repoData = { type: 'local', path: localPath };
@@ -121,13 +132,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const owner = document.getElementById('github-owner').value.trim();
             const repo = document.getElementById('github-repo').value.trim();
             if (!owner || !repo) {
-                addSystemMessage('Error: Please enter both owner and repository name');
+                showRepoStatus('Error: Please enter both owner and repository name', 'error');
                 return;
             }
             repoData = { type: 'github', owner, repo };
         }
 
         try {
+            // Show connecting status
+            showRepoStatus('Connecting to repository...', 'connecting');
+
             // Store current repository data
             currentRepository = repoData;
 
@@ -136,9 +150,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Connect to repository using Socket.IO
             socket.emit('connect-repo', repoData);
+
+            // Add welcome message to chat
+            addSystemMessage('Connecting to repository...');
         } catch (error) {
+            showRepoStatus(`Error: ${error.message}`, 'error');
             addSystemMessage(`Error: ${error.message}`);
         }
+    }
+
+    function handleChangeRepository() {
+        // Show the form again
+        repoConnected.classList.add('hidden');
+        repoForm.classList.remove('hidden');
+
+        // Clear status
+        showRepoStatus('', '');
     }
 
     async function handleChatSubmit(event) {
@@ -158,6 +185,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Removed manual issue creation function
+
+    function showRepoStatus(message, type) {
+        if (!message) {
+            repoStatus.classList.add('hidden');
+            return;
+        }
+
+        repoStatus.textContent = message;
+        repoStatus.className = `mb-4 p-3 rounded-md text-center status-${type}`;
+        repoStatus.classList.remove('hidden');
+    }
+
+    function showConnectedRepository() {
+        // Hide the form
+        repoForm.classList.add('hidden');
+
+        // Show the connected info
+        let repoName = '';
+        if (currentRepository.type === 'local') {
+            repoName = `Local: ${currentRepository.path}`;
+        } else {
+            repoName = `GitHub: ${currentRepository.owner}/${currentRepository.repo}`;
+        }
+
+        connectedRepoName.textContent = repoName;
+        repoConnected.classList.remove('hidden');
+    }
 
     function enableForms() {
         // Enable chat form

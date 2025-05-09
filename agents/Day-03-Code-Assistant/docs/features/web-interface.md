@@ -81,6 +81,9 @@ Then open your browser to http://localhost:3000
 2. For local repositories, enter the full path to the repository
 3. For GitHub repositories, enter the owner and repository name
 4. Click "Connect to Repository"
+5. The connection status will be displayed in the repository section
+6. Once connected, the form will collapse and show the connected repository name
+7. You can click "Change Repository" to connect to a different repository
 
 ### Talking to Your Repository
 

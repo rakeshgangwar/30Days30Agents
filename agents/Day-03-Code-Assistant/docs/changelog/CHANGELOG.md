@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added AI-powered issue creation with review and selection
 - Implemented batch issue creation from AI analysis findings
 - Added priority-based styling for issue findings
+- Improved repository connection UI with status messages and form collapsing
+- Added ability to switch between repositories
 - Created detailed documentation for the web interface
 
 #### Talk to Your Repository
