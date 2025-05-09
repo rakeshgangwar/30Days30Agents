@@ -678,8 +678,11 @@ class ResponseProcessor {
     }
 
     try {
+      // Clean the response to handle markdown code blocks
+      const cleanedResponse = this.cleanJsonResponse(response.response);
+
       // Parse the JSON response
-      const findings = JSON.parse(response.response).findings;
+      const findings = JSON.parse(cleanedResponse).findings;
 
       // Process and validate findings
       const processedFindings = findings.map(finding => ({
@@ -720,14 +723,30 @@ class ResponseProcessor {
     }
   }
 
+  cleanJsonResponse(response) {
+    // Remove markdown code block delimiters if present
+    let cleanedResponse = response;
+
+    // Remove opening code block with optional language specifier
+    cleanedResponse = cleanedResponse.replace(/^```(?:json|javascript)?\s*/m, '');
+
+    // Remove closing code block
+    cleanedResponse = cleanedResponse.replace(/\s*```\s*$/m, '');
+
+    return cleanedResponse;
+  }
+
   processRepositoryAnalysisResponse(response) {
     if (!response.success) {
       return { success: false, error: response.error };
     }
 
     try {
+      // Clean the response to handle markdown code blocks
+      const cleanedResponse = this.cleanJsonResponse(response.response);
+
       // Parse the JSON response
-      const findings = JSON.parse(response.response).findings;
+      const findings = JSON.parse(cleanedResponse).findings;
 
       // Process and validate findings
       const processedFindings = findings.map(finding => ({
