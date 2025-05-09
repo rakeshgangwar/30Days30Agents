@@ -5,6 +5,9 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/cli.js",
+    "talk": "node src/cli.js talk",
+    "analyze": "node src/cli.js analyze",
+    "configure": "node src/cli.js configure",
     "test": "jest",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
@@ -35,6 +38,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
     "glob": "^8.1.0",
+    "hnswlib-node": "^3.0.0",
     "iconv-lite": "^0.6.3",
     "isbinaryfile": "^5.0.0",
     "js-yaml": "^4.1.0",

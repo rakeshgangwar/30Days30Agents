@@ -1,5 +1,5 @@
 // Test script for analyzing a limited number of files
-const RepositoryAnalysisAgent = require('./src/app');
+const RepositoryAnalysisAgent = require('../src/app');
 const path = require('path');
 const fs = require('fs');
 
