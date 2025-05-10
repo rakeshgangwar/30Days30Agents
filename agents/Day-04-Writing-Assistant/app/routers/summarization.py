@@ -26,9 +26,9 @@ router = APIRouter()
 
 class SummarizeRequest(BaseModel):
     """Request model for text summarization."""
-    
+
     text: str
-    max_length: Optional[int] = Field(default=200, description="Maximum length of the summary in characters")
+    max_length: Optional[int] = Field(default=None, description="Optional maximum length of the summary in characters (no limit if not specified)")
     format: Optional[str] = Field(default="paragraph", description="Format of the summary (paragraph, bullets)")
     focus: Optional[str] = Field(default=None, description="Optional focus area for the summary")
     model: Optional[str] = None
@@ -38,7 +38,7 @@ class SummarizeRequest(BaseModel):
 
 class SummarizeResponse(BaseModel):
     """Response model for text summarization."""
-    
+
     summary: str
     model_used: str
     original_length: int
@@ -49,13 +49,13 @@ class SummarizeResponse(BaseModel):
 async def summarize_text(request: SummarizeRequest, db: Session = Depends(get_db)):
     """
     Summarize the provided text.
-    
+
     This endpoint uses an LLM to generate a concise summary of the
     provided text.
     """
     try:
         logger.info(f"Received summarization request for {len(request.text)} characters")
-        
+
         # Use the OpenRouter service to generate the summary
         summary = await openrouter_service.summarize(
             text=request.text,
@@ -67,14 +67,14 @@ async def summarize_text(request: SummarizeRequest, db: Session = Depends(get_db
             db=db,
             user_id=request.user_id
         )
-        
+
         return SummarizeResponse(
             summary=summary,
             model_used=request.model or settings.DEFAULT_LLM_MODEL,
             original_length=len(request.text),
             summary_length=len(summary)
         )
-    
+
     except Exception as e:
         logger.error(f"Error summarizing text: {str(e)}")
         raise HTTPException(

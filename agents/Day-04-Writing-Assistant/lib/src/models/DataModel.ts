@@ -173,7 +173,7 @@ export interface AnalyzeGrammarStyleResponse {
 export interface SummarizeRequest extends BaseRequest {
   /** The text to summarize */
   text: string;
-  /** Maximum length of the summary in characters */
+  /** Optional maximum length of the summary in characters (no limit if not specified) */
   max_length?: number;
   /** Format of the summary */
   format?: SummaryFormat | string;

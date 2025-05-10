@@ -236,7 +236,7 @@ class OpenRouterService:
             prompt=prompt,
             model=model,
             temperature=temperature or 0.3,
-            max_tokens=2000,  # Analysis may require more tokens
+            max_tokens=4000,  # Increased token limit for comprehensive analysis
             system_prompt=system_prompt,
             db=db,
             user_id=user_id
@@ -255,7 +255,7 @@ class OpenRouterService:
     async def summarize(
         self,
         text: str,
-        max_length: int = 200,
+        max_length: Optional[int] = None,
         format: str = "paragraph",
         focus: Optional[str] = None,
         model: Optional[str] = None,
@@ -268,7 +268,7 @@ class OpenRouterService:
 
         Args:
             text: The text to summarize
-            max_length: Maximum length of the summary in characters
+            max_length: Optional maximum length of the summary in characters (no limit if None)
             format: Format of the summary (paragraph, bullets)
             focus: Optional focus area for the summary
             model: Optional specific model to use
@@ -282,10 +282,12 @@ class OpenRouterService:
         system_prompt = f"""You are a professional summarizer. Create a concise, accurate
         summary of the provided text.{focus_instruction}{format_instruction}"""
 
-        prompt = f"Please summarize the following text in approximately {max_length} characters:\n\n{text}"
+        # Adjust prompt based on whether max_length is specified
+        length_instruction = f" in approximately {max_length} characters" if max_length else ""
+        prompt = f"Please summarize the following text{length_instruction}:\n\n{text}"
 
-        # Convert max_length to approximate token count (roughly 4 chars per token)
-        max_tokens = max(50, int(max_length / 4))
+        # Use a high token limit if max_length is None, otherwise convert to tokens
+        max_tokens = 3000 if max_length is None else max(50, int(max_length / 4))
 
         return await self._generate_completion(
             prompt=prompt,
@@ -335,7 +337,7 @@ class OpenRouterService:
             prompt=prompt,
             model=model,
             temperature=temperature or 0.6,
-            max_tokens=int(len(text) / 2) + 200,  # Adjusted text might be longer
+            max_tokens=max(4000, int(len(text) / 2) + 500),  # Significantly increased token limit
             system_prompt=system_prompt,
             db=db,
             user_id=user_id
