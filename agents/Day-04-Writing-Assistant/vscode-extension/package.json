@@ -1,0 +1,240 @@
+{
+  "name": "writing-assistant-vscode",
+  "displayName": "Writing Assistant",
+  "description": "VS Code extension for the Writing Assistant service",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "writing-assistant.draft",
+        "title": "Writing Assistant: Draft with AI",
+        "icon": "$(pencil)"
+      },
+      {
+        "command": "writing-assistant.analyzeGrammarStyle",
+        "title": "Writing Assistant: Analyze Grammar & Style",
+        "icon": "$(check)"
+      },
+      {
+        "command": "writing-assistant.summarize",
+        "title": "Writing Assistant: Summarize Text",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "writing-assistant.adjustTone",
+        "title": "Writing Assistant: Adjust Tone",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "writing-assistant.preferences",
+        "title": "Writing Assistant: Preferences",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "writing-assistant.showPanel",
+        "title": "Writing Assistant: Open Panel",
+        "icon": "$(book)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "writing-assistant.menu",
+          "when": "editorTextFocus"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "writing-assistant.draft",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "writing-assistant.analyzeGrammarStyle",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "writing-assistant.summarize",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "writing-assistant.adjustTone",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        }
+      ],
+      "writing-assistant.menu": [
+        {
+          "command": "writing-assistant.draft",
+          "group": "1_creation"
+        },
+        {
+          "command": "writing-assistant.analyzeGrammarStyle",
+          "group": "2_analysis"
+        },
+        {
+          "command": "writing-assistant.summarize",
+          "group": "2_analysis"
+        },
+        {
+          "command": "writing-assistant.adjustTone",
+          "group": "3_modification"
+        },
+        {
+          "command": "writing-assistant.preferences",
+          "group": "4_tools"
+        },
+        {
+          "command": "writing-assistant.showPanel",
+          "group": "4_tools"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "writing-assistant.menu",
+        "label": "Writing Assistant"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "writing-assistant.draft",
+        "key": "ctrl+alt+u",
+        "mac": "cmd+alt+u",
+        "when": "editorFocus"
+      },
+      {
+        "command": "writing-assistant.analyzeGrammarStyle",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a",
+        "when": "editorFocus"
+      },
+      {
+        "command": "writing-assistant.summarize",
+        "key": "ctrl+alt+s",
+        "mac": "cmd+alt+s",
+        "when": "editorFocus"
+      },
+      {
+        "command": "writing-assistant.adjustTone",
+        "key": "ctrl+alt+t",
+        "mac": "cmd+alt+t",
+        "when": "editorFocus"
+      },
+      {
+        "command": "writing-assistant.preferences",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p"
+      }
+    ],
+    "configuration": {
+      "title": "Writing Assistant",
+      "properties": {
+        "writingAssistant.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "URL of the Writing Assistant API"
+        },
+        "writingAssistant.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for the Writing Assistant service"
+        },
+        "writingAssistant.userId": {
+          "type": "string",
+          "default": "",
+          "description": "User ID for syncing preferences with the server"
+        },
+        "writingAssistant.preferredModel": {
+          "type": "string",
+          "enum": [
+            "anthropic/claude-3-haiku",
+            "anthropic/claude-3-sonnet",
+            "anthropic/claude-3-opus",
+            "openai/gpt-4",
+            "openai/gpt-4-turbo",
+            "openai/gpt-3.5-turbo"
+          ],
+          "default": "anthropic/claude-3-haiku",
+          "description": "Preferred LLM model to use"
+        },
+        "writingAssistant.defaultTone": {
+          "type": "string",
+          "enum": [
+            "professional",
+            "casual",
+            "friendly",
+            "formal",
+            "academic",
+            "technical",
+            "persuasive",
+            "enthusiastic",
+            "confident",
+            "empathetic"
+          ],
+          "default": "professional",
+          "description": "Default tone for text adjustments"
+        },
+        "writingAssistant.resultDisplayMode": {
+          "type": "string",
+          "enum": [
+            "editor",
+            "webview"
+          ],
+          "default": "editor",
+          "description": "How to display results (in a text editor or interactive webview)"
+        },
+        "writingAssistant.syncPreferences": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically sync preferences with the server"
+        },
+        "writingAssistant.debugMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug logging for the extension"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "@vscode/test-electron": "^2.3.4",
+    "eslint": "^8.47.0",
+    "glob": "^10.3.3",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "writing-assistant-connector": "file:../lib"
+  }
+}

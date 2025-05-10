@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "writing-assistant"
+version = "0.1.0"
+description = "Writing Assistant with integration for multiple text editors"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+dependencies = [
+    "fastapi>=0.115.12",
+    "uvicorn>=0.34.2",
+    "langchain>=0.3.25",
+    "langchain-core>=0.3.59",
+    "langchain-openai>=0.3.16",
+    "openai>=1.78.0",
+    "pydantic>=2.11.4",
+    "pydantic-settings>=2.9.1",
+    "sqlalchemy>=2.0.40",
+    "python-jose[cryptography]>=3.4.0",
+    "httpx>=0.28.1",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.23.5",
+    "python-dotenv>=1.1.0",
+    "pytest-cov>=6.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "flake8>=7.2.0",
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# Add build configuration to specify which files to include
+[tool.hatch.build.targets.wheel]
+packages = ["."]
