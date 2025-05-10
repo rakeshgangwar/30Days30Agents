@@ -57,6 +57,14 @@ cp .env.example .env
 
 6. Edit the `.env` file and add your OpenRouter API key and other configuration
 
+7. (Optional) Generate an API key for authentication
+
+```bash
+python utils/generate_api_key.py
+```
+
+Add the generated API key to your `.env` file.
+
 ### Running the API
 
 Run the API server with:
@@ -84,7 +92,7 @@ app/
 ├── core/           # Core application code
 │   ├── config.py   # Configuration settings
 ├── models/         # Data models
-├── routers/        # API routes 
+├── routers/        # API routes
 ├── services/       # Business logic
 ├── utils/          # Utility functions
 └── tests/          # Test modules
@@ -102,7 +110,23 @@ pytest
 - `/api/v1/analyze_grammar_style` - Analyze grammar and style
 - `/api/v1/summarize` - Summarize text
 - `/api/v1/adjust_tone` - Adjust the tone of text
+- `/api/v1/preferences/{user_id}` - Manage user preferences (requires API key)
 - `/health` - Health check endpoint
+
+## Authentication
+
+The Writing Assistant API uses API key authentication for endpoints that manage user-specific data.
+To use authenticated endpoints, include the API key in the request header:
+
+```
+X-API-Key: your-api-key
+```
+
+You can generate a secure API key using the provided utility script:
+
+```bash
+python utils/generate_api_key.py
+```
 
 ## License
 
