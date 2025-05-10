@@ -26,9 +26,9 @@ router = APIRouter()
 
 class DraftRequest(BaseModel):
     """Request model for draft generation."""
-    
+
     prompt: str
-    max_length: Optional[int] = 500
+    max_length: Optional[int] = None  # Removed default limit
     format: Optional[str] = None
     context: Optional[str] = None
     model: Optional[str] = None
@@ -38,7 +38,7 @@ class DraftRequest(BaseModel):
 
 class DraftResponse(BaseModel):
     """Response model for draft generation."""
-    
+
     text: str
     model_used: str
 
@@ -47,18 +47,18 @@ class DraftResponse(BaseModel):
 async def create_draft(request: DraftRequest, db: Session = Depends(get_db)):
     """
     Generate a draft based on the provided prompt.
-    
+
     This endpoint uses an LLM to generate text based on the user's prompt
     and any provided context.
     """
     try:
         logger.info(f"Received draft request with prompt: {request.prompt[:50]}...")
-        
+
         # Combine context with prompt if provided
         prompt = request.prompt
         if request.context:
             prompt = f"Context: {request.context}\n\nPrompt: {request.prompt}"
-        
+
         # Generate the draft using the OpenRouter service
         generated_text = await openrouter_service.generate_draft(
             prompt=prompt,
@@ -68,13 +68,13 @@ async def create_draft(request: DraftRequest, db: Session = Depends(get_db)):
             db=db,
             user_id=request.user_id
         )
-        
+
         # Return the generated text
         return DraftResponse(
             text=generated_text,
             model_used=request.model or settings.DEFAULT_LLM_MODEL
         )
-    
+
     except Exception as e:
         logger.error(f"Error generating draft: {str(e)}")
         raise HTTPException(

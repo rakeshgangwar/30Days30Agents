@@ -138,7 +138,7 @@ class OpenRouterService:
     async def generate_draft(
         self,
         prompt: str,
-        max_length: int = 500,
+        max_length: Optional[int] = None,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
         db: Optional[Session] = None,
@@ -149,7 +149,7 @@ class OpenRouterService:
 
         Args:
             prompt: The input prompt describing what to write
-            max_length: Target length of the generated draft
+            max_length: Optional target length of the generated draft (no limit if None)
             model: Optional specific model to use
 
         Returns:
@@ -159,8 +159,8 @@ class OpenRouterService:
         coherent piece of text based on the user's prompt. The text should be clear, engaging,
         and appropriate for the requested context and audience."""
 
-        # Convert max_length to approximate token count (roughly 4 chars per token)
-        max_tokens = max(100, int(max_length / 4))
+        # Use a high token limit if max_length is None, otherwise convert to tokens
+        max_tokens = 4000 if max_length is None else max(100, int(max_length / 4))
 
         return await self._generate_completion(
             prompt=prompt,

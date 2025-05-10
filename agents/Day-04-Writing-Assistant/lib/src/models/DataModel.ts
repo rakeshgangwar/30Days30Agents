@@ -103,7 +103,7 @@ export interface DraftRequest extends BaseRequest {
   prompt: string;
   /** Optional context to provide additional information for the generation */
   context?: string;
-  /** Maximum length of the generated text in characters */
+  /** Optional maximum length of the generated text in characters (no limit if not specified) */
   max_length?: number;
   /** Optional format for the output */
   format?: string;
