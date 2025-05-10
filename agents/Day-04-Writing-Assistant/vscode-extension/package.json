@@ -34,6 +34,11 @@
         "icon": "$(edit)"
       },
       {
+        "command": "writing-assistant.preferences",
+        "title": "Writing Assistant: Preferences",
+        "icon": "$(gear)"
+      },
+      {
         "command": "writing-assistant.showPanel",
         "title": "Writing Assistant: Open Panel",
         "icon": "$(book)"
@@ -43,6 +48,28 @@
       "editor/context": [
         {
           "submenu": "writing-assistant.menu",
+          "when": "editorTextFocus"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "writing-assistant.draft",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "writing-assistant.analyzeGrammarStyle",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "writing-assistant.summarize",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "writing-assistant.adjustTone",
+          "group": "navigation",
           "when": "editorTextFocus"
         }
       ],
@@ -62,6 +89,10 @@
         {
           "command": "writing-assistant.adjustTone",
           "group": "3_modification"
+        },
+        {
+          "command": "writing-assistant.preferences",
+          "group": "4_tools"
         },
         {
           "command": "writing-assistant.showPanel",
@@ -99,6 +130,11 @@
         "key": "ctrl+alt+t",
         "mac": "cmd+alt+t",
         "when": "editorTextFocus"
+      },
+      {
+        "command": "writing-assistant.preferences",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p"
       }
     ],
     "configuration": {
@@ -113,6 +149,11 @@
           "type": "string",
           "default": "",
           "description": "API key for the Writing Assistant service"
+        },
+        "writingAssistant.userId": {
+          "type": "string",
+          "default": "",
+          "description": "User ID for syncing preferences with the server"
         },
         "writingAssistant.preferredModel": {
           "type": "string",
@@ -143,6 +184,25 @@
           ],
           "default": "professional",
           "description": "Default tone for text adjustments"
+        },
+        "writingAssistant.resultDisplayMode": {
+          "type": "string",
+          "enum": [
+            "editor",
+            "webview"
+          ],
+          "default": "editor",
+          "description": "How to display results (in a text editor or interactive webview)"
+        },
+        "writingAssistant.syncPreferences": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically sync preferences with the server"
+        },
+        "writingAssistant.debugMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug logging for the extension"
         }
       }
     }
