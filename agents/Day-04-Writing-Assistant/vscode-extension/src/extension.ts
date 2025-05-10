@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register preferences command
   const preferencesCommand = vscode.commands.registerCommand('writing-assistant.preferences', () => {
-    PreferencesPanel.createOrShow(context.extensionUri, preferencesManager);
+    PreferencesPanel.createOrShow(context.extensionUri, preferencesManager, apiService);
   });
 
   // Register panel command

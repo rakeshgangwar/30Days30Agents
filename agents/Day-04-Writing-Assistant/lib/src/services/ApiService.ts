@@ -17,6 +17,7 @@ import {
   AdjustToneRequest,
   AdjustToneResponse,
   UserPreferences,
+  ModelInfo,
 } from '../models/DataModel';
 
 /**
@@ -237,6 +238,48 @@ export class ApiService {
         return response.data;
       },
       'Failed to update user preferences'
+    );
+  }
+
+  /**
+   * Get available models from OpenRouter
+   * @param forceRefresh Whether to force a refresh of the cached models
+   * @param requestId Optional identifier for the request (for cancellation)
+   * @returns List of available models
+   * @throws {ApiError} If the request fails
+   */
+  async getAvailableModels(forceRefresh: boolean = false, requestId?: string): Promise<ModelInfo[]> {
+    return this.executeWithRetry<ModelInfo[]>(
+      async () => {
+        const cancelToken = this.getCancelToken(requestId);
+        const response = await this.client.get<ModelInfo[]>(
+          `/api/v1/models${forceRefresh ? '?force_refresh=true' : ''}`,
+          { cancelToken }
+        );
+        return response.data;
+      },
+      'Failed to get available models'
+    );
+  }
+
+  /**
+   * Get information about a specific model
+   * @param modelId Model ID
+   * @param requestId Optional identifier for the request (for cancellation)
+   * @returns Model information
+   * @throws {ApiError} If the request fails
+   */
+  async getModelById(modelId: string, requestId?: string): Promise<ModelInfo> {
+    return this.executeWithRetry<ModelInfo>(
+      async () => {
+        const cancelToken = this.getCancelToken(requestId);
+        const response = await this.client.get<ModelInfo>(
+          `/api/v1/models/${modelId}`,
+          { cancelToken }
+        );
+        return response.data;
+      },
+      `Failed to get model information for ${modelId}`
     );
   }
 

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { PreferencesManager } from './preferencesManager';
-import { UserPreferences, LLMModel, TextTone } from 'writing-assistant-connector';
+import { UserPreferences, LLMModel, TextTone, ModelInfo, ApiService } from 'writing-assistant-connector';
+import { Logger } from './logger';
 
 /**
  * Manages the preferences webview panel
@@ -10,16 +11,22 @@ export class PreferencesPanel {
   private readonly _panel: vscode.WebviewPanel;
   private readonly _extensionUri: vscode.Uri;
   private readonly _preferencesManager: PreferencesManager;
+  private readonly _apiService: ApiService;
   private _disposables: vscode.Disposable[] = [];
+  private _availableModels: ModelInfo[] = [];
+  private _modelsLoading: boolean = false;
+  private _logger: Logger;
 
   /**
    * Create or show a preferences panel
    * @param extensionUri The URI of the extension
    * @param preferencesManager The preferences manager
+   * @param apiService The API service
    */
   public static createOrShow(
     extensionUri: vscode.Uri,
-    preferencesManager: PreferencesManager
+    preferencesManager: PreferencesManager,
+    apiService: ApiService
   ): PreferencesPanel {
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
@@ -44,7 +51,7 @@ export class PreferencesPanel {
       }
     );
 
-    PreferencesPanel.currentPanel = new PreferencesPanel(panel, extensionUri, preferencesManager);
+    PreferencesPanel.currentPanel = new PreferencesPanel(panel, extensionUri, preferencesManager, apiService);
     return PreferencesPanel.currentPanel;
   }
 
@@ -53,15 +60,22 @@ export class PreferencesPanel {
    * @param panel The webview panel
    * @param extensionUri The URI of the extension
    * @param preferencesManager The preferences manager
+   * @param apiService The API service
    */
   private constructor(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
-    preferencesManager: PreferencesManager
+    preferencesManager: PreferencesManager,
+    apiService: ApiService
   ) {
     this._panel = panel;
     this._extensionUri = extensionUri;
     this._preferencesManager = preferencesManager;
+    this._apiService = apiService;
+    this._logger = Logger.getInstance();
+
+    // Fetch available models
+    this._fetchModels();
 
     // Set the webview's initial html content
     this._update();
@@ -83,11 +97,43 @@ export class PreferencesPanel {
           case 'setUserId':
             await this._setUserId(message.userId);
             return;
+          case 'refreshModels':
+            await this._fetchModels(true);
+            await this._update();
+            return;
         }
       },
       null,
       this._disposables
     );
+  }
+
+  /**
+   * Fetch available models from the API
+   * @param forceRefresh Whether to force a refresh of the cached models
+   */
+  private async _fetchModels(forceRefresh: boolean = false): Promise<void> {
+    if (this._modelsLoading) {
+      return;
+    }
+
+    this._modelsLoading = true;
+    try {
+      this._logger.debug('Fetching available models', { forceRefresh });
+      this._availableModels = await this._apiService.getAvailableModels(forceRefresh);
+      this._logger.debug('Fetched models', { count: this._availableModels.length });
+    } catch (error) {
+      this._logger.error('Failed to fetch models', error);
+      // If API call fails, use the static enum values
+      this._availableModels = Object.entries(LLMModel).map(([key, value]) => ({
+        id: value,
+        name: key,
+        provider: value.split('/')[0]
+      }));
+      this._logger.debug('Using fallback models', { count: this._availableModels.length });
+    } finally {
+      this._modelsLoading = false;
+    }
   }
 
   /**
@@ -154,13 +200,13 @@ export class PreferencesPanel {
 
       // Load preferences from backend
       const preferences = await this._preferencesManager.loadPreferences();
-      
+
       // Update VS Code settings
       await this._preferencesManager.applyToVSCodeSettings(preferences);
-      
+
       // Update the webview
       await this._update();
-      
+
       vscode.window.showInformationMessage('Preferences loaded successfully');
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to load preferences: ${error instanceof Error ? error.message : String(error)}`);
@@ -206,7 +252,18 @@ export class PreferencesPanel {
    */
   private _getHtmlForWebview(userId: string | undefined, preferences: UserPreferences): string {
     // Get available models and tones
-    const models = Object.entries(LLMModel).map(([key, value]) => ({ label: key, value }));
+    const models = this._availableModels.length > 0
+      ? this._availableModels.map(model => ({
+          label: model.name || model.id,
+          value: model.id,
+          provider: model.provider || model.id.split('/')[0]
+        }))
+      : Object.entries(LLMModel).map(([key, value]) => ({
+          label: key,
+          value,
+          provider: value.split('/')[0]
+        }));
+
     const tones = Object.entries(TextTone).map(([key, value]) => ({ label: key, value }));
 
     return `<!DOCTYPE html>
@@ -271,7 +328,7 @@ export class PreferencesPanel {
     </head>
     <body>
         <h1>Writing Assistant Preferences</h1>
-        
+
         <div class="user-id-section">
             <div class="form-group">
                 <label for="userId">User ID</label>
@@ -287,14 +344,37 @@ export class PreferencesPanel {
 
         <div class="form-group">
             <label for="preferredModel">Preferred LLM Model</label>
-            <select id="preferredModel">
-                <option value="">Default</option>
-                ${models.map(model => `
-                    <option value="${model.value}" ${preferences.preferred_model === model.value ? 'selected' : ''}>
-                        ${model.label}
-                    </option>
-                `).join('')}
-            </select>
+            <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                <select id="preferredModel" style="flex-grow: 1;">
+                    <option value="">Default</option>
+                    ${(() => {
+                        // Group models by provider
+                        const groupedModels = models.reduce<Record<string, Array<{label: string, value: string, provider: string}>>>((acc, model) => {
+                            const provider = model.provider || 'other';
+                            if (!acc[provider]) {
+                                acc[provider] = [];
+                            }
+                            acc[provider].push(model);
+                            return acc;
+                        }, {});
+
+                        // Generate options with optgroups
+                        return Object.entries(groupedModels).map(([provider, providerModels]) => `
+                            <optgroup label="${provider}">
+                                ${providerModels.map(model => `
+                                    <option value="${model.value}" ${preferences.preferred_model === model.value ? 'selected' : ''}>
+                                        ${model.label}
+                                    </option>
+                                `).join('')}
+                            </optgroup>
+                        `).join('');
+                    })()}
+                </select>
+                <button id="refreshModelsBtn" title="Refresh models list">↻</button>
+            </div>
+            <p style="font-size: 0.9em; color: var(--vscode-descriptionForeground);">
+                Models are fetched from OpenRouter. Click refresh to update the list.
+            </p>
         </div>
 
         <div class="form-group">
@@ -316,7 +396,7 @@ export class PreferencesPanel {
 
         <script>
             const vscode = acquireVsCodeApi();
-            
+
             // Elements
             const userIdInput = document.getElementById('userId');
             const setUserIdBtn = document.getElementById('setUserIdBtn');
@@ -324,7 +404,8 @@ export class PreferencesPanel {
             const defaultToneSelect = document.getElementById('defaultTone');
             const saveBtn = document.getElementById('saveBtn');
             const loadBtn = document.getElementById('loadBtn');
-            
+            const refreshModelsBtn = document.getElementById('refreshModelsBtn');
+
             // Set user ID
             setUserIdBtn.addEventListener('click', () => {
                 const userId = userIdInput.value.trim();
@@ -335,25 +416,43 @@ export class PreferencesPanel {
                     });
                 }
             });
-            
+
             // Save preferences
             saveBtn.addEventListener('click', () => {
                 const preferences = {
                     preferred_model: preferredModelSelect.value || undefined,
                     default_tone: defaultToneSelect.value || undefined
                 };
-                
+
                 vscode.postMessage({
                     command: 'savePreferences',
                     preferences: preferences
                 });
             });
-            
+
             // Load preferences
             loadBtn.addEventListener('click', () => {
                 vscode.postMessage({
                     command: 'loadPreferences'
                 });
+            });
+
+            // Refresh models
+            refreshModelsBtn.addEventListener('click', () => {
+                refreshModelsBtn.disabled = true;
+                refreshModelsBtn.textContent = '⟳';
+                refreshModelsBtn.style.opacity = '0.5';
+
+                vscode.postMessage({
+                    command: 'refreshModels'
+                });
+
+                // Re-enable button after a delay
+                setTimeout(() => {
+                    refreshModelsBtn.disabled = false;
+                    refreshModelsBtn.textContent = '↻';
+                    refreshModelsBtn.style.opacity = '1';
+                }, 2000);
             });
         </script>
     </body>

@@ -6,7 +6,28 @@
  */
 
 /**
+ * Model information from OpenRouter
+ */
+export interface ModelInfo {
+  /** Model identifier (e.g., 'anthropic/claude-3-haiku') */
+  id: string;
+  /** Display name of the model */
+  name: string;
+  /** Optional description of the model */
+  description?: string;
+  /** Maximum context length in tokens */
+  context_length?: number;
+  /** Pricing information */
+  pricing?: Record<string, any>;
+  /** Provider of the model (e.g., 'anthropic', 'openai') */
+  provider?: string;
+}
+
+/**
  * Available LLM models that can be used with the Writing Assistant
+ *
+ * Note: This enum is provided for backward compatibility.
+ * New code should use the dynamic model list from the API.
  */
 export enum LLMModel {
   CLAUDE_HAIKU = 'anthropic/claude-3-haiku',

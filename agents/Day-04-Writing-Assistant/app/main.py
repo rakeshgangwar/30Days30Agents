@@ -46,13 +46,14 @@ app.add_middleware(
 )
 
 # Import and include routers
-from app.routers import drafting, grammar, summarization, tone, preferences
+from app.routers import drafting, grammar, summarization, tone, preferences, models
 
 app.include_router(drafting.router, prefix="/api/v1", tags=["drafting"])
 app.include_router(grammar.router, prefix="/api/v1", tags=["grammar"])
 app.include_router(summarization.router, prefix="/api/v1", tags=["summarization"])
 app.include_router(tone.router, prefix="/api/v1", tags=["tone"])
 app.include_router(preferences.router, prefix="/api/v1", tags=["preferences"])
+app.include_router(models.router, prefix="/api/v1", tags=["models"])
 
 # Health check endpoint
 @app.get("/health", tags=["health"])
