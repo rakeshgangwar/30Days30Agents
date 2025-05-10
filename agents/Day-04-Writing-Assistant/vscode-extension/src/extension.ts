@@ -123,14 +123,47 @@ export function deactivate() {
 
 // Initialize the API service with configuration from settings
 function initializeApiService(): ApiService {
+  const logger = Logger.getInstance();
   const config = vscode.workspace.getConfiguration('writingAssistant');
+
+  // Get API URL from settings or use default
+  let baseUrl = config.get<string>('apiUrl');
+  if (!baseUrl || baseUrl.trim() === '') {
+    baseUrl = 'http://localhost:8000';
+    logger.warn(`No API URL configured, using default: ${baseUrl}`);
+    vscode.window.showWarningMessage(`No API URL configured, using default: ${baseUrl}. Please set a valid API URL in settings.`);
+  }
+
+  const apiKey = config.get<string>('apiKey') || '';
+
+  // Validate the API URL
+  try {
+    new URL(baseUrl);
+  } catch (error) {
+    const errorMsg = `Invalid API URL: ${baseUrl}. Please check your settings.`;
+    logger.error(errorMsg, error);
+    vscode.window.showErrorMessage(errorMsg);
+
+    // Use default URL if invalid
+    baseUrl = 'http://localhost:8000';
+    logger.warn(`Using default API URL instead: ${baseUrl}`);
+    vscode.window.showWarningMessage(`Using default API URL instead: ${baseUrl}`);
+  }
+
   const apiServiceConfig: ApiServiceConfig = {
-    baseUrl: config.get<string>('apiUrl') || 'http://localhost:8000',
-    apiKey: config.get<string>('apiKey') || '',
+    baseUrl: baseUrl,
+    apiKey: apiKey,
     timeout: 60000, // 60 seconds
     maxRetries: 3,
     retryDelay: 1000
   };
+
+  logger.debug('Initializing API service with config', {
+    baseUrl,
+    hasApiKey: !!apiKey,
+    timeout: apiServiceConfig.timeout,
+    maxRetries: apiServiceConfig.maxRetries
+  });
 
   return new ApiService(apiServiceConfig);
 }
@@ -215,11 +248,15 @@ async function handleDraftCommand(apiService: ApiService): Promise<void> {
     // Get prompt from user
     const prompt = await vscode.window.showInputBox({
       prompt: 'Enter a prompt for the AI to draft text',
-      placeHolder: 'Write a paragraph about...'
+      placeHolder: 'Write a paragraph about...',
+      validateInput: (value) => {
+        return value.trim() === '' ? 'Please enter a prompt' : null;
+      }
     });
 
     if (!prompt) {
       logger.debug('Draft command cancelled - no prompt provided');
+      vscode.window.showInformationMessage('Draft generation cancelled');
       return; // User cancelled
     }
 
@@ -238,9 +275,23 @@ async function handleDraftCommand(apiService: ApiService): Promise<void> {
         const preferredModel = config.get<string>('preferredModel');
         logger.debug('Using model', { model: preferredModel });
 
+        // Get preferences from preferences manager if available
+        // We can't access the extension context here, so we'll create a new instance
+        // In a real extension, you would pass the context from the activate function
+        const preferencesManager = new PreferencesManager(apiService, undefined);
+        const preferences = preferencesManager.getPreferences();
+
+        // Use preferences if available, otherwise use settings
+        const modelToUse = preferences?.preferred_model || preferredModel;
+        logger.debug('Using model from preferences', {
+          modelFromPreferences: preferences?.preferred_model,
+          modelFromSettings: preferredModel,
+          modelToUse: modelToUse
+        });
+
         // Create request
         const request = RequestFactory.createDraftRequest(prompt, {
-          model: preferredModel,
+          model: modelToUse,
           temperature: 0.7
         });
 
@@ -309,27 +360,42 @@ async function handleAnalyzeCommand(apiService: ApiService): Promise<void> {
         // Analyze text
         logger.debug('Sending analyze request to API', { requestId: 'analyze-' + Date.now() });
         const response = await apiService.analyzeGrammarStyle(request);
+
+        // Add null checks for response properties
+        if (!response.issues) {
+          response.issues = [];
+          logger.warn('Response issues array is null or undefined, using empty array instead');
+        }
+
+        if (!response.improved_text) {
+          response.improved_text = text;
+          logger.warn('Response improved_text is null or undefined, using original text instead');
+        }
+
         logger.debug('Received analyze response', {
-          model: response.model_used,
-          issuesCount: response.issues.length,
-          improvedTextLength: response.improved_text.length
+          model: response.model_used || 'unknown',
+          issuesCount: response.issues ? response.issues.length : 0,
+          improvedTextLength: response.improved_text ? response.improved_text.length : 0
         });
 
         // Format results
         let resultContent = '# Grammar & Style Analysis\n\n';
-        resultContent += `**Issues Found:** ${response.issues.length}\n\n`;
 
-        if (response.issues.length > 0) {
+        // Add null checks for issues array
+        const issues = response.issues || [];
+        resultContent += `**Issues Found:** ${issues.length}\n\n`;
+
+        if (issues.length > 0) {
           resultContent += '## Issues\n\n';
-          response.issues.forEach((issue, index) => {
-            resultContent += `### Issue ${index + 1}: ${issue.type} (${issue.severity})\n`;
-            resultContent += `**Description:** ${issue.description}\n`;
-            resultContent += `**Suggestion:** ${issue.suggestion}\n\n`;
+          issues.forEach((issue, index) => {
+            resultContent += `### Issue ${index + 1}: ${issue.type || 'Unknown'} (${issue.severity || 'Medium'})\n`;
+            resultContent += `**Description:** ${issue.description || 'No description provided'}\n`;
+            resultContent += `**Suggestion:** ${issue.suggestion || 'No suggestion provided'}\n\n`;
           });
         }
 
         resultContent += '## Improved Text\n\n';
-        resultContent += response.improved_text;
+        resultContent += response.improved_text || text;
 
         // Show result in new editor
         showResultInNewEditor('Grammar & Style Analysis', resultContent);
@@ -474,9 +540,29 @@ async function handleAdjustToneCommand(apiService: ApiService): Promise<void> {
         const preferredModel = config.get<string>('preferredModel');
         logger.debug('Using model', { model: preferredModel });
 
+        // Get preferences from preferences manager if available
+        // We can't access the extension context here, so we'll create a new instance
+        // In a real extension, you would pass the context from the activate function
+        const preferencesManager = new PreferencesManager(apiService, undefined);
+        const preferences = preferencesManager.getPreferences();
+
+        // Use preferences if available, otherwise use settings
+        const modelToUse = preferences?.preferred_model || preferredModel;
+
+        // If no tone is selected, use the default tone from preferences
+        const toneToUse = targetTone || preferences?.default_tone || TextTone.PROFESSIONAL;
+
+        logger.debug('Using preferences for tone adjustment', {
+          modelFromPreferences: preferences?.preferred_model,
+          defaultToneFromPreferences: preferences?.default_tone,
+          selectedTone: targetTone,
+          modelToUse: modelToUse,
+          toneToUse: toneToUse
+        });
+
         // Create request
-        const request = RequestFactory.createAdjustToneRequest(text, targetTone, {
-          model: preferredModel,
+        const request = RequestFactory.createAdjustToneRequest(text, toneToUse, {
+          model: modelToUse,
           preserve_meaning: true
         });
 

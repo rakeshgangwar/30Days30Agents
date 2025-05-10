@@ -109,27 +109,27 @@
     "keybindings": [
       {
         "command": "writing-assistant.draft",
-        "key": "ctrl+alt+d",
-        "mac": "cmd+alt+d",
-        "when": "editorTextFocus"
+        "key": "ctrl+alt+u",
+        "mac": "cmd+alt+u",
+        "when": "editorFocus"
       },
       {
         "command": "writing-assistant.analyzeGrammarStyle",
         "key": "ctrl+alt+a",
         "mac": "cmd+alt+a",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "writing-assistant.summarize",
         "key": "ctrl+alt+s",
         "mac": "cmd+alt+s",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "writing-assistant.adjustTone",
         "key": "ctrl+alt+t",
         "mac": "cmd+alt+t",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "writing-assistant.preferences",

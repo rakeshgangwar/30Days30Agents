@@ -81,15 +81,6 @@ export class ResultPanel {
             vscode.env.clipboard.writeText(message.text);
             vscode.window.showInformationMessage('Copied to clipboard');
             return;
-          case 'insertIntoEditor':
-            const editor = vscode.window.activeTextEditor;
-            if (editor) {
-              editor.edit(editBuilder => {
-                editBuilder.replace(editor.selection, message.text);
-              });
-              vscode.window.showInformationMessage('Text inserted into editor');
-            }
-            return;
         }
       },
       null,
@@ -195,25 +186,31 @@ export class ResultPanel {
         </div>
         <div class="actions">
             <button id="copyBtn">Copy to Clipboard</button>
-            <button id="insertBtn">Insert into Editor</button>
         </div>
         <script>
             const vscode = acquireVsCodeApi();
             const copyBtn = document.getElementById('copyBtn');
-            const insertBtn = document.getElementById('insertBtn');
-            const content = document.querySelector('.content').innerText;
-            
+
+            // Function to get the raw content (without HTML formatting)
+            function getContent() {
+                // Create a temporary div to extract text content
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = document.querySelector('.content').innerHTML;
+
+                // Remove any script tags
+                const scripts = tempDiv.getElementsByTagName('script');
+                while(scripts[0]) {
+                    scripts[0].parentNode.removeChild(scripts[0]);
+                }
+
+                // Get the text content
+                return tempDiv.innerText || tempDiv.textContent || '';
+            }
+
             copyBtn.addEventListener('click', () => {
                 vscode.postMessage({
                     command: 'copyToClipboard',
-                    text: content
-                });
-            });
-            
-            insertBtn.addEventListener('click', () => {
-                vscode.postMessage({
-                    command: 'insertIntoEditor',
-                    text: content
+                    text: getContent()
                 });
             });
         </script>
@@ -252,7 +249,7 @@ export class ResultPanel {
     html = '<p>' + html + '</p>';
     // Fix duplicate paragraph tags
     html = html.replace(/<\/p><p><\/p><p>/g, '</p><p>');
-    
+
     return html;
   }
 }

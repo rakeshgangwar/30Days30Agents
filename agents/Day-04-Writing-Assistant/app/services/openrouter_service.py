@@ -207,9 +207,27 @@ class OpenRouterService:
         checks_str = ", ".join(checks)
 
         system_prompt = f"""You are a professional editor and writing coach. Analyze the
-        provided text for {checks_str} issues. Your response should be in JSON format with
-        an 'issues' array containing objects with 'type', 'description', 'suggestion', and
-        'severity' fields. Also include an 'improved_text' field with the corrected version."""
+        provided text for {checks_str} issues.
+
+        Your response MUST be in valid JSON format with the following structure:
+        {{
+            "issues": [
+                {{
+                    "type": "grammar|style|spelling",
+                    "description": "Detailed description of the issue",
+                    "suggestion": "Suggested correction",
+                    "severity": "high|medium|low"
+                }}
+                // Additional issues...
+            ],
+            "improved_text": "The full corrected version of the text with all issues fixed"
+        }}
+
+        Be thorough in your analysis. If you find issues, make sure to include them in the issues array.
+        The improved_text should be a corrected version of the original text with all issues fixed.
+        If there are no issues, return an empty issues array and set improved_text to the original text.
+
+        IMPORTANT: Your entire response must be valid JSON. Do not include any explanatory text outside the JSON structure."""
 
         prompt = f"Please analyze the following text for {checks_str} issues:\n\n{text}"
 
