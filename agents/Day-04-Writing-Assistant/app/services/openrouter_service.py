@@ -17,8 +17,10 @@ sys.path.insert(0, parent_dir)
 
 from openai import OpenAI
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.services.preferences_service import preferences_service
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +42,56 @@ class OpenRouterService:
             "X-Title": "Writing Assistant",  # Update with actual site name
         }
     
+    def _apply_user_preferences(
+        self,
+        db: Optional[Session],
+        user_id: Optional[str],
+        model: Optional[str],
+        temperature: Optional[float]
+    ) -> Dict[str, Any]:
+        """
+        Apply user preferences to the request parameters.
+        
+        Args:
+            db: Database session (optional)
+            user_id: User ID to load preferences for (optional)
+            model: Model ID provided in the request (overrides preferences)
+            temperature: Temperature provided in the request (overrides preferences)
+            
+        Returns:
+            Dictionary with model and temperature parameters
+        """
+        params = {
+            "model": model or self.default_model,
+            "temperature": temperature or 0.7
+        }
+        
+        # If no user ID or DB session, use provided params
+        if not user_id or not db:
+            return params
+            
+        # Load user preferences
+        user_prefs = preferences_service.get_user_preferences(db, user_id)
+        
+        # Apply preferences if found (with request params taking precedence)
+        if user_prefs:
+            if not model and user_prefs.get("preferred_model"):
+                params["model"] = user_prefs["preferred_model"]
+                
+            if not temperature and user_prefs.get("temperature"):
+                params["temperature"] = user_prefs["temperature"]
+                
+        return params
+        
     async def _generate_completion(
-        self, 
-        prompt: str, 
+        self,
+        prompt: str,
         model: Optional[str] = None,
-        temperature: float = 0.7,
+        temperature: Optional[float] = 0.7,
         max_tokens: int = 1000,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        db: Optional[Session] = None,
+        user_id: Optional[str] = None
     ) -> str:
         """
         Generate a completion using the OpenRouter API.
@@ -71,11 +116,14 @@ class OpenRouterService:
             # Add user prompt
             messages.append({"role": "user", "content": prompt})
             
+            # Apply user preferences
+            params = self._apply_user_preferences(db, user_id, model, temperature)
+            
             # Make the API call
             completion = self.client.chat.completions.create(
-                model=model or self.default_model,
+                model=params["model"],
                 messages=messages,
-                temperature=temperature,
+                temperature=params["temperature"],
                 max_tokens=max_tokens,
                 extra_headers=self.headers,
             )
@@ -88,10 +136,13 @@ class OpenRouterService:
             raise
     
     async def generate_draft(
-        self, 
-        prompt: str, 
-        max_length: int = 500, 
-        model: Optional[str] = None
+        self,
+        prompt: str,
+        max_length: int = 500,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        db: Optional[Session] = None,
+        user_id: Optional[str] = None
     ) -> str:
         """
         Generate a draft text based on the provided prompt.
@@ -114,18 +165,23 @@ class OpenRouterService:
         return await self._generate_completion(
             prompt=prompt,
             model=model,
-            temperature=0.7,  # Moderate creativity
+            temperature=temperature,  # Will use user preference if defined
             max_tokens=max_tokens,
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            db=db,
+            user_id=user_id
         )
     
     async def analyze_grammar_style(
-        self, 
-        text: str, 
+        self,
+        text: str,
         check_grammar: bool = True,
         check_style: bool = True,
         check_spelling: bool = True,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        db: Optional[Session] = None,
+        user_id: Optional[str] = None
     ) -> Dict:
         """
         Analyze text for grammar, style, and spelling issues.
@@ -161,9 +217,11 @@ class OpenRouterService:
         result = await self._generate_completion(
             prompt=prompt,
             model=model,
-            temperature=0.3,
+            temperature=temperature or 0.3,
             max_tokens=2000,  # Analysis may require more tokens
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            db=db,
+            user_id=user_id
         )
         
         # Note: In a production setting, we'd use a more robust approach to ensure
@@ -177,12 +235,15 @@ class OpenRouterService:
         }
     
     async def summarize(
-        self, 
-        text: str, 
+        self,
+        text: str,
         max_length: int = 200,
         format: str = "paragraph",
         focus: Optional[str] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        db: Optional[Session] = None,
+        user_id: Optional[str] = None
     ) -> str:
         """
         Generate a summary of the provided text.
@@ -211,18 +272,23 @@ class OpenRouterService:
         return await self._generate_completion(
             prompt=prompt,
             model=model,
-            temperature=0.4,  # Lower temperature for more factual summary
+            temperature=temperature or 0.4,  # Lower temperature for more factual summary
             max_tokens=max_tokens,
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            db=db,
+            user_id=user_id
         )
     
     async def adjust_tone(
-        self, 
-        text: str, 
+        self,
+        text: str,
         target_tone: str,
         preserve_meaning: bool = True,
         strength: float = 0.7,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        db: Optional[Session] = None,
+        user_id: Optional[str] = None
     ) -> Dict:
         """
         Adjust the tone of the provided text.
@@ -250,9 +316,11 @@ class OpenRouterService:
         adjusted_text = await self._generate_completion(
             prompt=prompt,
             model=model,
-            temperature=0.6,
+            temperature=temperature or 0.6,
             max_tokens=int(len(text) / 2) + 200,  # Adjusted text might be longer
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            db=db,
+            user_id=user_id
         )
         
         return {

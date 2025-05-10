@@ -14,9 +14,11 @@ sys.path.insert(0, parent_dir)
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.services.openrouter_service import openrouter_service
+from app.db.database import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -30,6 +32,8 @@ class DraftRequest(BaseModel):
     format: Optional[str] = None
     context: Optional[str] = None
     model: Optional[str] = None
+    temperature: Optional[float] = None
+    user_id: Optional[str] = None
 
 
 class DraftResponse(BaseModel):
@@ -40,7 +44,7 @@ class DraftResponse(BaseModel):
 
 
 @router.post("/draft", response_model=DraftResponse)
-async def create_draft(request: DraftRequest):
+async def create_draft(request: DraftRequest, db: Session = Depends(get_db)):
     """
     Generate a draft based on the provided prompt.
     
@@ -59,7 +63,10 @@ async def create_draft(request: DraftRequest):
         generated_text = await openrouter_service.generate_draft(
             prompt=prompt,
             max_length=request.max_length,
-            model=request.model
+            model=request.model,
+            temperature=request.temperature,
+            db=db,
+            user_id=request.user_id
         )
         
         # Return the generated text

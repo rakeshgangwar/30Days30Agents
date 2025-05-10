@@ -13,11 +13,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(current_dir), ".."))
 sys.path.insert(0, parent_dir)
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.services.openrouter_service import openrouter_service
+from app.db.database import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -42,6 +44,8 @@ class GrammarAnalysisRequest(BaseModel):
     check_spelling: bool = True
     language: str = "en-US"
     model: Optional[str] = None
+    temperature: Optional[float] = None
+    user_id: Optional[str] = None
 
 
 class GrammarAnalysisResponse(BaseModel):
@@ -54,7 +58,7 @@ class GrammarAnalysisResponse(BaseModel):
 
 
 @router.post("/analyze_grammar_style", response_model=GrammarAnalysisResponse)
-async def analyze_grammar_style(request: GrammarAnalysisRequest):
+async def analyze_grammar_style(request: GrammarAnalysisRequest, db: Session = Depends(get_db)):
     """
     Analyze the grammar and style of the provided text.
     
@@ -70,7 +74,10 @@ async def analyze_grammar_style(request: GrammarAnalysisRequest):
             check_grammar=request.check_grammar,
             check_style=request.check_style,
             check_spelling=request.check_spelling,
-            model=request.model
+            model=request.model,
+            temperature=request.temperature,
+            db=db,
+            user_id=request.user_id
         )
         
         # For the MVP, we'll return the raw analysis from the LLM

@@ -12,11 +12,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(current_dir), ".."))
 sys.path.insert(0, parent_dir)
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.services.openrouter_service import openrouter_service
+from app.db.database import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -30,6 +32,8 @@ class SummarizeRequest(BaseModel):
     format: Optional[str] = Field(default="paragraph", description="Format of the summary (paragraph, bullets)")
     focus: Optional[str] = Field(default=None, description="Optional focus area for the summary")
     model: Optional[str] = None
+    temperature: Optional[float] = None
+    user_id: Optional[str] = None
 
 
 class SummarizeResponse(BaseModel):
@@ -42,7 +46,7 @@ class SummarizeResponse(BaseModel):
 
 
 @router.post("/summarize", response_model=SummarizeResponse)
-async def summarize_text(request: SummarizeRequest):
+async def summarize_text(request: SummarizeRequest, db: Session = Depends(get_db)):
     """
     Summarize the provided text.
     
@@ -58,7 +62,10 @@ async def summarize_text(request: SummarizeRequest):
             max_length=request.max_length,
             format=request.format,
             focus=request.focus,
-            model=request.model
+            model=request.model,
+            temperature=request.temperature,
+            db=db,
+            user_id=request.user_id
         )
         
         return SummarizeResponse(

@@ -12,11 +12,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(current_dir), ".."))
 sys.path.insert(0, parent_dir)
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.services.openrouter_service import openrouter_service
+from app.db.database import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -40,6 +42,8 @@ class ToneAdjustRequest(BaseModel):
         description="How strongly to adjust the tone (0.0-1.0)"
     )
     model: Optional[str] = None
+    temperature: Optional[float] = None
+    user_id: Optional[str] = None
 
 
 class ToneAdjustResponse(BaseModel):
@@ -55,7 +59,7 @@ class ToneAdjustResponse(BaseModel):
 
 
 @router.post("/adjust_tone", response_model=ToneAdjustResponse)
-async def adjust_tone(request: ToneAdjustRequest):
+async def adjust_tone(request: ToneAdjustRequest, db: Session = Depends(get_db)):
     """
     Adjust the tone of the provided text.
     
@@ -74,7 +78,10 @@ async def adjust_tone(request: ToneAdjustRequest):
             target_tone=request.target_tone,
             preserve_meaning=request.preserve_meaning,
             strength=request.strength,
-            model=request.model
+            model=request.model,
+            temperature=request.temperature,
+            db=db,
+            user_id=request.user_id
         )
         
         return ToneAdjustResponse(

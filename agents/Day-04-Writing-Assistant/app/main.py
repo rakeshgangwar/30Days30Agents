@@ -17,6 +17,12 @@ sys.path.insert(0, parent_dir)
 # Use absolute imports which work in both cases
 from app.core.config import settings
 from app.utils.logging_config import setup_logging
+from app.db.database import engine
+from app.models.preferences import UserPreference
+from app.models import preferences
+
+# Initialize database tables
+preferences.Base.metadata.create_all(bind=engine)
 
 # Setup logging
 setup_logging()
@@ -40,12 +46,13 @@ app.add_middleware(
 )
 
 # Import and include routers
-from app.routers import drafting, grammar, summarization, tone
+from app.routers import drafting, grammar, summarization, tone, preferences
 
 app.include_router(drafting.router, prefix="/api/v1", tags=["drafting"])
 app.include_router(grammar.router, prefix="/api/v1", tags=["grammar"])
 app.include_router(summarization.router, prefix="/api/v1", tags=["summarization"])
 app.include_router(tone.router, prefix="/api/v1", tags=["tone"])
+app.include_router(preferences.router, prefix="/api/v1", tags=["preferences"])
 
 # Health check endpoint
 @app.get("/health", tags=["health"])
