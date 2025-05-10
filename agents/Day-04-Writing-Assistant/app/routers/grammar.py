@@ -5,11 +5,19 @@ import json
 import logging
 from typing import Dict, List, Optional, Union
 
+import sys
+import os
+
+# Add the parent directory to the path so we can import app modules
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(current_dir), ".."))
+sys.path.insert(0, parent_dir)
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from core.config import settings
-from services.openrouter_service import openrouter_service
+from app.core.config import settings
+from app.services.openrouter_service import openrouter_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

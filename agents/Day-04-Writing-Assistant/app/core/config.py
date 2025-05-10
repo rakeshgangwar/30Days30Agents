@@ -2,6 +2,7 @@
 Configuration settings for the Writing Assistant API.
 """
 import os
+import json
 from typing import List, Optional, Union
 
 from pydantic import AnyHttpUrl, Field, field_validator
@@ -28,8 +29,19 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS")
     def validate_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         """Parse CORS origins string to list if needed."""
-        if isinstance(v, str) and v != "*":
-            return [i.strip() for i in v.split(",")]
+        if isinstance(v, str):
+            if v == "*":
+                return ["*"]
+                
+            # Try to parse as JSON first
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except (json.JSONDecodeError, TypeError):
+                # Fallback to comma separation if not JSON
+                return [i.strip() for i in v.split(",")]
+        
         return v
     
     # Database settings

@@ -3,12 +3,20 @@ Writing Assistant API
 Main application entry point for the FastAPI server.
 """
 import logging
+import sys
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.config import settings
-from utils.logging_config import setup_logging
+# Add the parent directory to the path so we can import app modules
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
+sys.path.insert(0, parent_dir)
+
+# Use absolute imports which work in both cases
+from app.core.config import settings
+from app.utils.logging_config import setup_logging
 
 # Setup logging
 setup_logging()
@@ -32,7 +40,7 @@ app.add_middleware(
 )
 
 # Import and include routers
-from routers import drafting, grammar, summarization, tone
+from app.routers import drafting, grammar, summarization, tone
 
 app.include_router(drafting.router, prefix="/api/v1", tags=["drafting"])
 app.include_router(grammar.router, prefix="/api/v1", tags=["grammar"])
