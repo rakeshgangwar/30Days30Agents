@@ -18,6 +18,7 @@ This is the backend service for the Writing Assistant application, providing AI-
 - LangChain (LLM orchestration)
 - OpenRouter (LLM gateway)
 - SQLite/PostgreSQL (database)
+- Docker (containerization)
 
 ## Setup and Installation
 
@@ -26,7 +27,7 @@ This is the backend service for the Writing Assistant application, providing AI-
 - Python 3.9 or higher
 - uv package manager
 
-### Installation
+### Option 1: Local Installation
 
 1. Clone the repository
 2. Navigate to the project directory
@@ -65,9 +66,7 @@ python utils/generate_api_key.py
 
 Add the generated API key to your `.env` file.
 
-### Running the API
-
-Run the API server with:
+8. Run the API server with:
 
 ```bash
 python main.py
@@ -78,6 +77,35 @@ Or with uvicorn directly:
 ```bash
 uvicorn main:app --reload
 ```
+
+### Option 2: Docker Installation
+
+1. Clone the repository
+2. Navigate to the project directory
+
+```bash
+cd agents/Day-04-Writing-Assistant
+```
+
+3. Create a `.env` file based on the `.env.example` template
+
+```bash
+cd app
+cp .env.example .env
+cd ..
+```
+
+4. Edit the `.env` file and add your OpenRouter API key and other configuration
+
+5. Build and start the Docker container
+
+```bash
+docker-compose up --build
+```
+
+For more detailed Docker instructions, see the [Docker README](../docker-README.md).
+
+### Accessing the API
 
 The API will be available at http://localhost:8000
 
@@ -100,8 +128,22 @@ app/
 
 ### Running Tests
 
+#### Local Testing
+
 ```bash
-pytest
+python run_tests.py
+```
+
+With coverage report:
+
+```bash
+python run_tests.py --coverage
+```
+
+#### Testing in Docker
+
+```bash
+docker-compose exec api python run_tests.py
 ```
 
 ## API Endpoints
