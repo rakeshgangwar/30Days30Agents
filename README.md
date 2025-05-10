@@ -70,10 +70,10 @@ The project is currently in the planning and specification phase. As implementat
 ## Project Timeline and Agent Ideas
 
 ### Week 1: Foundation Agents
-1. **Personal Assistant Agent** - Basic task management and information retrieval - [Implemented](agents/Day-01-Personal-Assistant/app)
-2. **Research Assistant** - Web search and information synthesis - [Implemented](agents/Day-02-Research-Assistant/app)
-3. **Code Assistant** - Help with coding tasks and debugging - [Implemented](agents/Day-03-Code-Assistant/app)
-4. **Writing Assistant** - Content generation and editing
+1. **Personal Assistant Agent** - Basic task management and information retrieval - [Implemented](agents/Day-01-Personal-Assistant)
+2. **Research Assistant** - Web search and information synthesis - [Implemented](agents/Day-02-Research-Assistant)
+3. **Code Assistant** - Help with coding tasks and debugging - [Implemented](agents/Day-03-Code-Assistant)
+4. **Writing Assistant** - Content generation and editing - [Implemented](agents/Day-04-Writing-Assistant)
 5. **Data Analysis Agent** - Basic data processing and visualization
 6. **Learning Coach** - Personalized learning recommendations
 7. **Task Automation Agent** - Automate repetitive workflows
