@@ -15,19 +15,90 @@
     "commands": [
       {
         "command": "writing-assistant.draft",
-        "title": "Writing Assistant: Draft with AI"
+        "title": "Writing Assistant: Draft with AI",
+        "icon": "$(pencil)"
       },
       {
         "command": "writing-assistant.analyzeGrammarStyle",
-        "title": "Writing Assistant: Analyze Grammar & Style"
+        "title": "Writing Assistant: Analyze Grammar & Style",
+        "icon": "$(check)"
       },
       {
         "command": "writing-assistant.summarize",
-        "title": "Writing Assistant: Summarize Text"
+        "title": "Writing Assistant: Summarize Text",
+        "icon": "$(list-ordered)"
       },
       {
         "command": "writing-assistant.adjustTone",
-        "title": "Writing Assistant: Adjust Tone"
+        "title": "Writing Assistant: Adjust Tone",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "writing-assistant.showPanel",
+        "title": "Writing Assistant: Open Panel",
+        "icon": "$(book)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "writing-assistant.menu",
+          "when": "editorTextFocus"
+        }
+      ],
+      "writing-assistant.menu": [
+        {
+          "command": "writing-assistant.draft",
+          "group": "1_creation"
+        },
+        {
+          "command": "writing-assistant.analyzeGrammarStyle",
+          "group": "2_analysis"
+        },
+        {
+          "command": "writing-assistant.summarize",
+          "group": "2_analysis"
+        },
+        {
+          "command": "writing-assistant.adjustTone",
+          "group": "3_modification"
+        },
+        {
+          "command": "writing-assistant.showPanel",
+          "group": "4_tools"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "writing-assistant.menu",
+        "label": "Writing Assistant"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "writing-assistant.draft",
+        "key": "ctrl+alt+d",
+        "mac": "cmd+alt+d",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "writing-assistant.analyzeGrammarStyle",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "writing-assistant.summarize",
+        "key": "ctrl+alt+s",
+        "mac": "cmd+alt+s",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "writing-assistant.adjustTone",
+        "key": "ctrl+alt+t",
+        "mac": "cmd+alt+t",
+        "when": "editorTextFocus"
       }
     ],
     "configuration": {

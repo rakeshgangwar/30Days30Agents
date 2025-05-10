@@ -2,14 +2,11 @@ import * as vscode from 'vscode';
 import {
   ApiService,
   ApiServiceConfig,
-  DraftRequest,
-  AnalyzeGrammarStyleRequest,
-  SummarizeRequest,
-  AdjustToneRequest,
   TextTone,
   SummaryFormat,
   RequestFactory
 } from 'writing-assistant-connector';
+import { StatusBarManager } from './statusBar';
 
 // This method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -17,6 +14,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Initialize the API service
   const apiService = initializeApiService();
+
+  // Create status bar item
+  const statusBarManager = new StatusBarManager(apiService);
+  context.subscriptions.push(statusBarManager);
 
   // Register commands
   const draftCommand = vscode.commands.registerCommand('writing-assistant.draft', async () => {
@@ -35,11 +36,17 @@ export function activate(context: vscode.ExtensionContext) {
     await handleAdjustToneCommand(apiService);
   });
 
+  // Register panel command
+  const showPanelCommand = vscode.commands.registerCommand('writing-assistant.showPanel', () => {
+    vscode.window.showInformationMessage('Writing Assistant panel will be available in a future update.');
+  });
+
   // Add commands to the extension context
   context.subscriptions.push(draftCommand);
   context.subscriptions.push(analyzeCommand);
   context.subscriptions.push(summarizeCommand);
   context.subscriptions.push(adjustToneCommand);
+  context.subscriptions.push(showPanelCommand);
 }
 
 // This method is called when the extension is deactivated
@@ -95,8 +102,19 @@ function replaceSelectedText(text: string): void {
 // Show the result in a new editor
 function showResultInNewEditor(title: string, content: string): void {
   vscode.workspace.openTextDocument({ content }).then(document => {
-    vscode.window.showTextDocument(document, { preview: false });
-    vscode.languages.setTextDocumentLanguage(document, 'markdown');
+    vscode.window.showTextDocument(document, { preview: false }).then(editor => {
+      // Use the title to set the document language and for display purposes
+      vscode.languages.setTextDocumentLanguage(document, 'markdown');
+
+      // If we wanted to set the editor title, we would need a custom editor
+      // For now, we'll just use the title in the content
+      if (title && !content.startsWith('# ')) {
+        // Insert title at the beginning if it doesn't already have a title
+        editor.edit(editBuilder => {
+          editBuilder.insert(new vscode.Position(0, 0), `# ${title}\n\n`);
+        });
+      }
+    });
   });
 }
 
