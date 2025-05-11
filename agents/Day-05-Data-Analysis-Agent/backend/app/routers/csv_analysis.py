@@ -31,10 +31,10 @@ agent_store: Dict[str, Any] = {}
 async def upload_csv(file: UploadFile = File(...)):
     """
     Upload and process a CSV file.
-    
+
     Args:
         file: The CSV file to upload
-        
+
     Returns:
         CSVUploadResponse: Response with upload status and file information
     """
@@ -43,38 +43,38 @@ async def upload_csv(file: UploadFile = File(...)):
             status_code=400,
             content={"success": False, "error": "Only CSV files are supported"}
         )
-    
+
     try:
         # Read file content
         file_content = await file.read()
-        
+
         # Load CSV file
         success, df, error = load_csv_file(file_content, file.filename)
-        
+
         if not success:
             return JSONResponse(
                 status_code=400,
                 content={"success": False, "error": error}
             )
-        
+
         # Generate a unique ID for this CSV data (using filename for simplicity)
         # In a production app, use a more robust ID generation method
         csv_id = file.filename
-        
+
         # Store the DataFrame in memory
         csv_data_store[csv_id] = df
-        
+
         # Get DataFrame info and preview
         info = get_dataframe_info(df)
         preview = get_dataframe_preview(df)
-        
+
         # Initialize LLM and agent
         llm = initialize_llm()
         if llm:
             agent = initialize_dataframe_agent(llm, df)
             if agent:
                 agent_store[csv_id] = agent
-        
+
         return {
             "success": True,
             "message": f"Successfully uploaded and processed {file.filename}",
@@ -82,7 +82,7 @@ async def upload_csv(file: UploadFile = File(...)):
             "rows": info["shape"][0],
             "preview": preview
         }
-    
+
     except Exception as e:
         logger.error(f"Error processing CSV upload: {str(e)}")
         return JSONResponse(
@@ -92,14 +92,14 @@ async def upload_csv(file: UploadFile = File(...)):
 
 
 @router.post("/query", response_model=QueryResponse)
-async def query_csv(request: QueryRequest, csv_id: str = Form(...)):
+async def query_csv(query: str = Form(...), csv_id: str = Form(...)):
     """
     Execute a natural language query on a CSV file.
-    
+
     Args:
-        request: The query request
+        query: The natural language query
         csv_id: ID of the CSV file to query
-        
+
     Returns:
         QueryResponse: Response with query results
     """
@@ -108,7 +108,7 @@ async def query_csv(request: QueryRequest, csv_id: str = Form(...)):
             status_code=404,
             content={"success": False, "error": "CSV file not found. Please upload a file first."}
         )
-    
+
     if csv_id not in agent_store:
         # Initialize LLM and agent if not already done
         llm = initialize_llm()
@@ -117,7 +117,7 @@ async def query_csv(request: QueryRequest, csv_id: str = Form(...)):
                 status_code=500,
                 content={"success": False, "error": "Failed to initialize LLM"}
             )
-        
+
         df = csv_data_store[csv_id]
         agent = initialize_dataframe_agent(llm, df)
         if not agent:
@@ -125,26 +125,26 @@ async def query_csv(request: QueryRequest, csv_id: str = Form(...)):
                 status_code=500,
                 content={"success": False, "error": "Failed to initialize agent"}
             )
-        
+
         agent_store[csv_id] = agent
-    
+
     try:
         # Get the agent and DataFrame
         agent = agent_store[csv_id]
         df = csv_data_store[csv_id]
-        
+
         # Process the query
-        response = process_dataframe_query(agent, request.query)
-        
+        response = process_dataframe_query(agent, query)
+
         if not response["success"]:
             return JSONResponse(
                 status_code=500,
                 content={"success": False, "error": response["error"]}
             )
-        
+
         # Extract the result
         result = response["result"]
-        
+
         # Check if there's any tabular data in the result
         # This is a simplified approach - in a real app, you'd need more sophisticated parsing
         data = None
@@ -156,14 +156,14 @@ async def query_csv(request: QueryRequest, csv_id: str = Form(...)):
                     if isinstance(action_result, pd.DataFrame):
                         data = action_result.to_dict(orient='records')
                         break
-        
+
         # Create a visualization if appropriate
         visualization = None
         try:
             # Determine if visualization is needed based on the query
-            if "plot" in request.query.lower() or "chart" in request.query.lower() or "graph" in request.query.lower() or "visualize" in request.query.lower():
+            if "plot" in query.lower() or "chart" in query.lower() or "graph" in query.lower() or "visualize" in query.lower():
                 # Try to create a visualization
-                viz_data = create_fallback_visualization(df, request.query)
+                viz_data = create_fallback_visualization(df, query)
                 if viz_data:
                     visualization = {
                         "type": "plotly",
@@ -171,7 +171,7 @@ async def query_csv(request: QueryRequest, csv_id: str = Form(...)):
                     }
         except Exception as viz_error:
             logger.error(f"Error creating visualization: {str(viz_error)}")
-        
+
         # Create the analysis result
         analysis_result = AnalysisResult(
             text=result.get("output", "No output generated"),
@@ -179,9 +179,9 @@ async def query_csv(request: QueryRequest, csv_id: str = Form(...)):
             visualization=visualization if visualization else None,
             code=None  # We're not exposing code in this version
         )
-        
+
         return {"success": True, "result": analysis_result}
-    
+
     except Exception as e:
         logger.error(f"Error processing query: {str(e)}")
         return JSONResponse(
