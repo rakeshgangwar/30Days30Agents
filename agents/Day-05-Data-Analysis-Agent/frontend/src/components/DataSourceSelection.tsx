@@ -25,7 +25,7 @@ const DataSourceSelection: React.FC = () => {
   };
 
   return (
-    <Card variant="outlined" sx={{ mb: 3 }}>
+    <Card variant="outlined" sx={{ mb: 3, width: '100%' }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Select Data Source

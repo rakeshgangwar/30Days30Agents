@@ -27,24 +27,34 @@ const AppContent: React.FC = () => {
   const { state } = useAppContext();
 
   return (
-    <Box>
-      <DataSourceSelection />
+    <Box sx={{ width: '100%', maxWidth: '100%' }}>
+      <Box sx={{ mb: 3, width: '100%' }}>
+        <DataSourceSelection />
+      </Box>
 
       {state.dataSource === 'csv' && (
-        <>
+        <Box sx={{ mb: 3, width: '100%' }}>
           <CSVUpload />
-          <CSVPreview />
-        </>
+          <Box sx={{ mt: 2, width: '100%' }}>
+            <CSVPreview />
+          </Box>
+        </Box>
       )}
 
       {state.dataSource === 'database' && (
-        <DBConnection />
+        <Box sx={{ mb: 3, width: '100%' }}>
+          <DBConnection />
+        </Box>
       )}
 
       {state.dataSource && (
         <>
-          <QueryInput />
-          <ResultsDisplay />
+          <Box sx={{ mb: 3, width: '100%' }}>
+            <QueryInput />
+          </Box>
+          <Box sx={{ width: '100%' }}>
+            <ResultsDisplay />
+          </Box>
         </>
       )}
     </Box>

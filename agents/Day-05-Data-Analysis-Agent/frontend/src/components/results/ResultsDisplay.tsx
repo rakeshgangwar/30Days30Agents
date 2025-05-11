@@ -1,17 +1,17 @@
 import React from 'react';
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Alert, 
-  Divider, 
-  Paper, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Alert,
+  Divider,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
   Tabs,
   Tab
@@ -32,9 +32,10 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
       hidden={value !== index}
       id={`results-tabpanel-${index}`}
       aria-labelledby={`results-tab-${index}`}
+      style={{ width: '100%' }}
     >
       {value === index && (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 2, width: '100%' }}>
           {children}
         </Box>
       )}
@@ -46,58 +47,58 @@ const ResultsDisplay: React.FC = () => {
   const { state } = useAppContext();
   const { result, error, loading } = state.query;
   const [tabValue, setTabValue] = React.useState(0);
-  
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
-  
+
   if (loading) {
     return (
-      <Card variant="outlined">
+      <Card variant="outlined" sx={{ width: '100%' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Processing Query...
           </Typography>
-          <Alert severity="info">
+          <Alert severity="info" sx={{ width: '100%' }}>
             The AI is analyzing your data. This may take a few moments.
           </Alert>
         </CardContent>
       </Card>
     );
   }
-  
+
   if (error) {
     return (
-      <Card variant="outlined">
+      <Card variant="outlined" sx={{ width: '100%' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Error
           </Typography>
-          <Alert severity="error">
+          <Alert severity="error" sx={{ width: '100%' }}>
             {error}
           </Alert>
         </CardContent>
       </Card>
     );
   }
-  
+
   if (!result) {
     return null;
   }
-  
+
   const hasVisualization = result.visualization && result.visualization.figure;
   const hasData = result.data && result.data.length > 0;
   const hasCode = result.code && result.code.trim().length > 0;
-  
+
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{ width: '100%' }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Analysis Results
         </Typography>
-        
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="results tabs">
+
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', width: '100%' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="results tabs" variant="scrollable" scrollButtons="auto" sx={{ width: '100%' }}>
             <Tab label="Analysis" id="results-tab-0" aria-controls="results-tabpanel-0" />
             {hasData && (
               <Tab label="Data" id="results-tab-1" aria-controls="results-tabpanel-1" />
@@ -110,16 +111,16 @@ const ResultsDisplay: React.FC = () => {
             )}
           </Tabs>
         </Box>
-        
+
         <TabPanel value={tabValue} index={0}>
-          <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap' }}>
+          <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap', width: '100%' }}>
             {result.text}
           </Typography>
         </TabPanel>
-        
+
         {hasData && (
           <TabPanel value={tabValue} index={1}>
-            <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 400 }}>
+            <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: { xs: 300, sm: 400, md: 500 }, width: '100%' }}>
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
@@ -145,23 +146,26 @@ const ResultsDisplay: React.FC = () => {
             </TableContainer>
           </TabPanel>
         )}
-        
+
         {hasVisualization && (
           <TabPanel value={tabValue} index={hasData ? 2 : 1}>
-            <PlotlyVisualization data={result.visualization} />
+            <Box sx={{ width: '100%' }}>
+              <PlotlyVisualization data={result.visualization} />
+            </Box>
           </TabPanel>
         )}
-        
+
         {hasCode && (
           <TabPanel value={tabValue} index={(hasData ? 1 : 0) + (hasVisualization ? 1 : 0) + 1}>
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 2, 
-                backgroundColor: '#f5f5f5', 
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                backgroundColor: '#f5f5f5',
                 fontFamily: 'monospace',
                 whiteSpace: 'pre-wrap',
-                overflowX: 'auto'
+                overflowX: 'auto',
+                width: '100%'
               }}
             >
               {result.code}

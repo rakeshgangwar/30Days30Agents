@@ -42,7 +42,7 @@ const PlotlyVisualization: React.FC<PlotlyVisualizationProps> = ({ data }) => {
     <Box
       sx={{
         width: '100%',
-        height: '500px',
+        height: { xs: '400px', sm: '500px', md: '600px' },
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'

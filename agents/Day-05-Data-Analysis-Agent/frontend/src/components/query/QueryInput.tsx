@@ -89,20 +89,20 @@ const QueryInput: React.FC = () => {
   };
 
   return (
-    <Card variant="outlined" sx={{ mb: 3 }}>
+    <Card variant="outlined" sx={{ mb: 3, width: '100%' }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Natural Language Query
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
             {error}
           </Alert>
         )}
 
         {!isActive && (
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert severity="info" sx={{ mb: 2, width: '100%' }}>
             Please select and connect to a data source first
           </Alert>
         )}
@@ -117,10 +117,10 @@ const QueryInput: React.FC = () => {
           onChange={handleQueryChange}
           onKeyDown={handleKeyDown}
           disabled={!isActive}
-          sx={{ mb: 2 }}
+          sx={{ mb: 2, width: '100%' }}
         />
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           <Typography variant="caption" color="text.secondary">
             Press Ctrl+Enter to submit
           </Typography>
