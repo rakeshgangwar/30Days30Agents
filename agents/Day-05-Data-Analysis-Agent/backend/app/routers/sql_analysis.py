@@ -204,16 +204,53 @@ async def query_database(request: QueryRequest, connection_id: str):
         visualization = None
         try:
             # Determine if visualization is needed based on the query
-            if df is not None and ("plot" in request.query.lower() or "chart" in request.query.lower() or "graph" in request.query.lower() or "visualize" in request.query.lower()):
-                # Try to create a visualization
-                viz_data = create_fallback_visualization(df, request.query)
-                if viz_data:
-                    visualization = {
-                        "type": "plotly",
-                        "figure": viz_data
-                    }
+            visualization_keywords = ["plot", "chart", "graph", "visualize", "visualization", "bar chart", "line chart",
+                                     "histogram", "pie chart", "scatter plot", "heatmap", "box plot"]
+
+            needs_visualization = df is not None and any(keyword in request.query.lower() for keyword in visualization_keywords)
+
+            if needs_visualization:
+                logger.info(f"Visualization requested in query: {request.query}")
+                logger.info(f"DataFrame shape: {df.shape if df is not None else 'No DataFrame'}")
+                logger.info(f"DataFrame columns: {df.columns.tolist() if df is not None else 'No columns'}")
+
+                # Use the fallback visualization which is more general and works with any data
+                if df is not None:
+                    viz_data = create_fallback_visualization(df, request.query)
+
+                    if viz_data:
+                        logger.info(f"Visualization created successfully")
+                        # Log a sample of the visualization data to debug
+                        if isinstance(viz_data, dict):
+                            # Log the structure of the visualization data
+                            logger.info(f"Visualization data structure: {list(viz_data.keys())}")
+
+                            # Log layout information if available
+                            if 'layout' in viz_data:
+                                logger.info(f"Visualization layout title: {viz_data['layout'].get('title', 'No title')}")
+
+                            # Log data information if available
+                            if 'data' in viz_data:
+                                logger.info(f"Visualization contains {len(viz_data['data'])} data traces")
+                                for i, trace in enumerate(viz_data['data']):
+                                    logger.info(f"Trace {i} type: {trace.get('type', 'unknown')}")
+
+                        visualization = {
+                            "type": "plotly",
+                            "figure": viz_data
+                        }
+
+                        # Log the final visualization object structure
+                        logger.info(f"Final visualization object keys: {list(visualization.keys())}")
+                        logger.info(f"Figure object keys: {list(visualization['figure'].keys()) if visualization['figure'] else 'Empty figure'}")
+                    else:
+                        logger.error("Failed to create visualization data")
+                else:
+                    logger.error("Cannot create visualization: DataFrame is None")
         except Exception as viz_error:
             logger.error(f"Error creating visualization: {str(viz_error)}")
+            import traceback
+            logger.error(f"Visualization error traceback: {traceback.format_exc()}")
 
         # Create the analysis result
         analysis_result = AnalysisResult(

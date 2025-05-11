@@ -86,9 +86,19 @@ const ResultsDisplay: React.FC = () => {
     return null;
   }
 
+  // Log the result for debugging
+  console.log('Query result:', result);
+
   const hasVisualization = result.visualization && result.visualization.figure;
   const hasData = result.data && result.data.length > 0;
   const hasCode = result.code && result.code.trim().length > 0;
+
+  // Log visualization data if available
+  if (hasVisualization) {
+    console.log('Visualization data available:', result.visualization);
+  } else {
+    console.log('No visualization data in result');
+  }
 
   return (
     <Card variant="outlined" sx={{ width: '100%' }}>
@@ -150,6 +160,12 @@ const ResultsDisplay: React.FC = () => {
         {hasVisualization && (
           <TabPanel value={tabValue} index={hasData ? 2 : 1}>
             <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1" gutterBottom>
+                Visualization
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                The visualization is based on the query results. You can interact with the chart using the toolbar.
+              </Typography>
               <PlotlyVisualization data={result.visualization} />
             </Box>
           </TabPanel>
