@@ -25,7 +25,13 @@ from core.agent import initialize_agent, process_query
 # Import data handling modules
 from data.csv_handler import load_csv_file, display_dataframe_info
 from data.sql_handler import create_db_connection, execute_sql_query
-from data.visualization import create_visualization, display_visualization
+from data.visualization import (
+    create_visualization,
+    display_visualization,
+    extract_code_from_response,
+    execute_visualization_code,
+    generate_visualization_prompt
+)
 
 # Import utility functions
 from utils.helpers import (
@@ -158,10 +164,33 @@ def main():
                                     except Exception:
                                         pass
 
-                                # If the response mentions a visualization, try to create it
+                                # If the response mentions a visualization, generate and execute visualization code
                                 if detect_visualization_request(query):
                                     st.markdown("### Visualization")
-                                    render_info("Visualization capabilities will be implemented in Task 1.7")
+
+                                    with st.spinner("Generating visualization..."):
+                                        # Generate a specialized prompt for visualization
+                                        viz_prompt = generate_visualization_prompt(query, st.session_state.df)
+
+                                        # Get visualization code from LLM
+                                        viz_response = st.session_state.llm.invoke([HumanMessage(content=viz_prompt)])
+                                        viz_code = extract_code_from_response(viz_response.content)
+
+                                        if viz_code:
+                                            # Display the generated code in an expander
+                                            with st.expander("View Generated Visualization Code"):
+                                                st.code(viz_code, language="python")
+
+                                            # Execute the code and get the figure
+                                            fig, message = execute_visualization_code(viz_code, st.session_state.df)
+
+                                            if fig:
+                                                # Display the visualization
+                                                display_visualization(fig)
+                                            else:
+                                                render_warning(f"Failed to create visualization: {message}")
+                                        else:
+                                            render_warning("Could not generate visualization code from the LLM response.")
 
                         elif data_source == "SQL Database":
                             # For SQL, we'll just use the LLM directly for now
@@ -180,7 +209,46 @@ def main():
                             st.code(sql_query, language="sql")
 
                             st.markdown("### Query Results")
-                            render_info("SQL query execution will be implemented in Task 2.4")
+                            # Execute the SQL query if we have a database connection
+                            if st.session_state.db_engine:
+                                try:
+                                    success, result = execute_sql_query(st.session_state.db_engine, sql_query)
+                                    if success and isinstance(result, pd.DataFrame):
+                                        st.dataframe(result, use_container_width=True)
+
+                                        # If the query is a visualization request, generate a visualization
+                                        if detect_visualization_request(query) and not result.empty:
+                                            st.markdown("### Visualization")
+
+                                            with st.spinner("Generating visualization..."):
+                                                # Generate a specialized prompt for visualization
+                                                viz_prompt = generate_visualization_prompt(query, result)
+
+                                                # Get visualization code from LLM
+                                                viz_response = st.session_state.llm.invoke([HumanMessage(content=viz_prompt)])
+                                                viz_code = extract_code_from_response(viz_response.content)
+
+                                                if viz_code:
+                                                    # Display the generated code in an expander
+                                                    with st.expander("View Generated Visualization Code"):
+                                                        st.code(viz_code, language="python")
+
+                                                    # Execute the code and get the figure
+                                                    fig, message = execute_visualization_code(viz_code, result)
+
+                                                    if fig:
+                                                        # Display the visualization
+                                                        display_visualization(fig)
+                                                    else:
+                                                        render_warning(f"Failed to create visualization: {message}")
+                                                else:
+                                                    render_warning("Could not generate visualization code from the LLM response.")
+                                    else:
+                                        render_error(f"Error executing SQL query: {result}")
+                                except Exception as e:
+                                    render_error(f"Error executing SQL query: {str(e)}")
+                            else:
+                                render_info("SQL query execution will be implemented in Task 2.4")
 
                 except Exception as e:
                     error_details = traceback.format_exc()
