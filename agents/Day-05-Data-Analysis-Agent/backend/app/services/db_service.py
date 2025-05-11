@@ -43,10 +43,24 @@ def create_db_connection(db_type: str, **kwargs) -> Tuple[bool, Optional[Any], O
             database = kwargs.get('database', '')
             user = kwargs.get('user', '')
             password = kwargs.get('password', '')
+            schema = kwargs.get('schema', None)
 
-            engine = create_engine(
-                f'postgresql://{user}:{password}@{host}:{port}/{database}'
-            )
+            # Build connection string
+            connection_string = f'postgresql://{user}:{password}@{host}:{port}/{database}'
+
+            # Log connection details (without password)
+            logger.info(f"Connecting to PostgreSQL database: host={host}, port={port}, database={database}, user={user}, schema={schema}")
+
+            # Create engine with schema if provided
+            if schema:
+                engine = create_engine(
+                    connection_string,
+                    connect_args={'options': f'-c search_path={schema}'}
+                )
+                logger.info(f"Using schema: {schema}")
+            else:
+                engine = create_engine(connection_string)
+                logger.info("No schema specified, using default schema")
         else:
             error_msg = f"Unsupported database type: {db_type}"
             logger.error(error_msg)
@@ -64,7 +78,7 @@ def create_db_connection(db_type: str, **kwargs) -> Tuple[bool, Optional[Any], O
 
 
 def create_langchain_sql_database(engine: Any, include_tables: Optional[List[str]] = None,
-                                 sample_rows_in_table_info: int = 3) -> Optional[SQLDatabase]:
+                                 sample_rows_in_table_info: int = 3, schema: Optional[str] = None) -> Optional[SQLDatabase]:
     """
     Create a LangChain SQLDatabase from a SQLAlchemy engine.
 
@@ -72,19 +86,50 @@ def create_langchain_sql_database(engine: Any, include_tables: Optional[List[str
         engine: SQLAlchemy engine
         include_tables: Optional list of tables to include (if None, all tables are included)
         sample_rows_in_table_info: Number of sample rows to include in table info
+        schema: Optional database schema to use
 
     Returns:
         Optional[SQLDatabase]: LangChain SQLDatabase or None if creation fails
     """
     try:
-        db = SQLDatabase(
-            engine=engine,
-            include_tables=include_tables,
-            sample_rows_in_table_info=sample_rows_in_table_info
-        )
+        # Log the tables in the database before creating SQLDatabase
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+
+        # Get all schemas
+        schemas = inspector.get_schema_names()
+        logger.info(f"Available schemas: {schemas}")
+
+        # Get tables in the specified schema or default schema
+        if schema and schema in schemas:
+            tables = inspector.get_table_names(schema=schema)
+            logger.info(f"Tables in schema '{schema}': {tables}")
+        else:
+            tables = inspector.get_table_names()
+            logger.info(f"Tables in default schema: {tables}")
+
+        # Create SQLDatabase with schema if provided
+        if schema:
+            db = SQLDatabase(
+                engine=engine,
+                include_tables=include_tables,
+                sample_rows_in_table_info=sample_rows_in_table_info,
+                schema=schema
+            )
+            logger.info(f"Created LangChain SQLDatabase with schema: {schema}")
+        else:
+            db = SQLDatabase(
+                engine=engine,
+                include_tables=include_tables,
+                sample_rows_in_table_info=sample_rows_in_table_info
+            )
+            logger.info("Created LangChain SQLDatabase with default schema")
+
         return db
     except Exception as e:
         logger.error(f"Error creating LangChain SQLDatabase: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         return None
 
 
@@ -166,12 +211,13 @@ def execute_sql_query(engine: Any, query: str) -> Tuple[bool, Any]:
         return False, str(e)
 
 
-def get_table_names(engine: Any) -> List[str]:
+def get_table_names(engine: Any, schema: Optional[str] = None) -> List[str]:
     """
     Get a list of table names from the database.
 
     Args:
         engine: SQLAlchemy engine
+        schema: Optional schema name to get tables from
 
     Returns:
         List[str]: List of table names
@@ -179,9 +225,35 @@ def get_table_names(engine: Any) -> List[str]:
     try:
         from sqlalchemy import inspect
         inspector = inspect(engine)
-        return inspector.get_table_names()
+
+        # Get all schemas
+        schemas = inspector.get_schema_names()
+        logger.info(f"Available schemas: {schemas}")
+
+        # Get tables from specified schema or default
+        if schema and schema in schemas:
+            tables = inspector.get_table_names(schema=schema)
+            logger.info(f"Tables in schema '{schema}': {tables}")
+            return tables
+        else:
+            # If no schema specified or schema not found, try all schemas
+            all_tables = []
+            for schema_name in schemas:
+                schema_tables = inspector.get_table_names(schema=schema_name)
+                logger.info(f"Tables in schema '{schema_name}': {schema_tables}")
+                all_tables.extend(schema_tables)
+
+            # Also get tables without schema specification
+            default_tables = inspector.get_table_names()
+            logger.info(f"Tables in default schema: {default_tables}")
+
+            # Combine and deduplicate
+            all_tables.extend(default_tables)
+            return list(set(all_tables))
     except Exception as e:
         logger.error(f"Error getting table names: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         return []
 
 

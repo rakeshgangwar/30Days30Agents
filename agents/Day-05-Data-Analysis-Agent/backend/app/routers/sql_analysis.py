@@ -68,11 +68,16 @@ async def connect_to_database(request: DBConnectionRequest):
         # Store the connection
         db_connections[connection_id] = engine
 
-        # Get table names
-        tables = get_table_names(engine)
+        # Get schema from connection parameters if provided
+        schema = request.connection_params.get('schema', None)
+        if schema:
+            logger.info(f"Using schema from connection parameters: {schema}")
 
-        # Create LangChain SQLDatabase
-        langchain_db = create_langchain_sql_database(engine)
+        # Get table names with schema if provided
+        tables = get_table_names(engine, schema=schema)
+
+        # Create LangChain SQLDatabase with schema if provided
+        langchain_db = create_langchain_sql_database(engine, schema=schema)
         if langchain_db:
             langchain_dbs[connection_id] = langchain_db
 

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     DEFAULT_MAX_RETRIES: int = 3
     
     # Agent Settings
-    AGENT_MAX_ITERATIONS: int = 10
+    AGENT_MAX_ITERATIONS: int = 25
     AGENT_MAX_EXECUTION_TIME: int = 30
     AGENT_EARLY_STOPPING_METHOD: str = "force"
     AGENT_ALLOW_DANGEROUS_CODE: bool = True

@@ -29,6 +29,7 @@ const DBConnection: React.FC = () => {
   const [host, setHost] = useState<string>('localhost');
   const [port, setPort] = useState<string>('5432');
   const [database, setDatabase] = useState<string>('');
+  const [schema, setSchema] = useState<string>('');
   const [user, setUser] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
@@ -44,7 +45,7 @@ const DBConnection: React.FC = () => {
       // Prepare connection parameters based on database type
       const connectionParams = dbType === 'sqlite'
         ? { db_path: dbPath }
-        : { host, port, database, user, password };
+        : { host, port, database, user, password, schema };
 
       const response = await api.connectToDatabase({
         db_type: dbType,
@@ -161,13 +162,23 @@ const DBConnection: React.FC = () => {
                     onChange={(e) => setPort(e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     margin="normal"
                     label="Database Name"
                     value={database}
                     onChange={(e) => setDatabase(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Schema"
+                    value={schema}
+                    onChange={(e) => setSchema(e.target.value)}
+                    helperText="Optional: Database schema (e.g., 'video_games')"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
