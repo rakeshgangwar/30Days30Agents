@@ -160,8 +160,14 @@ def initialize_sql_agent(llm: BaseLanguageModel, db: SQLDatabase,
             verbose=verbose,
             agent_type="zero-shot-react-description",  # More compatible with various LLMs
             max_iterations=settings.AGENT_MAX_ITERATIONS,
+            max_execution_time=settings.AGENT_MAX_EXECUTION_TIME,
             early_stopping_method=settings.AGENT_EARLY_STOPPING_METHOD
         )
+
+        # Log the agent configuration for debugging
+        logger.info(f"SQL agent configured with max_iterations={settings.AGENT_MAX_ITERATIONS}, " +
+                   f"max_execution_time={settings.AGENT_MAX_EXECUTION_TIME}, " +
+                   f"early_stopping_method={settings.AGENT_EARLY_STOPPING_METHOD}")
 
         logger.info(f"SQL agent initialized successfully: {type(agent).__name__}")
         return agent
@@ -325,10 +331,23 @@ def process_sql_query(agent: Any, query: str) -> Dict[str, Any]:
         logger.info(f"Processing SQL query: {query}")
         logger.info(f"Agent type: {type(agent).__name__}")
 
+        # Log agent configuration if available
+        if hasattr(agent, 'max_iterations'):
+            logger.info(f"Agent max_iterations: {agent.max_iterations}")
+        if hasattr(agent, 'max_execution_time'):
+            logger.info(f"Agent max_execution_time: {agent.max_execution_time}")
+
+        # Start timing the query execution
+        import time
+        start_time = time.time()
+
         # Invoke the agent with the query
         result = agent.invoke({"input": query})
 
-        logger.info(f"Query processed successfully")
+        # Calculate and log execution time
+        execution_time = time.time() - start_time
+        logger.info(f"Query processed successfully in {execution_time:.2f} seconds")
+
         return {"success": True, "result": result}
     except Exception as e:
         logger.error(f"Error processing SQL query with agent: {str(e)}")

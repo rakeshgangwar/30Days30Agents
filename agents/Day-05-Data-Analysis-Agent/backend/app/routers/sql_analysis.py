@@ -24,6 +24,7 @@ from app.services.db_service import (
     execute_sql_query
 )
 from app.services.visualization_service import create_plotly_visualization, create_fallback_visualization
+from app.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -166,10 +167,14 @@ async def query_database(request: QueryRequest, connection_id: str):
         chain = db_chains.get(connection_id)
         engine = db_connections[connection_id]
 
+        # Log agent configuration before processing
+        logger.info(f"Using SQL agent with configuration from settings: max_iterations={settings.AGENT_MAX_ITERATIONS}, max_execution_time={settings.AGENT_MAX_EXECUTION_TIME}")
+
         # Process the query using the agent
         response = process_sql_query(agent, request.query)
 
         if not response["success"]:
+            logger.error(f"SQL query processing failed: {response.get('error', 'Unknown error')}")
             return JSONResponse(
                 status_code=500,
                 content={"success": False, "error": response["error"]}

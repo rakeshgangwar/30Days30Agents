@@ -43,6 +43,54 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
   );
 };
 
+// Function to format text with code blocks
+const formatTextWithCodeBlocks = (text: string): React.ReactNode => {
+  if (!text) return null;
+
+  // Split by code blocks (```python ... ```)
+  const parts = text.split(/(```[a-z]*\n[\s\S]*?```)/g);
+
+  return parts.map((part, index) => {
+    // Check if this part is a code block
+    if (part.startsWith('```') && part.endsWith('```')) {
+      // Extract language and code
+      const match = part.match(/```([a-z]*)\n([\s\S]*?)```/);
+      if (match) {
+        const [_, language, code] = match;
+        return (
+          <Box
+            key={index}
+            sx={{
+              backgroundColor: '#272822',
+              color: '#f8f8f2',
+              padding: 2,
+              borderRadius: 1,
+              fontFamily: 'monospace',
+              overflowX: 'auto',
+              my: 2
+            }}
+          >
+            <Typography
+              variant="body2"
+              component="pre"
+              sx={{
+                whiteSpace: 'pre',
+                m: 0,
+                fontSize: '0.875rem'
+              }}
+            >
+              {code}
+            </Typography>
+          </Box>
+        );
+      }
+    }
+
+    // Regular text
+    return <React.Fragment key={index}>{part}</React.Fragment>;
+  });
+};
+
 const ResultsDisplay: React.FC = () => {
   const { state } = useAppContext();
   const { result, error, loading } = state.query;
@@ -89,9 +137,19 @@ const ResultsDisplay: React.FC = () => {
   // Log the result for debugging
   console.log('Query result:', result);
 
+  // Check if result.text exists and is not empty
+  const hasText = result.text && result.text.trim().length > 0;
   const hasVisualization = result.visualization && result.visualization.figure;
   const hasData = result.data && result.data.length > 0;
   const hasCode = result.code && result.code.trim().length > 0;
+
+  // Log what content is available
+  console.log('Content available:', {
+    hasText,
+    hasVisualization,
+    hasData,
+    hasCode
+  });
 
   // Log visualization data if available
   if (hasVisualization) {
@@ -123,9 +181,34 @@ const ResultsDisplay: React.FC = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap', width: '100%' }}>
-            {result.text}
-          </Typography>
+          {hasText ? (
+            <Box
+              sx={{
+                width: '100%',
+                padding: 2,
+                backgroundColor: '#f8f9fa',
+                borderRadius: 1,
+                border: '1px solid #e9ecef',
+                lineHeight: 1.6,
+                fontSize: '1rem'
+              }}
+            >
+              <Typography
+                variant="body1"
+                component="div"
+                sx={{
+                  whiteSpace: 'pre-wrap',
+                  width: '100%',
+                }}
+              >
+                {formatTextWithCodeBlocks(result.text)}
+              </Typography>
+            </Box>
+          ) : (
+            <Alert severity="info" sx={{ width: '100%' }}>
+              No analysis text available.
+            </Alert>
+          )}
         </TabPanel>
 
         {hasData && (
