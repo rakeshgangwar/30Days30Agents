@@ -1,0 +1,26 @@
+id,name,age,gender,city,income,education,job_title,years_experience
+1,John Smith,34,Male,New York,85000,Bachelor,Software Engineer,8
+2,Emily Johnson,29,Female,Los Angeles,72000,Master,Data Analyst,5
+3,Michael Brown,42,Male,Chicago,110000,PhD,Senior Manager,15
+4,Sarah Davis,31,Female,Houston,65000,Bachelor,Marketing Specialist,7
+5,David Wilson,38,Male,Phoenix,92000,Master,Project Manager,12
+6,Jennifer Miller,27,Female,Philadelphia,58000,Bachelor,HR Coordinator,3
+7,Robert Taylor,45,Male,San Antonio,125000,Master,Director,18
+8,Lisa Anderson,33,Female,San Diego,79000,Bachelor,UX Designer,6
+9,James Thomas,36,Male,Dallas,88000,Bachelor,Product Manager,10
+10,Jessica Martinez,30,Female,San Jose,81000,Master,Research Scientist,4
+11,William Jackson,41,Male,Austin,105000,PhD,Principal Engineer,14
+12,Amanda White,28,Female,Jacksonville,62000,Bachelor,Content Writer,4
+13,Charles Harris,39,Male,San Francisco,115000,Master,Technical Lead,11
+14,Stephanie Lewis,32,Female,Columbus,76000,Bachelor,Account Manager,8
+15,Daniel Clark,44,Male,Indianapolis,98000,Bachelor,Sales Director,16
+16,Rebecca Walker,26,Female,Seattle,59000,Bachelor,Junior Developer,2
+17,Matthew Hall,37,Male,Denver,91000,Master,Data Scientist,9
+18,Michelle Allen,31,Female,Boston,83000,PhD,Research Analyst,6
+19,Andrew Young,40,Male,Portland,96000,Master,IT Manager,13
+20,Nicole King,29,Female,Las Vegas,68000,Bachelor,Graphic Designer,5
+21,Joshua Wright,35,Male,Nashville,87000,Bachelor,Systems Administrator,9
+22,Melissa Scott,33,Female,Oklahoma City,74000,Master,Financial Analyst,7
+23,Brian Green,43,Male,Miami,118000,Master,VP of Operations,17
+24,Heather Baker,30,Female,Raleigh,71000,Bachelor,Marketing Manager,6
+25,Kevin Nelson,38,Male,Minneapolis,94000,Bachelor,Senior Developer,11

@@ -41,7 +41,7 @@
 
 *   **Task 1.1: Project Initialization (Est: 0.5 hr)**
     *   1.1.1. Create agent directory: `agents/Day-05-Data-Analysis-Agent/app/`.
-    *   1.1.2. Initialize `pyproject.toml` (e.g., using `poetry init` or manually).
+    *   1.1.2. Initialize `pyproject.toml` (e.g., using `uv init` or manually).
     *   1.1.3. Create `main.py`, `utils.py` (if anticipated), `.env.example`.
     *   1.1.4. Add initial dependencies to `pyproject.toml` and install (e.g., `streamlit`, `python-dotenv`).
 *   **Task 1.2: Streamlit UI - Core Layout (Est: 1 hr)**
