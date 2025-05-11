@@ -4,170 +4,366 @@
 *   Implement core CSV file analysis capabilities.
 *   Implement integration with at least one SQL Database type (e.g., SQLite or PostgreSQL).
 *   Utilize LangChain with OpenRouter for LLM access.
-*   Develop a basic Streamlit UI for interaction.
+*   Develop a React frontend with Ant Design components.
+*   Create a FastAPI backend to handle data processing and LLM interactions.
 
 ## 2. Core Technologies (Recap from Architecture Plan)
-*   **Frontend:** Streamlit
+*   **Backend:** FastAPI
+*   **Frontend:** React with Ant Design
 *   **LLM Orchestration:** LangChain
 *   **LLM Access:** OpenRouter (Primary), Local LLM via Ollama (Secondary/Stretch)
 *   **Data Processing (CSV):** Pandas
 *   **Data Processing (SQL):** SQLAlchemy (via LangChain SQL tools)
-*   **Visualization:** Matplotlib/Seaborn (Primary), Plotly (Stretch)
-*   **Core Language:** Python
+*   **Visualization:** Plotly (backend generates configurations, frontend renders)
+*   **Core Languages:** Python (Backend), JavaScript/TypeScript (Frontend)
 
 ## 3. Environment Setup
-*   **Project Directory:** `agents/Day-05-Data-Analysis-Agent/app/`
+
+### 3.1 Backend Environment
+*   **Project Directory:** `agents/Day-05-Data-Analysis-Agent/backend/`
 *   **Virtual Environment:** Create and activate a Python virtual environment.
-*   **`pyproject.toml` Dependencies:**
-    *   `streamlit`
-    *   `langchain`
-    *   `langchain_community` (for OpenRouterChat, SQLDatabase, OllamaChat, CSVLoader, etc.)
-    *   `pandas`
-    *   `matplotlib`
-    *   `seaborn`
-    *   `python-dotenv`
-    *   `sqlalchemy`
-    *   `psycopg2-binary` (if targeting PostgreSQL, otherwise not strictly needed for SQLite)
-    *   `openpyxl` (for potential Excel stretch goal)
-    *   `plotly` (for stretch goal)
-    *   `ollama` (if directly using the ollama python client, or ensure Ollama service is running for LangChain integration)
+*   **Dependencies (requirements.txt):**
+    ```
+    fastapi==0.104.1
+    uvicorn==0.23.2
+    python-multipart==0.0.6  # For file uploads
+    langchain==0.0.325
+    langchain-community==0.0.10
+    pandas==2.1.1
+    matplotlib==3.8.0  # If needed for fallback
+    plotly==5.17.0
+    python-dotenv==1.0.0
+    sqlalchemy==2.0.22
+    psycopg2-binary==2.9.9  # For PostgreSQL
+    pydantic==2.4.2
+    numpy==1.26.0
+    cors==1.0.1  # For CORS handling
+    openpyxl==3.1.2  # For Excel support (stretch goal)
+    ```
 *   **`.env` File:** Create a `.env` file for API keys:
-    *   `OPENROUTER_API_KEY="your_openrouter_key"`
-    *   (Potentially `DATABASE_URL="your_db_connection_string"` if not using SQLite file path and not constructing it in code)
+    ```
+    OPENROUTER_API_KEY="your_openrouter_key"
+    DATABASE_URL="your_db_connection_string"  # Optional for non-SQLite configurations
+    ```
+
+### 3.2 Frontend Environment
+*   **Project Directory:** `agents/Day-05-Data-Analysis-Agent/frontend/`
+*   **React Setup:** Create React app structure.
+*   **Dependencies (package.json):**
+    ```json
+    {
+      "dependencies": {
+        "antd": "^5.9.0",
+        "axios": "^1.5.0",
+        "plotly.js": "^2.26.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-plotly.js": "^2.6.0"
+      },
+      "devDependencies": {
+        "@types/react": "^18.2.21",
+        "@types/react-dom": "^18.2.7",
+        "typescript": "^5.2.2",
+        "vite": "^4.4.9"
+      }
+    }
+    ```
 
 ## 4. Implementation Steps (Phased Approach)
 
-### Phase 1: Basic Setup & CSV Analysis (Total Est: ~5 hours)
+### Phase 1: Core Backend Setup (FastAPI) (Total Est: ~4 hours)
 
 *   **Task 1.1: Project Initialization (Est: 0.5 hr)**
-    *   1.1.1. Create agent directory: `agents/Day-05-Data-Analysis-Agent/app/`.
-    *   1.1.2. Initialize `pyproject.toml` (e.g., using `uv init` or manually).
-    *   1.1.3. Create `main.py`, `utils.py` (if anticipated), `.env.example`.
-    *   1.1.4. Add initial dependencies to `pyproject.toml` and install (e.g., `streamlit`, `python-dotenv`).
-*   **Task 1.2: Streamlit UI - Core Layout (Est: 1 hr)**
-    *   1.2.1. `main.py`: Set up `st.set_page_config`, page title, header.
-    *   1.2.2. Create main sections/columns for UI (e.g., sidebar for controls, main area for output).
-    *   1.2.3. Add `st.file_uploader` for CSV files, restrict to `.csv` type.
-    *   1.2.4. Add `st.text_area` for natural language queries.
-    *   1.2.5. Add a "Submit" button for the query.
-    *   1.2.6. Create placeholders in the UI for displaying:
-        *   Uploaded data preview.
-        *   LLM text responses.
-        *   DataFrames (tables).
-        *   Plots.
-*   **Task 1.3: CSV Data Handling (Est: 0.5 hr)**
-    *   1.3.1. Implement a function to load the uploaded CSV file into a Pandas DataFrame upon file upload.
-    *   1.3.2. Display the head of the DataFrame (`st.dataframe(df.head())`) and basic info (`st.text(df.info())`) immediately after upload.
-    *   1.3.3. Store the DataFrame in Streamlit's session state (`st.session_state`) for persistence across interactions.
-*   **Task 1.4: LangChain & OpenRouter LLM Integration (Est: 0.5 hr)**
-    *   1.4.1. Add `langchain`, `langchain_community` to `pyproject.toml` and install.
-    *   1.4.2. Load `OPENROUTER_API_KEY` from `.env` using `dotenv`.
-    *   1.4.3. Initialize `OpenRouterChat` model from `langchain_community.chat_models` with a chosen model (e.g., a free tier or small model like "mistralai/mistral-7b-instruct").
-    *   1.4.4. Create a simple test function to send a prompt to the LLM and print/display the response in Streamlit to verify connectivity.
-*   **Task 1.5: CSV Analysis Agent/Chain (Est: 1.5 hrs)**
-    *   1.5.1. Decide on approach: `create_pandas_dataframe_agent` or a custom chain using LLM to generate Pandas code. Start with the agent for speed.
-    *   1.5.2. If using agent: Instantiate `create_pandas_dataframe_agent` with the loaded DataFrame and the initialized LLM.
-    *   1.5.3. Implement logic to take the user's NL query from `st.text_area` and pass it to the agent/chain upon "Submit" button click.
-    *   1.5.4. Test basic descriptive queries: "Summarize this data", "What are the columns?", "Show the first 3 rows".
-    *   1.5.5. Test basic aggregation queries: "What is the average of column X?", "What is the total sum of column Y?".
-    *   1.5.6. Test basic filtering: "Show rows where column X is greater than 10".
-*   **Task 1.6: Displaying Agent's Output (Est: 0.5 hr)**
-    *   1.6.1. Capture the agent's textual response and display it using `st.markdown()` or `st.write()`.
-    *   1.6.2. If the agent's response implies a DataFrame (e.g., from filtering), attempt to parse/extract it or ensure the agent returns it in a usable format to display with `st.dataframe()`. (This might be tricky with the default agent output, may need prompt engineering or output parsing).
-*   **Task 1.7: CSV Data Visualization (Matplotlib/Seaborn via LLM) (Est: 0.5 hr)**
-    *   1.7.1. Enhance prompting for the agent/chain (or create a separate tool/chain) to understand visualization requests (e.g., "Plot a histogram of column X", "Create a bar chart for column Y").
-    *   1.7.2. The LLM should generate Python code using Matplotlib/Seaborn to create the plot.
-    *   1.7.3. Implement a secure way to execute this generated plotting code (e.g., `exec()`, carefully considering security implications, or using a safer sandbox if possible. For a quick prototype, `exec` might be used with caution).
-    *   1.7.4. Capture the Matplotlib figure and display it in Streamlit using `st.pyplot(fig)`.
+    *   1.1.1. Create backend directory: `agents/Day-05-Data-Analysis-Agent/backend/`.
+    *   1.1.2. Set up virtual environment (`python -m venv venv`).
+    *   1.1.3. Create `requirements.txt` with dependencies.
+    *   1.1.4. Create `.env.example` and `.env` files.
+    *   1.1.5. Create basic application structure:
+        ```
+        backend/
+        ├── app/
+        │   ├── __init__.py
+        │   ├── main.py
+        │   ├── models/
+        │   │   └── __init__.py
+        │   ├── routers/
+        │   │   ├── __init__.py
+        │   │   ├── csv_analysis.py
+        │   │   └── sql_analysis.py
+        │   └── services/
+        │       ├── __init__.py
+        │       ├── llm_service.py
+        │       ├── csv_service.py
+        │       └── db_service.py
+        ├── .env
+        ├── .env.example
+        └── requirements.txt
+        ```
 
-### Phase 2: SQL Database Integration (Total Est: ~4.5 hours)
+*   **Task 1.2: FastAPI App Setup & Base Endpoints (Est: 0.5 hr)**
+    *   1.2.1. Set up the FastAPI application in `main.py`:
+        *   Create FastAPI app instance.
+        *   Configure CORS middleware to allow frontend connections.
+        *   Include routers.
+        *   Implement a health check endpoint.
+    *   1.2.2. Create Pydantic models in `models/__init__.py` for:
+        *   Query requests.
+        *   CSV upload responses.
+        *   DB connection requests.
+        *   Analysis results (including text, data, visualizations).
 
-*   **Task 2.1: Streamlit UI for Database Connection (Est: 0.75 hr)**
-    *   2.1.1. Add `st.selectbox` for choosing DB type (e.g., "SQLite", "PostgreSQL").
-    *   2.1.2. Conditionally display input fields based on DB type:
-        *   SQLite: `st.text_input` for database file path (e.g., `my_data.db`).
-        *   PostgreSQL: `st.text_input` for Host, Port, User, Password, Database Name.
-    *   2.1.3. Add a "Connect to Database" button.
-*   **Task 2.2: Database Connection Logic (SQLAlchemy) (Est: 0.75 hr)**
-    *   2.2.1. Add `sqlalchemy` and relevant DB driver (e.g., `psycopg2-binary`) to `pyproject.toml` and install.
-    *   2.2.2. Implement a function that takes connection parameters and creates a SQLAlchemy engine string.
-    *   2.2.3. On "Connect to Database" click, attempt to create the engine using `create_engine`.
-    *   2.2.4. Store the engine or `SQLDatabase` utility in `st.session_state`.
-    *   2.2.5. Provide feedback to the user (success/failure of connection).
-*   **Task 2.3: LangChain SQL Integration (Est: 1 hr)**
-    *   2.3.1. Initialize `SQLDatabase` from `langchain_community.utilities` using the created SQLAlchemy engine.
-    *   2.3.2. Instantiate `create_sql_agent` (from `langchain_community.agent_toolkits`) or `SQLDatabaseChain` (from `langchain.chains`) using the `SQLDatabase` utility and the initialized LLM.
-*   **Task 2.4: Handling NL Queries for SQL (Est: 1 hr)**
-    *   2.4.1. If a DB connection is active, route the user's NL query from `st.text_area` to the SQL agent/chain.
-    *   2.4.2. Test basic SQL queries via NL: "List all tables.", "Describe the 'users' table.", "Show me all data from the 'products' table where price > 100."
-    *   2.4.3. Display the generated SQL (optional, for transparency) and the textual result from the agent/chain using `st.markdown()` or `st.write()`.
-*   **Task 2.5: SQL Data Visualization (Matplotlib/Seaborn via LLM) (Est: 1 hr)**
-    *   2.5.1. Similar to Task 1.7, adapt the LLM prompting or create a specific tool/chain to generate Matplotlib/Seaborn plotting code based on the results of SQL queries.
-    *   2.5.2. The process might involve: NL query -> SQL query -> SQL result -> (optional) Convert to Pandas DataFrame -> Generate Plotting Code -> Execute Plotting Code -> Display Plot.
-    *   2.5.3. Display the plot in Streamlit using `st.pyplot(fig)`.
+*   **Task 1.3: LLM Service Implementation (Est: 1 hr)**
+    *   1.3.1. In `services/llm_service.py`, implement:
+        *   OpenRouter API key loading from environment variables.
+        *   LLM initialization function using `OpenRouterChat`.
+        *   Basic prompt handling.
+        *   Error handling for API failures.
+    *   1.3.2. Create test function to verify LLM connectivity.
 
-### Phase 3: Refinements & Stretch Goals (If time permits on Day 5) (Total Est: ~3-5 hours)
+*   **Task 1.4: CSV Analysis Service & Router (Est: 1 hr)**
+    *   1.4.1. In `services/csv_service.py`, implement:
+        *   Function to handle uploaded CSV files and load into Pandas DataFrame.
+        *   Function to create DataFrame agent using LangChain.
+        *   Function to execute queries against DataFrame agent.
+        *   Function to generate Plotly visualizations as JSON.
+    *   1.4.2. In `routers/csv_analysis.py`, create endpoints:
+        *   `POST /csv/upload` - For uploading CSV files.
+        *   `POST /csv/query` - For running natural language queries.
 
-*   **Task 3.1: Robust Error Handling & User Feedback (Est: 1 hr)**
-    *   3.1.1. Wrap file loading logic in `try-except` blocks, show `st.error()` for invalid files.
-    *   3.1.2. Wrap DB connection logic in `try-except`, show `st.error()` for connection failures.
-    *   3.1.3. Wrap agent/chain execution in `try-except`, show `st.warning()` or `st.error()` if the LLM or code execution fails, and display the error message if helpful.
-    *   3.1.4. Add loading spinners (`st.spinner`) for long operations.
-*   **Task 3.2: Plotly Integration (One Chart Type) (Est: 1-1.5 hrs)**
-    *   3.2.1. Add `plotly` to `pyproject.toml` and install.
-    *   3.2.2. Adapt LLM prompting to generate Plotly Express code for one chart type (e.g., a scatter plot).
-    *   3.2.3. Execute the generated code.
-    *   3.2.4. Display the interactive Plotly chart using `st.plotly_chart()`.
-*   **Task 3.3: Local LLM Integration (Ollama - Basic) (Est: 1-1.5 hrs)**
-    *   3.3.1. Ensure Ollama is installed and a model (e.g., `llama3:8b-instruct` or `mistral`) is pulled.
-    *   3.3.2. Add `ollama` to `pyproject.toml` if using the direct client, or rely on LangChain's `OllamaChat`.
-    *   3.3.3. Initialize `OllamaChat` from `langchain_community.chat_models`.
-    *   3.3.4. Add a simple UI element (e.g., `st.checkbox` or `st.radio`) to allow the user to switch between OpenRouter and the local Ollama LLM.
-    *   3.3.5. Re-initialize the LLM object for agents/chains based on user selection.
-    *   3.3.6. Test basic functionality with the local LLM.
-*   **Task 3.4: Code Organization & README Update (Est: 0.5 hr)**
-    *   3.4.1. Refactor `main.py` into smaller functions or move parts to `utils.py` if it becomes too large.
-    *   3.4.2. Add comments to clarify complex sections of code.
-    *   3.4.3. Create/update a `README.md` within the `agents/Day-05-Data-Analysis-Agent/` directory with:
-        *   Brief description of the agent.
-        *   Setup instructions (virtual env, dependencies, `.env` file).
-        *   How to run the Streamlit app.
-        *   Example queries.
+*   **Task 1.5: SQL Database Service & Router (Est: 1 hr)**
+    *   1.5.1. In `services/db_service.py`, implement:
+        *   Function to create DB connection.
+        *   Function to create SQL Database agent.
+        *   Function to execute natural language queries.
+        *   Function to generate Plotly visualizations from SQL results.
+    *   1.5.2. In `routers/sql_analysis.py`, create endpoints:
+        *   `POST /db/connect` - For establishing database connections.
+        *   `POST /db/query` - For running natural language queries.
 
-## 5. Key LangChain Components (Anticipated)
-*   `CSVLoader` (from `langchain_community.document_loaders`)
-*   `create_pandas_dataframe_agent` (from `langchain_community.agent_toolkits`)
-*   `SQLDatabase` (from `langchain_community.utilities`)
-*   `create_sql_agent` (from `langchain_community.agent_toolkits`) or `SQLDatabaseChain` (from `langchain.chains`)
-*   `OpenRouterChat` (from `langchain_community.chat_models.openrouter`)
-*   `OllamaChat` (from `langchain_community.chat_models.ollama`)
-*   Prompt Templates (as needed for custom chains or agent refinements)
+### Phase 2: Frontend Development with React (Total Est: ~5 hours)
+
+*   **Task 2.1: Project Setup & Basic Structure (Est: 0.5 hr)**
+    *   2.1.1. Create frontend directory: `agents/Day-05-Data-Analysis-Agent/frontend/`.
+    *   2.1.2. Initialize a new React project with TypeScript using Vite:
+        ```bash
+        npm create vite@latest . -- --template react-ts
+        ```
+    *   2.1.3. Install dependencies:
+        ```bash
+        npm install antd axios plotly.js react-plotly.js
+        ```
+    *   2.1.4. Create basic application structure:
+        ```
+        frontend/
+        ├── public/
+        ├── src/
+        │   ├── components/
+        │   │   ├── DataSourceSelection.tsx
+        │   │   ├── QueryInput.tsx
+        │   │   ├── ResultsDisplay.tsx
+        │   │   ├── CSVUpload.tsx
+        │   │   ├── DBConnection.tsx
+        │   │   └── Visualization.tsx
+        │   ├── services/
+        │   │   └── api.ts
+        │   ├── contexts/
+        │   │   └── AppContext.tsx
+        │   ├── types/
+        │   │   └── index.ts
+        │   ├── App.tsx
+        │   ├── main.tsx
+        │   └── styles.css
+        ├── index.html
+        ├── package.json
+        └── tsconfig.json
+        ```
+
+*   **Task 2.2: Context Setup & API Service (Est: 0.5 hr)**
+    *   2.2.1. Create API service in `services/api.ts`:
+        *   Setup Axios instance.
+        *   Implement functions for CSV upload, DB connection, and query execution.
+    *   2.2.2. Create application context in `contexts/AppContext.tsx`:
+        *   Create state for data source type (CSV or DB).
+        *   Create state for current data (either CSV data or DB connection).
+        *   Create state for query results and visualization data.
+        *   Implement context provider with state management.
+
+*   **Task 2.3: Main Layout & Data Source Selection (Est: 1 hr)**
+    *   2.3.1. In `App.tsx`, implement:
+        *   Main layout using Ant Design's Layout component.
+        *   Context provider wrapper.
+        *   Header with title and information.
+        *   Content area with main component.
+    *   2.3.2. In `components/DataSourceSelection.tsx`, implement:
+        *   Radio or tab selection for CSV vs. DB.
+        *   Conditional rendering of the appropriate input component.
+
+*   **Task 2.4: CSV & Database Components (Est: 1 hr)**
+    *   2.4.1. In `components/CSVUpload.tsx`, implement:
+        *   Ant Design's Upload component for CSV file selection.
+        *   Progress indicator during upload.
+        *   Preview of uploaded data (first few rows).
+    *   2.4.2. In `components/DBConnection.tsx`, implement:
+        *   Database type selection (SQLite, PostgreSQL).
+        *   Form inputs for connection parameters.
+        *   Test connection button.
+        *   Success/failure feedback.
+
+*   **Task 2.5: Query & Results Components (Est: 1 hr)**
+    *   2.5.1. In `components/QueryInput.tsx`, implement:
+        *   Text area for natural language query input.
+        *   Submit button.
+        *   Loading indicator during query processing.
+    *   2.5.2. In `components/ResultsDisplay.tsx`, implement:
+        *   Section for textual response.
+        *   Section for data table (using Ant Design Table).
+        *   Section for visualization.
+        *   Export options (if time permits).
+
+*   **Task 2.6: Visualization Component (Est: 1 hr)**
+    *   2.6.1. In `components/Visualization.tsx`, implement:
+        *   Wrapper for Plotly.js React component.
+        *   Logic to handle visualization data from backend.
+        *   Default placeholder when no visualization is available.
+        *   Basic interactive features (zoom, tooltip hover).
+
+### Phase 3: Integration & End-to-End Testing (Total Est: ~3 hours)
+
+*   **Task 3.1: Backend CORS & Error Handling (Est: 0.5 hr)**
+    *   3.1.1. Ensure CORS is properly configured in FastAPI to accept requests from the React frontend.
+    *   3.1.2. Implement comprehensive error handling in all endpoints.
+    *   3.1.3. Add detailed logging for debugging.
+
+*   **Task 3.2: Frontend-Backend Integration (Est: 1 hr)**
+    *   3.2.1. Test CSV upload flow from frontend to backend.
+    *   3.2.2. Test database connection flow.
+    *   3.2.3. Test query submission and result rendering.
+    *   3.2.4. Test visualization rendering in the frontend.
+
+*   **Task 3.3: User Experience Enhancements (Est: 1 hr)**
+    *   3.3.1. Add loading states for all operations.
+    *   3.3.2. Implement error notifications using Ant Design message or notification components.
+    *   3.3.3. Add tooltips and helper text for better usability.
+    *   3.3.4. Ensure responsive design works on different screen sizes.
+
+*   **Task 3.4: Documentation & Deployment Guide (Est: 0.5 hr)**
+    *   3.4.1. Update/create `README.md` with:
+        *   Project description and features.
+        *   Setup instructions for both backend and frontend.
+        *   API documentation.
+        *   Usage examples.
+    *   3.4.2. Document deployment options.
+
+### Phase 4: Refinements & Stretch Goals (If time permits on Day 5) (Total Est: ~3-5 hours)
+
+*   **Task 4.1: Local LLM Integration (Est: 1-1.5 hrs)**
+    *   4.1.1. Add Ollama support in backend.
+    *   4.1.2. Add LLM selection option in frontend.
+    *   4.1.3. Implement switching logic between OpenRouter and local LLM.
+
+*   **Task 4.2: Enhanced Visualization Options (Est: 1 hr)**
+    *   4.2.1. Add support for more Plotly chart types.
+    *   4.2.2. Implement visualization customization options in the UI.
+    *   4.2.3. Add the ability to save or export visualizations.
+
+*   **Task 4.3: Excel File Support (Est: 1 hr)**
+    *   4.3.1. Add Excel file processing in the backend.
+    *   4.3.2. Update file upload component to accept .xlsx files.
+    *   4.3.3. Test with sample Excel files.
+
+*   **Task 4.4: Code View & Export (Est: 0.5-1 hr)**
+    *   4.4.1. Expose generated Python/SQL code in the API response.
+    *   4.4.2. Add a code viewer component in the frontend.
+    *   4.4.3. Implement code copy/export functionality.
+
+## 5. Key Components & Integration Points
+
+### 5.1 Backend (FastAPI)
+*   **LangChain Components:**
+    *   `OpenRouterChat` for LLM access
+    *   `create_pandas_dataframe_agent` for CSV analysis
+    *   `SQLDatabase` and `create_sql_agent` for SQL database analysis
+*   **Key API Endpoints:**
+    *   `/csv/upload` - Upload and process CSV files
+    *   `/csv/query` - Execute natural language queries on CSV data
+    *   `/db/connect` - Establish database connections
+    *   `/db/query` - Execute natural language queries on connected databases
+*   **Response Structure:**
+    ```json
+    {
+      "success": true,
+      "result": {
+        "text": "Analysis shows...",
+        "data": [
+          {"column1": "value1", "column2": "value2", ...}
+        ],
+        "visualization": {
+          "type": "plotly",
+          "figure": {...} // Plotly figure JSON
+        },
+        "code": "# Generated Python/SQL code" // Optional
+      }
+    }
+    ```
+
+### 5.2 Frontend (React)
+*   **Key Components:**
+    *   `DataSourceSelection` - Choose between CSV and DB
+    *   `CSVUpload` - Handle file uploads
+    *   `DBConnection` - Manage database connections
+    *   `QueryInput` - Input natural language queries
+    *   `ResultsDisplay` - Show results and visualizations
+*   **State Management:**
+    *   React Context API for application state
+    *   Local component state for UI-specific state
+
+### 5.3 Integration Points
+*   File uploads using `FormData` and `multipart/form-data`
+*   JSON API requests and responses
+*   Plotly figure JSON passed from backend to frontend for rendering
 
 ## 6. Testing Strategy
+
+### 6.1 Backend Testing
 *   Create a sample CSV file (e.g., `sample_data.csv` with varied data types).
 *   Create a sample SQLite database (e.g., `sample_db.sqlite`) with 2-3 tables and sample data.
 *   If using PostgreSQL, set up a test database.
-*   **CSV Tests:**
-    *   File upload success/failure.
-    *   Correct display of DataFrame head/info.
-    *   NL queries for summarization, column listing, head/tail.
-    *   NL queries for aggregations (mean, sum, count) on numeric columns.
-    *   NL queries for filtering on various conditions (text, numeric, date if applicable).
-    *   NL queries for simple Matplotlib/Seaborn plots (histogram, bar chart).
-*   **SQL DB Tests:**
-    *   Connection success/failure for SQLite (and PostgreSQL if implemented).
-    *   NL queries for listing tables, describing table schemas.
-    *   NL queries for `SELECT *` from tables.
-    *   NL queries for `SELECT` with `WHERE` clauses.
-    *   NL queries for basic aggregations (`COUNT`, `SUM`, `AVG`) using SQL.
-    *   NL queries for simple Matplotlib/Seaborn plots based on SQL results.
-*   **LLM Switching Tests (if local LLM implemented):**
-    *   Verify UI switch works.
-    *   Test a few CSV and SQL queries with the local LLM to check for comparable (though potentially different quality) results.
-*   **Error Handling Tests:**
-    *   Upload incorrect file type.
-    *   Provide invalid DB credentials.
-    *   Enter ambiguous or unanswerable queries.
-*   **UI/UX Tests:**
-    *   Clarity of instructions and feedback.
-    *   Responsiveness of the application.
+*   **API Endpoint Tests:**
+    *   CSV upload endpoint - test with valid and invalid files
+    *   CSV query endpoint - test with various query types
+    *   DB connection endpoint - test with valid and invalid credentials
+    *   DB query endpoint - test with various SQL-related queries
+
+### 6.2 Frontend Testing
+*   **Component Testing:**
+    *   Form submissions and validations
+    *   File upload component
+    *   Visualization rendering
+*   **Integration Testing:**
+    *   End-to-end user flows
+    *   Error handling and UI feedback
+
+### 6.3 Query Testing
+*   **CSV Analysis Queries:**
+    *   "Summarize this data"
+    *   "What are the columns?"
+    *   "What is the average of column X?"
+    *   "Show rows where column X is greater than 10"
+    *   "Create a histogram of column Y"
+    *   "Plot the relationship between column X and Y"
+*   **SQL DB Queries:**
+    *   "List all tables"
+    *   "Describe the 'users' table"
+    *   "Show me all data from the 'products' table where price > 100"
+    *   "What is the average order value?"
+    *   "Create a bar chart of sales by region"
+
+### 6.4 Error Handling Tests
+*   Upload incorrect file types
+*   Provide invalid DB credentials
+*   Enter ambiguous or unanswerable queries
+*   Test API timeout scenarios
+
+### 6.5 Browser Compatibility
+*   Test on Chrome, Firefox, Safari (if available)
+*   Test responsive design on different screen sizes

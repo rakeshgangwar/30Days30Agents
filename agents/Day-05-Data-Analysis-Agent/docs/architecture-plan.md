@@ -7,51 +7,46 @@ Develop a Data Analysis Agent capable of loading, analyzing, and visualizing dat
 
 ```mermaid
 graph TD
-    UserInput[User Enters NL Query & Chooses Data Source] --> DSS{Data Source Selection};
-    DSS -- CSV File --> FU[File Upload Component];
-    FU -- File Path --> IP{Input Processor};
-    DSS -- DB Connection Details & Query --> DBC[Database Connector Component];
-    DBC -- Fetched Data --> IP;
+    UserInput[User Enters NL Query & Chooses Data Source] --> REACT[React Frontend];
+    REACT -- API Request --> API[FastAPI Backend];
     
-    IP -- Data (DataFrame) & Parsed Query --> CAL{"Core Agent Logic (LangChain + LLM)"};
-    CAL -- Data Operations / SQL Generation --> DH["Data Handling (Pandas/Polars/SQLAlchemy/PyMongo)"];
-    DH -- Data for Analysis/Viz --> CAL;
-    CAL -- Visualization Commands --> VE["Visualization Engine (Plotly/Matplotlib/Seaborn)"];
-    VE -- Plot Image/Interactive Chart --> CAL;
-    CAL -- Results/Plot --> OF{Output Formatter};
-    OF -- Formatted Output (Table, Text, Image/Chart) --> UI["User Interface (Streamlit/Dash)"];
-
-    subgraph "User Interaction Layer"
+    subgraph "Backend Processing"
+        API -- CSV File --> FU[File Processor];
+        API -- DB Connection Details & Query --> DBC[Database Connector];
+        
+        FU -- Processed Data --> CAL{"Core Agent Logic (LangChain + LLM)"};
+        DBC -- Fetched Data --> CAL;
+        
+        CAL -- Data Operations / SQL Generation --> DH["Data Handling (Pandas/Polars/SQLAlchemy/PyMongo)"];
+        DH -- Data for Analysis/Viz --> CAL;
+        CAL -- Visualization Commands --> VE["Visualization Engine (Plotly/Matplotlib)"];
+        VE -- Plot Data/Config --> CAL;
+        CAL -- Results/Plot Data --> API;
+    end
+    
+    API -- JSON Response --> REACT;
+    REACT -- Display Results --> UI[User Interface Components];
+    
+    subgraph "Frontend (React)"
+        REACT
         UI
         UserInput
-    end
-
-    subgraph "Data Input Layer"
-        DSS
-        FU
-        DBC
-        IP
-    end
-
-    subgraph "Agent Core Processing"
-        CAL
-        DH
-        VE
-        OF
     end
 ```
 
 ## 3. Detailed Initial Plan (Baseline from Spec, expanded for DB & File Loaders)
 
 1.  **Environment Setup & Basic Structure:**
-    *   Directory structure for `agents/Day-05-Data-Analysis-Agent/app`.
-    *   `pyproject.toml` with initial dependencies (including DB drivers and loader-specific libraries as needed).
+    *   **Backend Structure:** Directory structure for `agents/Day-05-Data-Analysis-Agent/backend`.
+    *   **Frontend Structure:** Directory structure for `agents/Day-05-Data-Analysis-Agent/frontend`.
+    *   `requirements.txt` and `pyproject.toml` for backend dependencies.
+    *   `package.json` with React dependencies for frontend.
     *   Basic `.gitignore`, `.env.example`, `README.md`.
-2.  **Input Processing Module:**
-    *   **2.1. Data Source Selection:** UI element for user to choose File Upload or Database.
+2.  **Input Processing Module (Backend):**
+    *   **2.1. API Endpoints:** FastAPI endpoints for file uploads and database connections.
     *   **2.2. File Upload & Database Connector:**
-        *   **File Upload:** UI for selecting local files.
-        *   **Database Connector:** UI for inputting connection parameters (type, host, port, user, pass, db_name). Logic to establish connection. Mechanism for user to specify table/collection or an initial query.
+        *   **File Upload:** API endpoint for accepting file uploads.
+        *   **Database Connector:** API endpoint for DB connection parameters, establishing connections, and executing queries.
     *   **2.3. Supported Data Formats & Loaders (LangChain Integrations):**
         *   The agent will aim to support a variety of structured data sources through LangChain document loaders. The initial focus will be on the most common formats, with others as stretch goals or future enhancements.
         *   **Core File Formats:**
@@ -69,31 +64,38 @@ graph TD
             *   PostgreSQL, MySQL, SQLite (via SQLAlchemy)
             *   MongoDB (via PyMongo)
             *   *For a comprehensive list of potential database loaders, see Section 5.*
-    *   **2.4. Data Loading:** Load data from the selected file or database query result into a Pandas/Polars DataFrame.
-    *   **2.5. Natural Language Query Input.**
-3.  **Core Agent Logic - LLM Integration:**
+    *   **2.4. Data Loading:** Load data from the file upload or database query result into a Pandas/Polars DataFrame.
+    *   **2.5. Natural Language Query API:** Endpoint to process natural language queries.
+3.  **Core Agent Logic - LLM Integration (Backend):**
     *   LangChain Agent/Chain setup.
         *   For CSV/DataFrame/File-based data: Pandas DataFrame Agent or custom chain.
         *   For SQL DBs: LangChain SQLDatabaseChain or SQL Agent.
     *   LLM Prompting:
-        *   For DataFrames: Generate Pandas/Polars code, Matplotlib/Plotly code, and interpret results.
-        *   For SQL DBs: Generate SQL queries based on NL, then potentially Pandas/Plotly code on results.
+        *   For DataFrames: Generate Pandas/Polars code, visualization code, and interpret results.
+        *   For SQL DBs: Generate SQL queries based on NL, then potentially Pandas/visualization code on results.
         *   For NoSQL (MongoDB): Generate PyMongo code to fetch data, then treat as DataFrame.
     *   Secure code/query execution.
     *   Error handling for connections, queries, and code execution.
-4.  **Data Handling & Analysis:**
+4.  **Data Handling & Analysis (Backend):**
     *   Driven by LLM-generated code/queries.
     *   Operations on DataFrames (inspection, stats, filtering, correlation).
     *   Direct SQL querying for SQL DBs.
-5.  **Visualization Engine:** (Largely unchanged, operates on DataFrames)
+5.  **Visualization Engine (Backend):**
     *   LLM generates code for various chart types.
-    *   Capture static images or prepare interactive chart data.
-6.  **Output Formatting Module:** (Largely unchanged)
-    *   Display DataFrames, textual summaries, and visualizations.
-7.  **User Interface:**
-    *   Enhanced UI for data source selection, file upload, and DB connection input.
+    *   For backend-generated visualizations: Capture and send plot data/configuration.
+    *   For Plotly: Send Plotly figure JSON for client-side rendering.
+6.  **API Response Formatting (Backend):**
+    *   Format DataFrames as JSON.
+    *   Format visualizations as Plotly figure JSON or base64-encoded images.
+    *   Structure and send full response with results, visualizations, and supplementary info.
+7.  **User Interface (Frontend - React):**
+    *   React components for data source selection, file upload, and DB connection input.
+    *   Components for displaying query results, tables, and visualizations.
+    *   Responsive design with Ant Design components.
 8.  **Testing & Refinement:**
-    *   Test with various supported file types and connections to target database types.
+    *   Test API endpoints with various file types and database connections.
+    *   Test React component integration.
+    *   End-to-end testing of full user flows.
 
 ## 4. Potential Unique Features (Brainstormed)
 *   **Multi-Source Connectivity:** Seamlessly switch between and analyze data from various files (CSV, Excel, JSON, TSV) and databases (PostgreSQL, MySQL, MongoDB, etc.).
@@ -109,7 +111,7 @@ graph TD
 
 *   **Core Language & Backend Framework:**
     *   **Python**
-    *   **FastAPI** (Optional, for scalability/decoupling)
+    *   **FastAPI** (Required for API endpoints)
 *   **LLM Orchestration & Agent Logic:**
     *   **LangChain** (including SQLDatabaseChain/Agent and various Document Loaders)
     *   **LLM Access Layer:**
@@ -164,10 +166,12 @@ graph TD
         *   **NumPy & SciPy** (Advanced statistics)
 *   **Visualization Engine:**
     *   **Plotly & Plotly Express** (Primary for interactivity)
-    *   **Matplotlib & Seaborn** (For static plots or specific needs)
+    *   **Matplotlib & Seaborn** (For generating images on the backend if needed)
 *   **Frontend/User Interface:**
-    *   **Streamlit** (Rapid development for data apps)
-    *   **Dash by Plotly** (More complex interactive dashboards)
+    *   **React** (Frontend framework)
+    *   **Ant Design** (UI component library for React)
+    *   **Plotly.js** (For client-side rendering of interactive visualizations)
+    *   **State Management:** React Context API or Zustand (lightweight state management)
 *   **Database (Optional - Persistence/Caching for Agent itself):**
     *   **SQLite** (Simple local storage)
 
@@ -178,6 +182,7 @@ To balance ambition with the 30-day challenge timeline, the core focus for Day 5
 *   **Primary Data Source Goals for Day 5:**
     *   Robust **CSV file** analysis capabilities.
     *   Integration with at least **one SQL Database type** (e.g., SQLite for ease of setup, or PostgreSQL if a local instance is available) using LangChain's SQL tools (e.g., `SQLDatabaseChain` or SQL Agent).
+*   **Backend Framework:** FastAPI.
 *   **LLM Orchestration:** LangChain.
 *   **LLM Access & Choice:**
     *   **Primary:** Utilize **OpenRouter** via LangChain integration (`OpenRouterChat`) to access a suitable hosted model (e.g., Claude 3 Haiku, Llama 3 8B, or a free-tier model for initial development).
@@ -185,14 +190,21 @@ To balance ambition with the 30-day challenge timeline, the core focus for Day 5
 *   **Data Processing:**
     *   For CSV: Pandas (leveraging `read_csv`).
     *   For SQL Databases: SQLAlchemy (as used by LangChain's SQL tools).
-*   **Visualization:** Start with Matplotlib/Seaborn for outputs from both CSV and SQL query results. Aim for one Plotly chart if time permits.
-*   **Frontend:** Streamlit.
-*   **Core Language:** Python.
+*   **Visualization:** 
+    *   Backend: Generate Plotly JSON configurations from data analysis.
+    *   Frontend: Render interactive Plotly visualizations using the configurations.
+*   **Frontend:** 
+    *   **React** with **Ant Design** components.
+    *   State management: React Context API (for simplicity).
+    *   Visualization rendering: Plotly.js.
+*   **Core Languages:** 
+    *   Backend: Python
+    *   Frontend: JavaScript/TypeScript
 *   **Further Stretch Goals for Day 5 / Subsequent Iterations:**
     *   Support for Microsoft Excel files.
     *   Broader file format support (JSON, TSV).
     *   Support for other SQL database types or NoSQL databases (e.g., MongoDB).
-    *   More advanced interactive visualizations with Plotly.
+    *   More advanced interactive visualizations.
     *   UI elements to select between OpenRouter models or local LLMs.
 
-This revised focus ensures that core connectivity to both flat files (CSV) and relational databases (SQL) is achieved on Day 5, with flexible LLM access.
+This revised focus ensures that core connectivity to both flat files (CSV) and relational databases (SQL) is achieved on Day 5, with an improved user experience through the React frontend and interactive visualizations.
