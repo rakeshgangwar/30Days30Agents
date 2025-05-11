@@ -34,6 +34,7 @@ class DBConnectionResponse(BaseModel):
     success: bool = Field(..., description="Whether the connection was successful")
     message: str = Field(..., description="Status message")
     tables: Optional[List[str]] = Field(None, description="List of tables in the database")
+    connection_id: Optional[str] = Field(None, description="ID of the database connection")
     error: Optional[str] = Field(None, description="Error message if connection failed")
 
 

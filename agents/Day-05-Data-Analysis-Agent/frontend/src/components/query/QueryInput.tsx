@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Button, 
-  Card, 
-  CardContent, 
-  CircularProgress, 
-  TextField, 
-  Typography, 
-  Alert 
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  TextField,
+  Typography,
+  Alert
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { useAppContext } from '../../contexts/AppContext';
@@ -17,28 +17,28 @@ const QueryInput: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
-  
+
   const isCSVActive = state.dataSource === 'csv' && state.csv.fileId;
   const isDatabaseActive = state.dataSource === 'database' && state.database.connected;
   const isActive = isCSVActive || isDatabaseActive;
-  
+
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
     dispatch({ type: 'SET_QUERY', payload: event.target.value });
   };
-  
+
   const handleSubmit = async () => {
     if (!query.trim()) {
       setError('Please enter a query');
       return;
     }
-    
+
     setError(null);
     dispatch({ type: 'SET_QUERY_LOADING', payload: true });
-    
+
     try {
       let response;
-      
+
       if (isCSVActive && state.csv.fileId) {
         response = await api.queryCSV(state.csv.fileId, query);
       } else if (isDatabaseActive && state.database.connectionId) {
@@ -46,51 +46,67 @@ const QueryInput: React.FC = () => {
       } else {
         throw new Error('No active data source');
       }
-      
+
       const data = response.data;
-      
+
       if (data.success && data.result) {
         dispatch({ type: 'SET_QUERY_RESULT', payload: data.result });
       } else {
-        dispatch({ 
-          type: 'SET_QUERY_ERROR', 
-          payload: data.error || 'Failed to process query' 
+        dispatch({
+          type: 'SET_QUERY_ERROR',
+          payload: data.error || 'Failed to process query'
         });
       }
     } catch (err) {
       console.error('Error processing query:', err);
-      dispatch({ 
-        type: 'SET_QUERY_ERROR', 
-        payload: 'Error processing query. Please try again.' 
+
+      // Try to extract a more detailed error message if available
+      let errorMessage = 'Error processing query. Please try again.';
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      // If it's an Axios error, try to get the error from the response
+      if (err && typeof err === 'object' && 'response' in err && err.response) {
+        const axiosErr = err as any;
+        if (axiosErr.response.data && axiosErr.response.data.error) {
+          errorMessage = axiosErr.response.data.error;
+        }
+      }
+
+      dispatch({
+        type: 'SET_QUERY_ERROR',
+        payload: errorMessage
       });
     }
   };
-  
+
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && event.ctrlKey) {
       handleSubmit();
     }
   };
-  
+
   return (
     <Card variant="outlined" sx={{ mb: 3 }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Natural Language Query
         </Typography>
-        
+
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
-        
+
         {!isActive && (
           <Alert severity="info" sx={{ mb: 2 }}>
             Please select and connect to a data source first
           </Alert>
         )}
-        
+
         <TextField
           fullWidth
           multiline
@@ -103,12 +119,12 @@ const QueryInput: React.FC = () => {
           disabled={!isActive}
           sx={{ mb: 2 }}
         />
-        
+
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="caption" color="text.secondary">
             Press Ctrl+Enter to submit
           </Typography>
-          
+
           <Button
             variant="contained"
             color="primary"

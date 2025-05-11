@@ -57,7 +57,7 @@ const DBConnection: React.FC = () => {
         dispatch({
           type: 'SET_DB_CONNECTION',
           payload: {
-            connectionId: `${dbType}_${Date.now()}`, // Generate a simple ID
+            connectionId: data.connection_id || `${dbType}_${Date.now()}`, // Use server-provided ID or fallback
             dbType,
             tables: data.tables || [],
             connected: true

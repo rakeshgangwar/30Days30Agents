@@ -102,22 +102,29 @@ def initialize_sql_agent(llm: BaseLanguageModel, db: SQLDatabase,
         Optional[Any]: SQL agent or None if initialization fails
     """
     try:
+        logger.info(f"Initializing SQL agent with LLM type: {type(llm).__name__}")
+
         # Create a toolkit with the database
         toolkit = SQLDatabaseToolkit(db=db, llm=llm)
+        logger.info(f"Created SQL toolkit: {type(toolkit).__name__}")
 
-        # Create the SQL agent
+        # Create the SQL agent with a more compatible agent type
         agent = create_sql_agent(
             llm=llm,
             toolkit=toolkit,
             verbose=verbose,
-            agent_type="openai-tools",
+            agent_type="zero-shot-react-description",  # More compatible with various LLMs
             max_iterations=settings.AGENT_MAX_ITERATIONS,
             early_stopping_method=settings.AGENT_EARLY_STOPPING_METHOD
         )
 
+        logger.info(f"SQL agent initialized successfully: {type(agent).__name__}")
         return agent
     except Exception as e:
         logger.error(f"Error initializing SQL agent: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         return None
 
 
@@ -243,11 +250,21 @@ def process_sql_query(agent: Any, query: str) -> Dict[str, Any]:
         Dict[str, Any]: Result from the agent
     """
     try:
+        logger.info(f"Processing SQL query: {query}")
+        logger.info(f"Agent type: {type(agent).__name__}")
+
+        # Invoke the agent with the query
         result = agent.invoke({"input": query})
+
+        logger.info(f"Query processed successfully")
         return {"success": True, "result": result}
     except Exception as e:
         logger.error(f"Error processing SQL query with agent: {str(e)}")
-        return {"success": False, "error": f"Error: {str(e)}"}
+        logger.error(f"Exception type: {type(e).__name__}")
+        logger.error(f"Exception details: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return {"success": False, "error": f"Error processing query: {str(e)}"}
 
 
 def generate_sql_query(chain: Any, question: str) -> str:

@@ -25,6 +25,7 @@ export interface DBConnectionResponse {
   success: boolean;
   message: string;
   tables?: string[];
+  connection_id?: string;
   error?: string;
 }
 
