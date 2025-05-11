@@ -116,6 +116,92 @@ def display_visualization(fig: plt.Figure) -> None:
         st.error("No visualization to display")
 
 
+def create_fallback_visualization(df: pd.DataFrame, query: str) -> Tuple[Optional[plt.Figure], str]:
+    """
+    Create a fallback visualization when the LLM-generated code fails.
+    This function creates a simple visualization based on the DataFrame structure.
+
+    Args:
+        df: The DataFrame to visualize
+        query: The user's query (used to determine visualization type)
+
+    Returns:
+        tuple: (fig, success_message) or (None, error_message)
+    """
+    try:
+        # Create a figure
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Determine the best visualization type based on the data structure
+        if len(df.columns) == 2:
+            x_col = df.columns[0]
+            y_col = df.columns[1]
+
+            # Check if the second column is numeric (for bar charts/histograms)
+            if df.dtypes.iloc[1].kind in 'iuf':
+                # Create a bar chart
+                bars = ax.bar(df[x_col], df[y_col], color='skyblue', edgecolor='navy')
+
+                # Add data labels
+                for bar in bars:
+                    height = bar.get_height()
+                    ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                           f'{height:.0f}', ha='center', va='bottom')
+
+                plt.title(f'{y_col} by {x_col}')
+                plt.xlabel(x_col)
+                plt.ylabel(y_col)
+                plt.xticks(rotation=45)
+                plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+            # If both columns are numeric, create a scatter plot
+            elif df.dtypes.iloc[0].kind in 'iuf' and df.dtypes.iloc[1].kind in 'iuf':
+                plt.scatter(df[x_col], df[y_col], alpha=0.7)
+                plt.title(f'Relationship between {x_col} and {y_col}')
+                plt.xlabel(x_col)
+                plt.ylabel(y_col)
+                plt.grid(True, linestyle='--', alpha=0.7)
+
+            # Otherwise, create a simple line chart
+            else:
+                plt.plot(df[x_col], df[y_col], marker='o')
+                plt.title(f'Trend of {y_col} by {x_col}')
+                plt.xlabel(x_col)
+                plt.ylabel(y_col)
+                plt.grid(True, linestyle='--', alpha=0.7)
+
+        # For DataFrames with more columns, create a summary visualization
+        else:
+            # Get numeric columns
+            numeric_cols = df.select_dtypes(include=['number']).columns
+
+            if len(numeric_cols) > 0:
+                # Create a bar chart of the mean of each numeric column
+                means = df[numeric_cols].mean().sort_values(ascending=False)
+                means.plot(kind='bar', ax=ax, color='skyblue', edgecolor='navy')
+                plt.title('Average Values by Column')
+                plt.xlabel('Column')
+                plt.ylabel('Average Value')
+                plt.xticks(rotation=45)
+                plt.grid(axis='y', linestyle='--', alpha=0.7)
+            else:
+                # Create a count plot of the first categorical column
+                first_col = df.columns[0]
+                value_counts = df[first_col].value_counts().sort_values(ascending=False).head(10)
+                value_counts.plot(kind='bar', ax=ax, color='skyblue', edgecolor='navy')
+                plt.title(f'Count of {first_col} Values')
+                plt.xlabel(first_col)
+                plt.ylabel('Count')
+                plt.xticks(rotation=45)
+                plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+        plt.tight_layout()
+        return fig, "Fallback visualization created successfully"
+
+    except Exception as e:
+        return None, f"Failed to create fallback visualization: {str(e)}"
+
+
 def extract_code_from_response(response: str) -> str:
     """
     Extract Python code from an LLM response.
@@ -275,7 +361,38 @@ def generate_visualization_prompt(query: str, df: pd.DataFrame) -> str:
     }
 
     # Add sample data (first few rows)
-    sample_data = df.head(3).to_dict(orient='records')
+    sample_data = df.head(3).to_string()
+
+    # Determine the most appropriate visualization type based on the data structure
+    viz_type = "auto"
+
+    # Analyze the data structure to suggest an appropriate visualization type
+    # This treats all visualization types equally without special cases
+
+    # For count data with two columns, suggest a bar chart
+    if len(df.columns) == 2 and df.dtypes.iloc[1].kind in 'iuf':
+        viz_type = "bar"
+
+    # For time series data, suggest a line chart
+    date_cols = [col for col, dtype in df.dtypes.items() if 'date' in str(dtype).lower() or 'time' in str(dtype).lower()]
+    if date_cols:
+        viz_type = "line"
+
+    # If the user explicitly requests a specific visualization type, use that
+    chart_types = {
+        "histogram": "histogram",
+        "bar": "bar",
+        "line": "line",
+        "scatter": "scatter",
+        "pie": "pie",
+        "box": "box"
+    }
+
+    # Check if any chart type is mentioned in the query
+    for chart_type, viz_value in chart_types.items():
+        if chart_type in query.lower():
+            viz_type = viz_value
+            break
 
     prompt = f"""
 You are a data visualization expert. Create Python code to visualize the following data based on the user's query.
@@ -291,16 +408,31 @@ DATAFRAME INFORMATION:
 SAMPLE DATA (first 3 rows):
 {sample_data}
 
+SUGGESTED VISUALIZATION TYPE: {viz_type}
+
 INSTRUCTIONS:
-1. Generate Python code using matplotlib and/or seaborn to create the visualization.
+1. Generate Python code using matplotlib and/or seaborn to create a clear, professional visualization.
 2. Use the variable 'df' which already contains the DataFrame.
 3. Include necessary imports (matplotlib.pyplot as plt, seaborn as sns).
-4. Set an appropriate figure size and title.
-5. Include code to create the figure (e.g., fig, ax = plt.subplots()).
-6. Do NOT include plt.show() as the figure will be displayed by Streamlit.
-7. Return ONLY the Python code within a code block (```python ... ```).
-8. Make sure the code is complete and can run independently.
-9. Use appropriate colors, labels, and styling for a professional visualization.
+4. Set an appropriate figure size (figsize=(10, 6) is a good default).
+5. Add a descriptive title, axis labels, and legend if applicable.
+6. Use appropriate colors and styling for a professional look.
+7. Include code to create the figure (e.g., fig, ax = plt.subplots()).
+8. Do NOT include plt.show() as the figure will be displayed by Streamlit.
+9. Return ONLY the Python code within a code block (```python ... ```).
+10. Make sure the code is complete and can run independently.
+
+IMPORTANT NOTES:
+- Choose the most appropriate visualization type based on the data structure and the user's query.
+- For categorical data with counts/frequencies, use bar charts (plt.bar() or sns.barplot()).
+- For numerical distributions, use histograms (plt.hist() or sns.histplot()) with appropriate bins.
+- For time series data, use line charts (plt.plot() or sns.lineplot()) with proper date formatting.
+- For relationships between variables, use scatter plots (plt.scatter() or sns.scatterplot()).
+- For part-to-whole relationships, use pie charts (plt.pie()).
+- For comparing distributions, use box plots (plt.boxplot() or sns.boxplot()).
+- Always include plt.tight_layout() to ensure the figure is properly displayed.
+- Rotate x-axis labels if they might overlap (plt.xticks(rotation=45)).
+- Use appropriate colors, legends, and grid lines to enhance readability.
 
 Example response format:
 ```python

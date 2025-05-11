@@ -10,6 +10,7 @@ import pandas as pd
 import traceback
 import sys
 import os
+import re
 from langchain_core.messages import HumanMessage
 
 # Add the parent directory to the Python path so we can import modules
@@ -24,13 +25,24 @@ from core.agent import initialize_agent, process_query
 
 # Import data handling modules
 from data.csv_handler import load_csv_file, display_dataframe_info
-from data.sql_handler import create_db_connection, execute_sql_query
+from data.sql_handler import (
+    create_db_connection,
+    execute_sql_query,
+    create_langchain_sql_database,
+    initialize_sql_agent,
+    initialize_sql_chain,
+    get_database_info,
+    process_sql_query,
+    generate_sql_query,
+    get_table_names
+)
 from data.visualization import (
     create_visualization,
     display_visualization,
     extract_code_from_response,
     execute_visualization_code,
-    generate_visualization_prompt
+    generate_visualization_prompt,
+    create_fallback_visualization
 )
 
 # Import utility functions
@@ -65,6 +77,15 @@ if 'llm' not in st.session_state:
     st.session_state.llm = None
 if 'agent' not in st.session_state:
     st.session_state.agent = None
+# SQL-specific session state variables
+if 'sql_database' not in st.session_state:
+    st.session_state.sql_database = None
+if 'sql_agent' not in st.session_state:
+    st.session_state.sql_agent = None
+if 'sql_chain' not in st.session_state:
+    st.session_state.sql_chain = None
+if 'table_names' not in st.session_state:
+    st.session_state.table_names = []
 
 def main():
     """Main application function"""
@@ -193,62 +214,259 @@ def main():
                                             render_warning("Could not generate visualization code from the LLM response.")
 
                         elif data_source == "SQL Database":
-                            # For SQL, we'll just use the LLM directly for now
-                            # In Task 2.3, we'll implement proper SQL integration
-                            prompt = f"""
-                            I have a SQL database and I want to answer this question: {query}
+                            # Check if we have the SQL database and agent initialized
+                            if not st.session_state.sql_database:
+                                render_error("SQL Database not properly initialized. Please reconnect to the database.")
+                                return
 
-                            Please help me formulate a SQL query that would answer this question.
-                            Only return the SQL query, nothing else.
-                            """
+                            # Display database schema information in an expander
+                            with st.expander("Database Schema Information"):
+                                st.markdown("#### Tables")
+                                for table in st.session_state.table_names:
+                                    st.markdown(f"- {table}")
 
-                            response = st.session_state.llm.invoke([HumanMessage(content=prompt)])
-                            sql_query = response.content.strip()
+                                # Add a button to show detailed schema
+                                if st.button("Show Detailed Schema"):
+                                    schema_info = get_database_info(st.session_state.sql_database)
+                                    st.markdown(schema_info)
 
-                            st.markdown("### Generated SQL Query")
-                            st.code(sql_query, language="sql")
+                            # Process the query using the SQL agent if available
+                            if st.session_state.sql_agent:
+                                st.markdown("### Using SQL Agent")
 
-                            st.markdown("### Query Results")
-                            # Execute the SQL query if we have a database connection
-                            if st.session_state.db_engine:
-                                try:
-                                    success, result = execute_sql_query(st.session_state.db_engine, sql_query)
-                                    if success and isinstance(result, pd.DataFrame):
-                                        st.dataframe(result, use_container_width=True)
+                                with st.spinner("Processing your query with SQL Agent..."):
+                                    # Process the query using the SQL agent
+                                    agent_result = process_sql_query(st.session_state.sql_agent, query)
 
-                                        # If the query is a visualization request, generate a visualization
-                                        if detect_visualization_request(query) and not result.empty:
-                                            st.markdown("### Visualization")
-
-                                            with st.spinner("Generating visualization..."):
-                                                # Generate a specialized prompt for visualization
-                                                viz_prompt = generate_visualization_prompt(query, result)
-
-                                                # Get visualization code from LLM
-                                                viz_response = st.session_state.llm.invoke([HumanMessage(content=viz_prompt)])
-                                                viz_code = extract_code_from_response(viz_response.content)
-
-                                                if viz_code:
-                                                    # Display the generated code in an expander
-                                                    with st.expander("View Generated Visualization Code"):
-                                                        st.code(viz_code, language="python")
-
-                                                    # Execute the code and get the figure
-                                                    fig, message = execute_visualization_code(viz_code, result)
-
-                                                    if fig:
-                                                        # Display the visualization
-                                                        display_visualization(fig)
-                                                    else:
-                                                        render_warning(f"Failed to create visualization: {message}")
-                                                else:
-                                                    render_warning("Could not generate visualization code from the LLM response.")
+                                    # Store the agent's response for later display
+                                    agent_output = ""
+                                    if isinstance(agent_result, dict) and 'output' in agent_result:
+                                        agent_output = agent_result['output']
                                     else:
-                                        render_error(f"Error executing SQL query: {result}")
-                                except Exception as e:
-                                    render_error(f"Error executing SQL query: {str(e)}")
+                                        agent_output = str(agent_result)
+
+                                    # Try to extract SQL query from the agent's response
+                                    sql_query = None
+                                    if isinstance(agent_result, dict) and 'output' in agent_result:
+                                        # Look for SQL code blocks in the output
+                                        sql_blocks = re.findall(r"```sql\s*(.*?)\s*```", agent_result['output'], re.DOTALL)
+                                        if sql_blocks:
+                                            sql_query = sql_blocks[0].strip()
+
+                                    # If we found a SQL query, execute it and get the results
+                                    result_df = None
+                                    if sql_query:
+                                        st.markdown("### Generated SQL Query")
+                                        st.code(sql_query, language="sql")
+
+                                        st.markdown("### Query Results")
+                                        try:
+                                            success, result = execute_sql_query(st.session_state.db_engine, sql_query)
+                                            if success and isinstance(result, pd.DataFrame):
+                                                result_df = result
+                                                st.dataframe(result, use_container_width=True)
+                                            else:
+                                                render_error(f"Error executing SQL query: {result}")
+                                        except Exception as e:
+                                            render_error(f"Error executing SQL query: {str(e)}")
+
+                                    # Check for visualization requests in both the original query and the agent's response
+                                    # This ensures we catch visualization requests that might be in either place
+                                    is_viz_request = detect_visualization_request(query)
+
+                                    # Also check the agent's response for visualization terms
+                                    if not is_viz_request and isinstance(agent_output, str):
+                                        is_viz_request = detect_visualization_request(agent_output)
+
+                                    # Add debugging information
+                                    st.markdown("### Debug Information")
+                                    st.write(f"Query: '{query}'")
+                                    st.write(f"Visualization detected in query: {detect_visualization_request(query)}")
+                                    if isinstance(agent_output, str):
+                                        st.write(f"Agent output contains visualization terms: {detect_visualization_request(agent_output)}")
+                                    st.write(f"Final visualization decision: {is_viz_request}")
+
+                                    if is_viz_request and result_df is not None and not result_df.empty:
+                                        st.markdown("### Visualization")
+
+                                        with st.spinner("Generating visualization..."):
+                                            # Generate a specialized prompt for the visualization
+                                            viz_prompt = generate_visualization_prompt(query, result_df)
+
+                                            # Get visualization code from LLM
+                                            viz_response = st.session_state.llm.invoke([HumanMessage(content=viz_prompt)])
+                                            viz_code = extract_code_from_response(viz_response.content)
+
+                                            if viz_code:
+                                                # Display the generated code
+                                                with st.expander("View Generated Visualization Code"):
+                                                    st.code(viz_code, language="python")
+
+                                                # Execute the code and display the figure
+                                                fig, message = execute_visualization_code(viz_code, result_df)
+                                                if fig:
+                                                    display_visualization(fig)
+                                                else:
+                                                    render_warning(f"Failed to create visualization: {message}")
+
+                                                    # Try a more robust fallback visualization
+                                                    st.markdown("### Fallback Visualization")
+                                                    fallback_fig, fallback_msg = create_fallback_visualization(result_df, query)
+                                                    if fallback_fig:
+                                                        st.pyplot(fallback_fig)
+                                                    else:
+                                                        render_warning(f"Fallback visualization failed: {fallback_msg}")
+                                            else:
+                                                render_warning("Could not generate visualization code from the LLM response.")
+
+
+                                    # Display the agent's response after handling visualizations
+                                    st.markdown("### Agent Response")
+                                    st.markdown(agent_output)
+
+                            # If SQL agent is not available, fall back to SQL chain
+                            elif st.session_state.sql_chain:
+                                st.markdown("### Using SQL Chain")
+
+                                with st.spinner("Generating SQL query..."):
+                                    # Generate SQL query using the chain
+                                    sql_query = generate_sql_query(st.session_state.sql_chain, query)
+
+                                    # Display the generated SQL query
+                                    st.markdown("### Generated SQL Query")
+                                    st.code(sql_query, language="sql")
+
+                                    # Execute the SQL query
+                                    st.markdown("### Query Results")
+                                    result_df = None
+                                    try:
+                                        success, result = execute_sql_query(st.session_state.db_engine, sql_query)
+                                        if success and isinstance(result, pd.DataFrame):
+                                            result_df = result
+                                            st.dataframe(result, use_container_width=True)
+                                        else:
+                                            render_error(f"Error executing SQL query: {result}")
+                                    except Exception as e:
+                                        render_error(f"Error executing SQL query: {str(e)}")
+
+                                    # Handle visualization if requested
+                                    # Check both the original query and the SQL query for visualization terms
+                                    is_viz_request = detect_visualization_request(query)
+
+                                    # Also check the SQL query for visualization terms
+                                    if not is_viz_request and isinstance(sql_query, str):
+                                        is_viz_request = detect_visualization_request(sql_query)
+
+                                    if is_viz_request and result_df is not None and not result_df.empty:
+                                        st.markdown("### Visualization")
+
+                                        with st.spinner("Generating visualization..."):
+                                            # Generate a specialized prompt for the visualization
+                                            viz_prompt = generate_visualization_prompt(query, result_df)
+
+                                            # Get visualization code from LLM
+                                            viz_response = st.session_state.llm.invoke([HumanMessage(content=viz_prompt)])
+                                            viz_code = extract_code_from_response(viz_response.content)
+
+                                            if viz_code:
+                                                # Display the generated code
+                                                with st.expander("View Generated Visualization Code"):
+                                                    st.code(viz_code, language="python")
+
+                                                # Execute the code and display the figure
+                                                fig, message = execute_visualization_code(viz_code, result_df)
+                                                if fig:
+                                                    display_visualization(fig)
+                                                else:
+                                                    render_warning(f"Failed to create visualization: {message}")
+
+                                                    # Try a more robust fallback visualization
+                                                    st.markdown("### Fallback Visualization")
+                                                    fallback_fig, fallback_msg = create_fallback_visualization(result_df, query)
+                                                    if fallback_fig:
+                                                        st.pyplot(fallback_fig)
+                                                    else:
+                                                        render_warning(f"Fallback visualization failed: {fallback_msg}")
+                                            else:
+                                                render_warning("Could not generate visualization code from the LLM response.")
+
+                            # If neither SQL agent nor SQL chain is available, fall back to basic LLM
                             else:
-                                render_info("SQL query execution will be implemented in Task 2.4")
+                                st.markdown("### Using Basic LLM for SQL Generation")
+                                render_warning("SQL Agent and Chain not available. Using basic LLM for SQL generation.")
+
+                                prompt = f"""
+                                I have a SQL database with the following tables: {', '.join(st.session_state.table_names)}
+                                I want to answer this question: {query}
+
+                                Please help me formulate a SQL query that would answer this question.
+                                Only return the SQL query, nothing else.
+                                """
+
+                                response = st.session_state.llm.invoke([HumanMessage(content=prompt)])
+                                sql_query = response.content.strip()
+
+                                st.markdown("### Generated SQL Query")
+                                st.code(sql_query, language="sql")
+
+                                st.markdown("### Query Results")
+                                # Execute the SQL query if we have a database connection
+                                result_df = None
+                                if st.session_state.db_engine:
+                                    try:
+                                        success, result = execute_sql_query(st.session_state.db_engine, sql_query)
+                                        if success and isinstance(result, pd.DataFrame):
+                                            result_df = result
+                                            st.dataframe(result, use_container_width=True)
+                                        else:
+                                            render_error(f"Error executing SQL query: {result}")
+                                    except Exception as e:
+                                        render_error(f"Error executing SQL query: {str(e)}")
+                                else:
+                                    render_error("Database connection not available.")
+
+                                # If the query is a visualization request, generate a visualization
+                                # Check both the original query and the SQL query for visualization terms
+                                is_viz_request = detect_visualization_request(query)
+
+                                # Also check the SQL query for visualization terms
+                                if not is_viz_request and isinstance(sql_query, str):
+                                    is_viz_request = detect_visualization_request(sql_query)
+
+                                if is_viz_request and result_df is not None and not result_df.empty:
+                                    st.markdown("### Visualization")
+
+                                    with st.spinner("Generating visualization..."):
+                                        # Generate a specialized prompt for the visualization
+                                        viz_prompt = generate_visualization_prompt(query, result_df)
+
+                                        # Get visualization code from LLM
+                                        viz_response = st.session_state.llm.invoke([HumanMessage(content=viz_prompt)])
+                                        viz_code = extract_code_from_response(viz_response.content)
+
+                                        if viz_code:
+                                            # Display the generated code in an expander
+                                            with st.expander("View Generated Visualization Code"):
+                                                st.code(viz_code, language="python")
+
+                                            # Execute the code and get the figure
+                                            fig, message = execute_visualization_code(viz_code, result_df)
+
+                                            if fig:
+                                                # Display the visualization
+                                                display_visualization(fig)
+                                            else:
+                                                render_warning(f"Failed to create visualization: {message}")
+
+                                                # Try a more robust fallback visualization
+                                                st.markdown("### Fallback Visualization")
+                                                fallback_fig, fallback_msg = create_fallback_visualization(result_df, query)
+                                                if fallback_fig:
+                                                    st.pyplot(fallback_fig)
+                                                else:
+                                                    render_warning(f"Fallback visualization failed: {fallback_msg}")
+                                        else:
+                                            render_warning("Could not generate visualization code from the LLM response.")
 
                 except Exception as e:
                     error_details = traceback.format_exc()
@@ -299,15 +517,71 @@ def handle_sql_connection():
 
     db_type, connection_params = render_sql_connection_section()
 
-    if st.button("Connect"):
+    # Display database schema information if already connected
+    if st.session_state.db_engine and st.session_state.sql_database:
+        st.markdown("### Database Information")
+
+        # Display table names
+        if st.session_state.table_names:
+            st.markdown("#### Tables")
+            for table in st.session_state.table_names:
+                st.markdown(f"- {table}")
+
+        # Add a button to show detailed schema information
+        if st.button("Show Database Schema"):
+            with st.spinner("Loading database schema..."):
+                schema_info = get_database_info(st.session_state.sql_database)
+                with st.expander("Database Schema", expanded=True):
+                    st.markdown(schema_info)
+
+    # Connect button
+    if st.button("Connect to Database"):
         with st.spinner("Connecting to database..."):
+            # Create SQLAlchemy engine
             engine = create_db_connection(db_type, **connection_params)
             if engine:
                 st.session_state.db_engine = engine
-                render_success(f"Connected to {db_type.capitalize()} database")
 
-                # Initialize LLM for SQL queries
-                initialize_llm_and_agent()
+                # Get table names
+                st.session_state.table_names = get_table_names(engine)
+
+                # Create LangChain SQLDatabase
+                sql_db = create_langchain_sql_database(
+                    engine=engine,
+                    sample_rows_in_table_info=3
+                )
+
+                if sql_db:
+                    st.session_state.sql_database = sql_db
+
+                    # Initialize LLM if not already done
+                    if st.session_state.llm is None:
+                        st.session_state.llm = initialize_llm()
+
+                    # Initialize SQL agent and chain
+                    if st.session_state.llm:
+                        # Initialize SQL agent
+                        sql_agent = initialize_sql_agent(
+                            llm=st.session_state.llm,
+                            db=sql_db,
+                            verbose=True
+                        )
+
+                        if sql_agent:
+                            st.session_state.sql_agent = sql_agent
+
+                        # Initialize SQL chain
+                        sql_chain = initialize_sql_chain(
+                            llm=st.session_state.llm,
+                            db=sql_db
+                        )
+
+                        if sql_chain:
+                            st.session_state.sql_chain = sql_chain
+
+                    render_success(f"Connected to {db_type.capitalize()} database with {len(st.session_state.table_names)} tables")
+                else:
+                    render_error(f"Failed to create LangChain SQLDatabase from {db_type.capitalize()} connection")
             else:
                 render_error(f"Failed to connect to {db_type.capitalize()} database")
 
