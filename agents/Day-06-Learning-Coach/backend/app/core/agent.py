@@ -467,9 +467,12 @@ class LearningCoachAgent:
                         "title": resource["title"],
                         "url": resource["url"],
                         "type": resource["type"],
-                        "description": resource["description"]
+                        "description": resource["description"],
+                        "topic_order": i+1,  # Associate resource with its topic
+                        "topic_id": i+1,     # Add topic_id for compatibility
+                        "topic_name": topic["title"]  # Add topic name for better filtering
                     }
-                    for topic in learning_path["topics"]
+                    for i, topic in enumerate(learning_path["topics"])
                     for resource in topic.get("resources", [])
                 ],
                 progress={"completed_topics": 0, "total_topics": len(learning_path["topics"])}
@@ -545,6 +548,7 @@ class LearningCoachAgent:
             from sqlalchemy.orm import Session
             from app.db.base import get_db
             from app.models.resource import Resource as ResourceModel
+            from app.models.learning_path import LearningPath
 
             # Get user ID from context if available
             user_id = state["context"].get("user_id")
@@ -569,6 +573,24 @@ class LearningCoachAgent:
                         source=resource.get("source", ""),
                         user_id=int(user_id) if user_id and user_id.isdigit() else None
                     )
+
+                    # If we have a learning path ID in the context, associate this resource with it
+                    if "learning_path_id" in state["context"] and "last_topic" in state["context"]:
+                        # Get the learning path from the database
+                        learning_path = db.query(LearningPath).filter(LearningPath.id == state["context"]["learning_path_id"]).first()
+                        if learning_path:
+                            # Find the topic order for the current topic
+                            topic_order = None
+                            for t in learning_path.topics:
+                                if t.get("name") == state["context"]["last_topic"]:
+                                    topic_order = t.get("order")
+                                    break
+
+                            # Add topic association to the resource
+                            if topic_order:
+                                db_resource.topic_order = topic_order
+                                db_resource.topic_id = topic_order
+                                db_resource.topic_name = state["context"]["last_topic"]
 
                     # Add to database and commit
                     db.add(db_resource)

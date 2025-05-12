@@ -3,6 +3,7 @@ import { Box } from '@chakra-ui/react';
 import HomePage from './pages/HomePage';
 import ChatPage from './pages/ChatPage';
 import LearningPathsPage from './pages/LearningPathsPage';
+import LearningPathViewPage from './pages/LearningPathViewPage';
 import ResourcesPage from './pages/ResourcesPage';
 import QuizzesPage from './pages/QuizzesPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -16,6 +17,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="chat" element={<ChatPage />} />
           <Route path="learning-paths" element={<LearningPathsPage />} />
+          <Route path="learning-paths/:id" element={<LearningPathViewPage />} />
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="quizzes" element={<QuizzesPage />} />
           <Route path="*" element={<NotFoundPage />} />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Heading,
@@ -111,7 +112,7 @@ const LearningPathsPage = () => {
         <Box textAlign="center" p={8} borderWidth="1px" borderRadius="lg">
           <Text mb={4}>You don't have any learning paths yet.</Text>
           <Button colorScheme="blue" asChild>
-            <a href="/chat">Chat with Learning Coach to create one</a>
+            <RouterLink to="/chat">Chat with Learning Coach to create one</RouterLink>
           </Button>
         </Box>
       ) : (
@@ -147,8 +148,15 @@ const LearningPathsPage = () => {
                 </Box>
               </Card.Body>
               <Card.Footer>
-                <Button colorScheme="blue" size="sm" width="full">
-                  Continue Learning
+                <Button
+                  colorScheme="blue"
+                  size="sm"
+                  width="full"
+                  asChild
+                >
+                  <RouterLink to={`/learning-paths/${path.id}`}>
+                    Continue Learning
+                  </RouterLink>
                 </Button>
               </Card.Footer>
             </Card.Root>
