@@ -19,7 +19,7 @@ import {
 } from './messages';
 
 // Define message types
-type MessageType = 'text' | 'learning_path' | 'resources' | 'quiz';
+type MessageType = 'text' | 'learning_path' | 'resources' | 'quiz' | 'explanation' | 'error';
 
 interface Message {
   id: string;
@@ -50,10 +50,9 @@ const ChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Function to detect message type and extract structured data
-  const processAgentResponse = (responseText: string): { type: MessageType; text: string; data?: any } => {
-    // Default to text message
-    let type: MessageType = 'text';
+  // Function to extract structured data from response text
+  const processAgentResponse = (responseText: string): { text: string; data?: any } => {
+    // Default values
     let data = null;
     let text = responseText;
 
@@ -68,7 +67,6 @@ const ChatInterface = () => {
         if (jsonMatch && jsonMatch[1]) {
           const jsonData = JSON.parse(jsonMatch[1]);
           if (jsonData.topics && Array.isArray(jsonData.topics)) {
-            type = 'learning_path';
             data = jsonData;
             // Remove the JSON from the content
             text = responseText.replace(/```json\n[\s\S]*?\n```/, '');
@@ -81,7 +79,6 @@ const ChatInterface = () => {
             try {
               const jsonData = JSON.parse(responseText.substring(startIndex, endIndex));
               if (jsonData.topics && Array.isArray(jsonData.topics)) {
-                type = 'learning_path';
                 data = jsonData;
                 // Remove the JSON from the content
                 text = responseText.replace(responseText.substring(startIndex, endIndex), '');
@@ -103,7 +100,6 @@ const ChatInterface = () => {
         if (jsonMatch && jsonMatch[1]) {
           const jsonData = JSON.parse(jsonMatch[1]);
           if (jsonData.resources && Array.isArray(jsonData.resources)) {
-            type = 'resources';
             data = jsonData;
             // Remove the JSON from the content
             text = responseText.replace(/```json\n[\s\S]*?\n```/, '');
@@ -121,7 +117,6 @@ const ChatInterface = () => {
         if (jsonMatch && jsonMatch[1]) {
           const jsonData = JSON.parse(jsonMatch[1]);
           if (jsonData.questions && Array.isArray(jsonData.questions)) {
-            type = 'quiz';
             data = jsonData;
             // Remove the JSON from the content
             text = responseText.replace(/```json\n[\s\S]*?\n```/, '');
@@ -132,7 +127,7 @@ const ChatInterface = () => {
       console.error('Error processing agent response:', error);
     }
 
-    return { type, text, data };
+    return { text, data };
   };
 
   const handleSend = async () => {
@@ -156,8 +151,16 @@ const ChatInterface = () => {
         user_input: input,
       });
 
-      // Process the response to detect message type and extract data
-      const { type, text, data } = processAgentResponse(response.response);
+      // Get the response type from the API response
+      let messageType: MessageType = response.response_type as MessageType;
+
+      // Process the response to detect structured data
+      const { text, data } = processAgentResponse(response.response);
+
+      // If the API doesn't provide a valid message type, use the one detected from content
+      if (!['text', 'learning_path', 'resources', 'quiz', 'explanation', 'error'].includes(messageType)) {
+        messageType = 'text';
+      }
 
       // Add agent response
       const agentMessage: Message = {
@@ -165,7 +168,7 @@ const ChatInterface = () => {
         text: text,
         sender: 'agent',
         timestamp: new Date(),
-        type: type,
+        type: messageType,
         data: data
       };
       setMessages((prev) => [...prev, agentMessage]);

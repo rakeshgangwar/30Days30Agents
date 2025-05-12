@@ -16,7 +16,7 @@ agent_service = AgentService()
 
 class AgentRequest(BaseModel):
     """Agent request schema."""
-    
+
     user_input: str
     user_id: Optional[int] = None
     context: Optional[Dict[str, Any]] = None
@@ -24,8 +24,9 @@ class AgentRequest(BaseModel):
 
 class AgentResponse(BaseModel):
     """Agent response schema."""
-    
+
     response: str
+    response_type: str
     context: Dict[str, Any]
 
 

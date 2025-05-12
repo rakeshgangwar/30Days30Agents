@@ -8,6 +8,7 @@ interface AgentRequest {
 
 interface AgentResponse {
   response: string;
+  response_type: string;
   context: Record<string, any>;
 }
 

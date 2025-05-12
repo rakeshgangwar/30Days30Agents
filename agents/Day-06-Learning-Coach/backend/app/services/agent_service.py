@@ -86,8 +86,19 @@ class AgentService:
             else:
                 response_text = f"I received your message about {user_input}. This is a mock response since no OpenAI API key is configured."
 
+            # Determine response type based on the input
+            if "learning path" in user_input.lower():
+                response_type = "learning_path"
+            elif "quiz" in user_input.lower():
+                response_type = "quiz"
+            elif "resources" in user_input.lower() or "recommend" in user_input.lower():
+                response_type = "resources"
+            else:
+                response_type = "general"
+
             mock_response = {
                 "response": response_text,
+                "response_type": response_type,
                 "context": context
             }
 
@@ -111,5 +122,6 @@ class AgentService:
             # Return a fallback response
             return {
                 "response": "I'm sorry, I encountered an error while processing your request. Please try again with a different query.",
+                "response_type": "error",
                 "context": context
             }
