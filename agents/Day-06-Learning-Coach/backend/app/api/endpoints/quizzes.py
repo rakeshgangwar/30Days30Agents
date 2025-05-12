@@ -3,6 +3,8 @@ Quizzes endpoints for the Learning Coach Agent.
 """
 
 from typing import List, Optional, Dict, Any
+import uuid
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -10,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.db.base import get_db
 from app.core.quiz_generator import QuizGenerator
+from app.models import Quiz as QuizModel, QuizAttempt as QuizAttemptModel
 
 router = APIRouter()
 
@@ -18,7 +21,7 @@ quiz_generator = QuizGenerator()
 
 class QuizQuestion(BaseModel):
     """Quiz question schema."""
-    
+
     question: str
     options: List[str]
     correct_answer: int
@@ -27,7 +30,7 @@ class QuizQuestion(BaseModel):
 
 class Quiz(BaseModel):
     """Quiz schema."""
-    
+
     id: str
     title: str
     description: str
@@ -41,7 +44,7 @@ class Quiz(BaseModel):
 
 class QuizAttempt(BaseModel):
     """Quiz attempt schema."""
-    
+
     quiz_id: str
     user_id: str
     answers: List[int]
@@ -63,6 +66,39 @@ def get_quizzes(
     Get all quizzes, optionally filtered by topic, difficulty, and user_id.
     """
     try:
+        # First try to get quizzes from the database
+        query = db.query(QuizModel)
+
+        if topic:
+            query = query.filter(QuizModel.topic == topic)
+
+        if difficulty:
+            query = query.filter(QuizModel.difficulty == difficulty)
+
+        if user_id:
+            query = query.filter(QuizModel.user_id == user_id)
+
+        db_quizzes = query.offset(skip).limit(limit).all()
+
+        # If we have quizzes in the database, return them
+        if db_quizzes:
+            return [
+                {
+                    "id": quiz.id,
+                    "title": quiz.title,
+                    "description": quiz.description,
+                    "topic": quiz.topic,
+                    "difficulty": quiz.difficulty,
+                    "questions": quiz.questions,
+                    "estimated_time_minutes": quiz.estimated_time_minutes,
+                    "created_at": quiz.created_at.isoformat() if quiz.created_at else None,
+                    "user_id": quiz.user_id,
+                    "learning_objectives": quiz.learning_objectives,
+                    "tags": quiz.tags
+                } for quiz in db_quizzes
+            ]
+
+        # Otherwise, fall back to the in-memory quizzes
         quizzes = quiz_generator.get_quizzes(
             topic=topic,
             difficulty=difficulty,
@@ -108,6 +144,7 @@ async def generate_quiz(
     Generate a new quiz based on the given parameters.
     """
     try:
+        # Generate the quiz
         quiz = await quiz_generator.generate_quiz(
             topic=topic,
             difficulty=difficulty,
@@ -116,6 +153,34 @@ async def generate_quiz(
             learning_objectives=learning_objectives,
             user_id=user_id
         )
+
+        # Save the quiz to the database
+        try:
+            # Create a new quiz record
+            db_quiz = QuizModel(
+                id=quiz["id"],
+                title=quiz["title"],
+                description=quiz["description"],
+                topic=quiz["topic"],
+                difficulty=quiz["difficulty"],
+                questions=quiz["questions"],
+                estimated_time_minutes=quiz["estimated_time_minutes"],
+                created_at=datetime.now(timezone.utc),
+                learning_objectives=quiz.get("learning_objectives", []),
+                tags=quiz.get("tags", []),
+                user_id=int(user_id) if user_id and user_id.isdigit() else None
+            )
+
+            # Add to database and commit
+            db.add(db_quiz)
+            db.commit()
+
+            # Add the database ID to the result
+            quiz["db_id"] = db_quiz.id
+        except Exception as db_error:
+            # Log the error but continue with the in-memory quiz
+            print(f"Error saving quiz to database: {str(db_error)}")
+
         return quiz
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating quiz: {str(e)}")
@@ -132,11 +197,38 @@ def submit_quiz_attempt(
     Submit a quiz attempt and get the results.
     """
     try:
+        # Get the result from the quiz generator
         result = quiz_generator.submit_quiz_attempt(
             quiz_id=quiz_id,
             user_id=user_id,
             answers=answers
         )
+
+        # Save the attempt to the database
+        try:
+            # Create a new quiz attempt record
+            db_quiz_attempt = QuizAttemptModel(
+                id=str(uuid.uuid4()),
+                quiz_id=quiz_id,
+                user_id=int(user_id) if user_id and user_id.isdigit() else None,
+                answers=answers,
+                score=result.get("score", 0),
+                correct_answers=result.get("correct_answers", 0),
+                total_questions=result.get("total_questions", 0),
+                feedback=result.get("feedback", {}),
+                completed_at=datetime.now(timezone.utc)
+            )
+
+            # Add to database and commit
+            db.add(db_quiz_attempt)
+            db.commit()
+
+            # Add the database ID to the result
+            result["db_id"] = db_quiz_attempt.id
+        except Exception as db_error:
+            # Log the error but continue with the in-memory result
+            print(f"Error saving quiz attempt to database: {str(db_error)}")
+
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error submitting quiz attempt: {str(e)}")

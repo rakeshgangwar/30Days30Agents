@@ -117,6 +117,9 @@ class QuizGenerator:
         self.quizzes = {}
         self.quiz_results = {}
 
+        # Add sample quizzes for development
+        self._add_sample_quizzes()
+
         # Create the prompt template for quiz generation
         template = """
         You are a Learning Coach that creates educational quizzes.
@@ -195,6 +198,143 @@ class QuizGenerator:
         self.evaluate_chain = self.evaluate_prompt | self.llm
 
         logger.info(f"Quiz generator initialized with model: {model_name}")
+
+    def _add_sample_quizzes(self):
+        """Add sample quizzes for development."""
+        import uuid
+        from datetime import datetime, timezone
+
+        # Web Development Quiz
+        web_dev_quiz = {
+            "id": str(uuid.uuid4()),
+            "title": "Web Development Fundamentals Quiz",
+            "description": "Test your knowledge of HTML, CSS, and JavaScript fundamentals",
+            "topic": "Web Development",
+            "difficulty": "beginner",
+            "questions": [
+                {
+                    "question": "What does HTML stand for?",
+                    "options": [
+                        "Hyper Text Markup Language",
+                        "High Tech Modern Language",
+                        "Hyperlink and Text Markup Language",
+                        "Home Tool Markup Language"
+                    ],
+                    "correct_answer": 0,
+                    "explanation": "HTML stands for Hyper Text Markup Language, which is the standard markup language for creating web pages.",
+                    "question_type": "multiple_choice"
+                },
+                {
+                    "question": "Which CSS property is used to change the text color of an element?",
+                    "options": [
+                        "text-color",
+                        "font-color",
+                        "color",
+                        "text-style"
+                    ],
+                    "correct_answer": 2,
+                    "explanation": "The 'color' property is used to set the color of text in CSS.",
+                    "question_type": "multiple_choice"
+                },
+                {
+                    "question": "Which of the following is NOT a JavaScript data type?",
+                    "options": [
+                        "String",
+                        "Boolean",
+                        "Float",
+                        "Object"
+                    ],
+                    "correct_answer": 2,
+                    "explanation": "JavaScript has number type for both integers and floating-point values, but 'Float' is not a distinct data type in JavaScript.",
+                    "question_type": "multiple_choice"
+                },
+                {
+                    "question": "What is the correct HTML element for the largest heading?",
+                    "options": [
+                        "<h1>",
+                        "<heading>",
+                        "<head>",
+                        "<h6>"
+                    ],
+                    "correct_answer": 0,
+                    "explanation": "<h1> defines the largest heading in HTML. Headings range from h1 (largest) to h6 (smallest).",
+                    "question_type": "multiple_choice"
+                },
+                {
+                    "question": "Which CSS property is used to add space between the elements?",
+                    "options": [
+                        "spacing",
+                        "margin",
+                        "padding",
+                        "border"
+                    ],
+                    "correct_answer": 1,
+                    "explanation": "The 'margin' property in CSS is used to create space around elements, outside of any defined borders.",
+                    "question_type": "multiple_choice"
+                }
+            ],
+            "estimated_time_minutes": 10,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "learning_objectives": ["Understand basic web development concepts", "Test knowledge of HTML, CSS, and JavaScript"],
+            "tags": ["Web Development", "HTML", "CSS", "JavaScript", "beginner"]
+        }
+
+        # JavaScript Quiz
+        js_quiz = {
+            "id": str(uuid.uuid4()),
+            "title": "JavaScript Fundamentals Quiz",
+            "description": "Test your knowledge of JavaScript basics",
+            "topic": "JavaScript",
+            "difficulty": "beginner",
+            "questions": [
+                {
+                    "question": "Which of the following is used to declare a variable in JavaScript?",
+                    "options": [
+                        "var",
+                        "let",
+                        "const",
+                        "All of the above"
+                    ],
+                    "correct_answer": 3,
+                    "explanation": "In JavaScript, you can declare variables using 'var', 'let', or 'const'. Each has different scoping rules and behaviors.",
+                    "question_type": "multiple_choice"
+                },
+                {
+                    "question": "What will the following code return: typeof []?",
+                    "options": [
+                        "'array'",
+                        "'object'",
+                        "'list'",
+                        "'undefined'"
+                    ],
+                    "correct_answer": 1,
+                    "explanation": "In JavaScript, arrays are actually objects, so typeof [] returns 'object'.",
+                    "question_type": "multiple_choice"
+                },
+                {
+                    "question": "Which method is used to add an element to the end of an array?",
+                    "options": [
+                        "push()",
+                        "append()",
+                        "add()",
+                        "insert()"
+                    ],
+                    "correct_answer": 0,
+                    "explanation": "The push() method adds one or more elements to the end of an array and returns the new length of the array.",
+                    "question_type": "multiple_choice"
+                }
+            ],
+            "estimated_time_minutes": 6,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "learning_objectives": ["Understand JavaScript basics", "Test knowledge of JavaScript syntax and concepts"],
+            "tags": ["JavaScript", "Programming", "beginner"]
+        }
+
+        # Add the sample quizzes to the in-memory storage
+        self.quizzes[web_dev_quiz["id"]] = web_dev_quiz
+        self.quizzes[js_quiz["id"]] = js_quiz
+
+        logger.info(f"Added {len(self.quizzes)} sample quizzes")
 
     async def generate_quiz(
         self,
@@ -480,6 +620,58 @@ class QuizGenerator:
         else:
             logger.info("Retrieving all quizzes")
             return list(self.quizzes.values())
+
+    def get_quizzes(
+        self,
+        topic: Optional[str] = None,
+        difficulty: Optional[str] = None,
+        user_id: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[Dict[str, Any]]:
+        """
+        Get quizzes, optionally filtered by topic, difficulty, and user_id.
+
+        Args:
+            topic: Optional topic to filter by
+            difficulty: Optional difficulty level to filter by
+            user_id: Optional user ID to filter by
+            skip: Number of quizzes to skip
+            limit: Maximum number of quizzes to return
+
+        Returns:
+            List of quizzes
+        """
+        logger.info(f"Getting quizzes with filters - topic: {topic}, difficulty: {difficulty}, user_id: {user_id}")
+
+        filtered_quizzes = list(self.quizzes.values())
+
+        if topic:
+            filtered_quizzes = [
+                q for q in filtered_quizzes
+                if q.get("topic", "").lower() == topic.lower()
+            ]
+
+        if difficulty:
+            filtered_quizzes = [
+                q for q in filtered_quizzes
+                if q.get("difficulty", "").lower() == difficulty.lower()
+            ]
+
+        if user_id:
+            filtered_quizzes = [
+                q for q in filtered_quizzes
+                if q.get("user_id") == user_id
+            ]
+
+        # Sort by creation date if available
+        filtered_quizzes.sort(
+            key=lambda q: q.get("created_at", ""),
+            reverse=True
+        )
+
+        # Apply pagination
+        return filtered_quizzes[skip:skip + limit]
 
     def get_quiz_result(self, result_id: str) -> Dict[str, Any]:
         """Get a quiz result by ID.

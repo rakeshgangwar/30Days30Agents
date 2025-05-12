@@ -4,7 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 const HomePage = () => {
   return (
     <Box>
-      <VStack spacing={8} textAlign="center" mb={12}>
+      <VStack gap={8} textAlign="center" mb={12}>
         <Heading as="h1" size="2xl">
           Welcome to Learning Coach
         </Heading>
@@ -17,7 +17,7 @@ const HomePage = () => {
         </Button>
       </VStack>
 
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} rowGap={8}>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={8}>
         <FeatureCard
           title="Personalized Learning Paths"
           description="Create customized learning journeys based on your goals and interests."

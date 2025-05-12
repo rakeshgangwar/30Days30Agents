@@ -47,7 +47,7 @@ const LearningPathsPage = () => {
   useEffect(() => {
     const fetchLearningPaths = async () => {
       try {
-        // Replace with actual API call when backend is ready
+        // Fetch learning paths from the API
         const response = await fetch('/api/v1/paths');
 
         if (!response.ok) {
@@ -55,47 +55,20 @@ const LearningPathsPage = () => {
         }
 
         const data = await response.json();
-        setLearningPaths(data);
+
+        // Check if we got data back
+        if (data && Array.isArray(data)) {
+          console.log('Fetched learning paths:', data);
+          setLearningPaths(data);
+        } else {
+          console.warn('Received invalid data format for learning paths:', data);
+          setError('Received invalid data format from the server.');
+          setLearningPaths([]);
+        }
       } catch (err) {
         console.error('Error fetching learning paths:', err);
         setError('Failed to load learning paths. Please try again later.');
-
-        // For development: mock data until backend is ready
-        setLearningPaths([
-          {
-            id: '1',
-            title: 'Introduction to Python',
-            description: 'A beginner\'s guide to Python programming',
-            user_id: '1',
-            created_at: new Date().toISOString(),
-            topics: [
-              { name: 'Python Basics', order: 1 },
-              { name: 'Data Structures', order: 2 },
-              { name: 'Functions', order: 3 },
-            ],
-            progress: {
-              completed_topics: 1,
-              total_topics: 3,
-            },
-          },
-          {
-            id: '2',
-            title: 'Web Development Fundamentals',
-            description: 'Learn the basics of HTML, CSS, and JavaScript',
-            user_id: '1',
-            created_at: new Date().toISOString(),
-            topics: [
-              { name: 'HTML Basics', order: 1 },
-              { name: 'CSS Styling', order: 2 },
-              { name: 'JavaScript Fundamentals', order: 3 },
-              { name: 'Responsive Design', order: 4 },
-            ],
-            progress: {
-              completed_topics: 2,
-              total_topics: 4,
-            },
-          },
-        ]);
+        setLearningPaths([]);
       } finally {
         setIsLoading(false);
       }

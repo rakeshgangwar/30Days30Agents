@@ -441,6 +441,49 @@ class LearningCoachAgent:
         if "id" in learning_path:
             state["context"]["learning_path_id"] = learning_path["id"]
 
+        # Save the learning path to the database
+        try:
+            from sqlalchemy.orm import Session
+            from app.db.base import get_db
+            from app.models.learning_path import LearningPath
+
+            # Get a database session
+            db = next(get_db())
+
+            # Create a new learning path record
+            db_learning_path = LearningPath(
+                title=learning_path["title"],
+                description=learning_path["description"],
+                user_id=int(user_id) if user_id else None,
+                topics=[
+                    {"name": topic["title"], "order": i+1}
+                    for i, topic in enumerate(learning_path["topics"])
+                ],
+                resources=[
+                    {
+                        "title": resource["title"],
+                        "url": resource["url"],
+                        "type": resource["type"],
+                        "description": resource["description"]
+                    }
+                    for topic in learning_path["topics"]
+                    for resource in topic.get("resources", [])
+                ],
+                progress={"completed_topics": 0, "total_topics": len(learning_path["topics"])}
+            )
+
+            # Add to database and commit
+            db.add(db_learning_path)
+            db.commit()
+            db.refresh(db_learning_path)
+
+            # Update the learning path ID in the context with the database ID
+            state["context"]["learning_path_id"] = db_learning_path.id
+            logger.info(f"Saved learning path to database with ID: {db_learning_path.id}")
+        except Exception as e:
+            logger.error(f"Error saving learning path to database: {str(e)}")
+            # Continue with the in-memory learning path if database save fails
+
         logger.info(f"Created learning path with ID: {learning_path.get('id', 'unknown')}")
         return state
 

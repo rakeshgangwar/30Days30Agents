@@ -10,9 +10,9 @@ from app.db.base import Base
 
 class User(Base):
     """User model."""
-    
+
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
@@ -20,3 +20,8 @@ class User(Base):
     preferences = Column(JSON, default={})
     learning_styles = Column(JSON, default=[])
     interests = Column(JSON, default=[])
+
+    # Relationships
+    learning_paths = relationship("LearningPath", back_populates="user")
+    resources = relationship("Resource", back_populates="user")
+    quizzes = relationship("Quiz", back_populates="user")
