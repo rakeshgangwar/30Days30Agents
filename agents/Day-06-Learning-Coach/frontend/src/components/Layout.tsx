@@ -7,9 +7,11 @@ const Layout = () => {
   return (
     <Box minH="100vh" display="flex" flexDirection="column">
       <Navbar />
-      <Container maxW="container.xl" flex="1" py={8}>
-        <Outlet />
-      </Container>
+      <Box flex="1" bg="app.pageBg">
+        <Container maxW="container.xl" py={8}>
+          <Outlet />
+        </Container>
+      </Box>
       <Footer />
     </Box>
   );

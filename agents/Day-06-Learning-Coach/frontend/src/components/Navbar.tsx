@@ -7,41 +7,53 @@ import {
   IconButton
 } from '@chakra-ui/react';
 import { useColorMode } from './ui/color-mode';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const navigate = useNavigate();
 
   return (
-    <Box as="nav" bg="blue.600" color="white" px={4} py={3}>
-      <Flex maxW="container.xl" mx="auto" align="center" justify="space-between">
-        <Heading as={RouterLink} to="/" size="md" fontWeight="bold">
+    <Box as="nav" bg="app.navbar" color="app.navbarText" px={4} py={3}>
+      <Flex maxW="container.xl" mx="auto" alignItems="center" justifyContent="space-between">
+        <Heading size="md" fontWeight="bold" cursor="pointer" onClick={() => navigate('/')}>
           Learning Coach
         </Heading>
 
-        <HStack spacing={4}>
-          <Button as={RouterLink} to="/" variant="ghost" colorScheme="whiteAlpha">
-            Home
-          </Button>
-          <Button as={RouterLink} to="/chat" variant="ghost" colorScheme="whiteAlpha">
-            Chat
-          </Button>
-          <Button as={RouterLink} to="/learning-paths" variant="ghost" colorScheme="whiteAlpha">
-            Learning Paths
-          </Button>
-          <Button as={RouterLink} to="/resources" variant="ghost" colorScheme="whiteAlpha">
-            Resources
-          </Button>
-          <Button as={RouterLink} to="/quizzes" variant="ghost" colorScheme="whiteAlpha">
-            Quizzes
-          </Button>
+        <HStack gap={4}>
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <Button variant="ghost" colorScheme="whiteAlpha" color="app.navbarText">
+              Home
+            </Button>
+          </Link>
+          <Link to="/chat" style={{ textDecoration: 'none' }}>
+            <Button variant="ghost" colorScheme="whiteAlpha" color="app.navbarText">
+              Chat
+            </Button>
+          </Link>
+          <Link to="/learning-paths" style={{ textDecoration: 'none' }}>
+            <Button variant="ghost" colorScheme="whiteAlpha" color="app.navbarText">
+              Learning Paths
+            </Button>
+          </Link>
+          <Link to="/resources" style={{ textDecoration: 'none' }}>
+            <Button variant="ghost" colorScheme="whiteAlpha" color="app.navbarText">
+              Resources
+            </Button>
+          </Link>
+          <Link to="/quizzes" style={{ textDecoration: 'none' }}>
+            <Button variant="ghost" colorScheme="whiteAlpha" color="app.navbarText">
+              Quizzes
+            </Button>
+          </Link>
           <IconButton
             aria-label="Toggle color mode"
-            icon={colorMode === 'light' ? <span>🌙</span> : <span>☀️</span>}
-            onClick={toggleColorMode}
             variant="ghost"
             colorScheme="whiteAlpha"
-          />
+            onClick={toggleColorMode}
+          >
+            {colorMode === 'light' ? <span>🌙</span> : <span>☀️</span>}
+          </IconButton>
         </HStack>
       </Flex>
     </Box>

@@ -34,10 +34,12 @@ const QuizAttemptPage = () => {
   const [quizResults, setQuizResults] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Color mode values
-  const cardBg = useColorModeValue('white', 'gray.700');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const textColor = useColorModeValue('gray.600', 'gray.300');
+  // Use semantic tokens from theme
+  const cardBg = "app.cardBg";
+  const borderColor = "app.cardBorder";
+  const textColor = "app.textColor";
+
+  // Quiz-specific colors
   const optionBgLight = useColorModeValue('gray.50', 'gray.700');
   const optionBorderLight = useColorModeValue('gray.200', 'gray.600');
   const optionBgCorrect = useColorModeValue('green.50', 'green.900');
@@ -182,7 +184,7 @@ const QuizAttemptPage = () => {
         <Card.Root bg={cardBg} borderColor={borderColor} borderWidth="1px" borderRadius="lg" overflow="hidden">
           <Card.Header>
             <Flex justify="space-between" align="center">
-              <Heading size="md">{quiz.title}</Heading>
+              <Heading size="md" color="app.headingColor">{quiz.title}</Heading>
               <Badge colorScheme={getDifficultyColor(quiz.difficulty)}>
                 {quiz.difficulty}
               </Badge>
@@ -238,7 +240,7 @@ const QuizAttemptPage = () => {
 
         <Card.Root bg={cardBg} borderColor={borderColor} borderWidth="1px" borderRadius="lg" overflow="hidden">
           <Card.Header>
-            <Heading size="md">Quiz Results: {quiz.title}</Heading>
+            <Heading size="md" color="app.headingColor">Quiz Results: {quiz.title}</Heading>
           </Card.Header>
           <Card.Body>
             <Box textAlign="center" p={4}>
@@ -339,7 +341,7 @@ const QuizAttemptPage = () => {
       <Card.Root bg={cardBg} borderColor={borderColor} borderWidth="1px" borderRadius="lg" overflow="hidden">
         <Card.Header>
           <Flex justify="space-between" align="center">
-            <Heading size="md">{quiz.title}</Heading>
+            <Heading size="md" color="app.headingColor">{quiz.title}</Heading>
             <Text>Question {currentQuestion + 1} of {quiz.questions.length}</Text>
           </Flex>
         </Card.Header>

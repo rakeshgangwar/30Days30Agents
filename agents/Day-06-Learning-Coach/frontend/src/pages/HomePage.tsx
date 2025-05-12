@@ -1,18 +1,17 @@
-import { Box, Heading, Text, Button, VStack, SimpleGrid, Card as CardNamespace, Icon } from '@chakra-ui/react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Box, Heading, Text, Button, VStack, SimpleGrid, Card as CardNamespace } from '@chakra-ui/react';
 
 const HomePage = () => {
   return (
     <Box>
       <VStack gap={8} textAlign="center" mb={12}>
-        <Heading as="h1" size="2xl">
+        <Heading as="h1" size="2xl" color="app.pageTitleColor">
           Welcome to Learning Coach
         </Heading>
-        <Text fontSize="xl" maxW="container.md">
+        <Text fontSize="xl" maxW="container.md" color="app.textColor">
           Your AI-powered learning assistant that creates personalized learning paths, tracks progress,
           generates quizzes, and discovers relevant educational resources.
         </Text>
-        <Button as={RouterLink} to="/chat" colorScheme="blue" size="lg">
+        <Button size="lg" colorScheme="brand" onClick={() => window.location.href = '/chat'}>
           Chat with Learning Coach
         </Button>
       </VStack>
@@ -41,12 +40,12 @@ const HomePage = () => {
 
 const FeatureCard = ({ title, description }: { title: string; description: string }) => {
   return (
-    <CardNamespace.Root>
+    <CardNamespace.Root bg="app.cardBg" borderColor="app.cardBorder" borderWidth="1px">
       <CardNamespace.Header>
-        <Heading size="md">{title}</Heading>
+        <Heading size="md" color="app.headingColor">{title}</Heading>
       </CardNamespace.Header>
       <CardNamespace.Body>
-        <Text>{description}</Text>
+        <Text color="app.textColor">{description}</Text>
       </CardNamespace.Body>
     </CardNamespace.Root>
   );

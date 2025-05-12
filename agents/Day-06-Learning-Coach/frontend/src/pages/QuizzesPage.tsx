@@ -15,7 +15,7 @@ import {
   HStack,
   Progress,
 } from '@chakra-ui/react';
-import { useColorModeValue } from '../components/ui/color-mode';
+
 import { FiClock } from 'react-icons/fi';
 
 interface Quiz {
@@ -39,8 +39,9 @@ const QuizzesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cardBg = useColorModeValue('white', 'gray.700');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  // Use semantic tokens from theme
+  const cardBg = "app.cardBg";
+  const borderColor = "app.cardBorder";
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -145,10 +146,10 @@ const QuizzesPage = () => {
   return (
     <Container maxW="container.lg" py={8}>
       <Box textAlign="center" mb={8}>
-        <Heading as="h1" size="xl" mb={4}>
+        <Heading as="h1" size="xl" mb={4} color="app.pageTitleColor">
           Quizzes
         </Heading>
-        <Text fontSize="lg" color="gray.600">
+        <Text fontSize="lg" color="app.textColor">
           Test your knowledge and track your progress
         </Text>
       </Box>
@@ -174,7 +175,7 @@ const QuizzesPage = () => {
             <Card.Root key={quiz.id} bg={cardBg} borderColor={borderColor} borderWidth="1px" borderRadius="lg" overflow="hidden">
               <Card.Header>
                 <Flex justify="space-between" align="center">
-                  <Heading size="md">{quiz.title}</Heading>
+                  <Heading size="md" color="app.headingColor">{quiz.title}</Heading>
                   <Badge colorScheme={getDifficultyColor(quiz.difficulty)}>
                     {quiz.difficulty}
                   </Badge>

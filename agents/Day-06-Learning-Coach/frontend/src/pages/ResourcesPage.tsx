@@ -20,7 +20,7 @@ import {
   Portal,
   createListCollection,
 } from '@chakra-ui/react';
-import { useColorModeValue } from '../components/ui/color-mode';
+
 import { ExternalLinkIcon } from '../components/ui/custom-icons';
 import { LuSearch } from "react-icons/lu";
 
@@ -43,8 +43,9 @@ const ResourcesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
 
-  const cardBg = useColorModeValue('white', 'gray.700');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  // Use semantic tokens from theme
+  const cardBg = "app.cardBg";
+  const borderColor = "app.cardBorder";
 
   const resourceTypes = createListCollection({
     items: [
@@ -159,10 +160,10 @@ const ResourcesPage = () => {
   return (
     <Container maxW="container.lg" py={8}>
       <Box textAlign="center" mb={8}>
-        <Heading as="h1" size="xl" mb={4}>
+        <Heading as="h1" size="xl" mb={4} color="app.pageTitleColor">
           Learning Resources
         </Heading>
-        <Text fontSize="lg" color="gray.600">
+        <Text fontSize="lg" color="app.textColor">
           Curated educational materials to support your learning journey
         </Text>
       </Box>
@@ -226,7 +227,7 @@ const ResourcesPage = () => {
             <Card.Root key={resource.id} bg={cardBg} borderColor={borderColor} borderWidth="1px" borderRadius="lg" overflow="hidden">
               <Card.Header>
                 <Flex justify="space-between" align="center">
-                  <Heading size="md">{resource.title}</Heading>
+                  <Heading size="md" color="app.headingColor">{resource.title}</Heading>
                   <Badge colorScheme={getResourceTypeColor(resource.type)}>
                     {resource.type}
                   </Badge>

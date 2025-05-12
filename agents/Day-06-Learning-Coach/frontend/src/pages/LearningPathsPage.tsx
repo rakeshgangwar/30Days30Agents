@@ -16,7 +16,7 @@ import {
   HStack,
   Icon,
 } from '@chakra-ui/react';
-import { useColorModeValue } from '../components/ui/color-mode';
+
 import { FiClock } from 'react-icons/fi';
 
 interface LearningPathTopic {
@@ -42,8 +42,9 @@ const LearningPathsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cardBg = useColorModeValue('white', 'gray.700');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  // Use semantic tokens from theme
+  const cardBg = "app.cardBg";
+  const borderColor = "app.cardBorder";
 
   useEffect(() => {
     const fetchLearningPaths = async () => {
@@ -91,10 +92,10 @@ const LearningPathsPage = () => {
   return (
     <Container maxW="container.lg" py={8}>
       <Box textAlign="center" mb={8}>
-        <Heading as="h1" size="xl" mb={4}>
+        <Heading as="h1" size="xl" mb={4} color="app.pageTitleColor">
           Learning Paths
         </Heading>
-        <Text fontSize="lg" color="gray.600">
+        <Text fontSize="lg" color="app.textColor">
           Your personalized learning journeys
         </Text>
       </Box>
@@ -120,7 +121,7 @@ const LearningPathsPage = () => {
           {learningPaths.map((path) => (
             <Card.Root key={path.id} bg={cardBg} borderColor={borderColor} borderWidth="1px" borderRadius="lg" overflow="hidden">
               <Card.Header>
-                <Heading size="md">{path.title}</Heading>
+                <Heading size="md" color="app.headingColor">{path.title}</Heading>
               </Card.Header>
               <Card.Body>
                 <Text mb={4}>{path.description}</Text>

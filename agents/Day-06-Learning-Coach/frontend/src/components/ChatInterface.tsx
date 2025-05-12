@@ -8,7 +8,7 @@ import {
   Text,
   Flex
 } from '@chakra-ui/react';
-import { useColorModeValue } from './ui/color-mode';
+
 import { ArrowUpIcon } from './ui/custom-icons';
 import { chatWithAgent } from '../api/agent';
 import {
@@ -37,12 +37,13 @@ const ChatInterface = () => {
   // Add state for context
   const [context, setContext] = useState<Record<string, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const bgColor = useColorModeValue('gray.50', 'gray.800');
-  const userBubbleColor = useColorModeValue('blue.100', 'blue.600');
-  const agentBubbleColor = useColorModeValue('gray.200', 'gray.700');
-  const textColor = useColorModeValue('gray.800', 'white');
-  const mutedTextColor = useColorModeValue('gray.500', 'gray.400');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  // Use semantic tokens from theme
+  const bgColor = 'bg.subtle';
+  const userBubbleColor = 'app.userBubble';
+  const agentBubbleColor = 'app.agentBubble';
+  const textColor = 'app.textColor';
+  const mutedTextColor = 'app.mutedText';
+  const borderColor = 'app.cardBorder';
 
   useEffect(() => {
     scrollToBottom();
@@ -291,7 +292,7 @@ const ChatInterface = () => {
                       width="32px"
                       height="32px"
                       borderRadius="full"
-                      bg="blue.500"
+                      bg="brand.500"
                       mr={2}
                       display="flex"
                       alignItems="center"
@@ -306,7 +307,7 @@ const ChatInterface = () => {
                       width="32px"
                       height="32px"
                       borderRadius="full"
-                      bg="green.500"
+                      bg="brand.600"
                       ml={2}
                       display="flex"
                       alignItems="center"
@@ -333,12 +334,12 @@ const ChatInterface = () => {
               }
             }}
             disabled={isLoading}
-            bg={useColorModeValue('white', 'gray.700')}
+            bg="app.cardBg"
             borderColor={borderColor}
             _placeholder={{ color: mutedTextColor }}
           />
           <Button
-            colorScheme="blue"
+            colorScheme="brand"
             onClick={handleSend}
             data-loading={isLoading}
             disabled={isLoading || !input.trim()}
