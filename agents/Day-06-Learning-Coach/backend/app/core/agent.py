@@ -291,6 +291,8 @@ class LearningCoachAgent:
 
         intent = state["intent"].get("intent", "")
         confidence = state["intent"].get("confidence", 0.0)
+        entities = state["intent"].get("entities", {})
+        context = state["context"]
 
         # Log the routing decision
         logger.info(f"Routing based on intent: {intent} with confidence: {confidence}")
@@ -300,6 +302,35 @@ class LearningCoachAgent:
             logger.warning(f"Low confidence ({confidence}) for intent: {intent}, using default route")
             return "default"
 
+        # Check for multi-step queries in the user input
+        user_input = state["user_input"].lower()
+        has_learning_path_request = "learning path" in user_input or "path" in user_input
+        has_quiz_request = "quiz" in user_input or "test" in user_input
+        has_resources_request = "resources" in user_input or "materials" in user_input
+
+        # Check if we have a learning path in context
+        has_learning_path_in_context = "learning_path_id" in context
+
+        # Handle multi-step queries
+        if has_learning_path_request and has_quiz_request:
+            if has_learning_path_in_context:
+                # If we already have a learning path, prioritize the quiz generation
+                logger.info("Multi-step query detected: Learning path exists, routing to generate_quiz")
+                return "generate_quiz"
+            else:
+                # Otherwise, create the learning path first
+                logger.info("Multi-step query detected: No learning path yet, routing to create_learning_path")
+                # Store the fact that we need to generate a quiz after the learning path
+                state["context"]["generate_quiz_after_path"] = True
+                return "create_learning_path"
+
+        # Check for update requests on existing learning paths
+        if has_learning_path_in_context and ("update" in user_input or "modify" in user_input or
+                                            "change" in user_input or "make it" in user_input):
+            logger.info(f"Detected update request for existing learning path: {context.get('learning_path_id')}")
+            return "create_learning_path"  # We use the same node for updates
+
+        # Standard routing based on intent
         if intent == "create_learning_path" or intent == "update_learning_path":
             logger.info(f"Routing to create_learning_path for intent: {intent}")
             return "create_learning_path"
@@ -319,7 +350,7 @@ class LearningCoachAgent:
             return "default"
 
     async def _create_learning_path(self, state: AgentState) -> AgentState:
-        """Create a learning path based on the user's request.
+        """Create or update a learning path based on the user's request.
 
         Args:
             state: The current state
@@ -331,6 +362,50 @@ class LearningCoachAgent:
         logger = logging.getLogger(__name__)
 
         entities = state["intent"].get("entities", {})
+        intent = state["intent"].get("intent", "")
+        context = state["context"]
+        user_input = state["user_input"].lower()
+
+        # Check if this is an update request
+        is_update = (intent == "update_learning_path" or
+                    "update" in user_input or
+                    "modify" in user_input or
+                    "change" in user_input or
+                    "make it" in user_input)
+
+        # Check if we have an existing learning path to update
+        existing_path_id = context.get("learning_path_id")
+
+        if is_update and existing_path_id:
+            logger.info(f"Updating existing learning path with ID: {existing_path_id}")
+
+            # Extract update requirements
+            update_requirements = state["user_input"]
+
+            # Extract entities with defaults
+            current_knowledge = entities.get("current_knowledge", "beginner")
+            learning_style = entities.get("learning_style", "visual")
+            time_commitment = entities.get("time_commitment", "5 hours per week")
+
+            try:
+                # Update the learning path
+                learning_path = await self.learning_path_manager.update_learning_path(
+                    path_id=existing_path_id,
+                    update_requirements=update_requirements,
+                    current_knowledge=current_knowledge,
+                    learning_style=learning_style,
+                    time_commitment=time_commitment
+                )
+
+                state["learning_path"] = learning_path
+                logger.info(f"Updated learning path with ID: {learning_path.get('id', 'unknown')}")
+                return state
+            except Exception as e:
+                logger.error(f"Error updating learning path: {str(e)}")
+                # Fall back to creating a new learning path
+                logger.info("Falling back to creating a new learning path")
+
+        # If not updating or update failed, create a new learning path
         subject = entities.get("subject", "")
         if not subject:
             # Try to extract subject from user input
@@ -345,7 +420,7 @@ class LearningCoachAgent:
         additional_requirements = entities.get("additional_requirements", "")
 
         # Get user ID from context if available
-        user_id = state["context"].get("user_id")
+        user_id = context.get("user_id")
 
         logger.info(f"Creating learning path for subject: {subject}, goal: {goal}")
 
@@ -439,17 +514,36 @@ class LearningCoachAgent:
 
         # Check if we should generate a quiz from a learning path
         learning_path_id = state["context"].get("learning_path_id")
-        if learning_path_id and not topic:
+
+        # Check if the user explicitly mentioned the learning path
+        user_input = state["user_input"].lower()
+        mentions_learning_path = "learning path" in user_input or "path" in user_input
+
+        # Generate quiz from learning path if:
+        # 1. We have a learning path ID in context, and
+        # 2. Either no topic is specified or the user explicitly mentioned the learning path
+        if learning_path_id and (not topic or mentions_learning_path):
             logger.info(f"Generating quiz from learning path: {learning_path_id}")
 
             # In a real implementation, we would retrieve the learning path from the database
-            # For now, we'll just use a placeholder
+            # For now, we'll just use the learning path manager
             if hasattr(self.learning_path_manager, "get_learning_path"):
                 try:
                     learning_path = self.learning_path_manager.get_learning_path(learning_path_id)
+
+                    # Extract difficulty from entities or use the learning path difficulty
+                    if "difficulty" in entities:
+                        difficulty = entities.get("difficulty")
+                    else:
+                        difficulty = learning_path.get("difficulty", "beginner")
+
+                    # Extract number of questions per topic
+                    num_questions_per_topic = int(entities.get("num_questions", 2))
+
                     quiz = self.quiz_generator.generate_quiz_from_learning_path(
                         learning_path=learning_path,
-                        num_questions_per_topic=2
+                        num_questions_per_topic=num_questions_per_topic,
+                        difficulty=difficulty
                     )
                     state["quiz"] = quiz
                     logger.info(f"Generated quiz from learning path with ID: {quiz.get('id', 'unknown')}")
@@ -558,17 +652,69 @@ class LearningCoachAgent:
         chain = prompt | self.llm
 
         try:
-            # Generate the response
-            response = await chain.ainvoke(template_inputs)
-            state["response"] = response.content
+            # Check if we need to generate a quiz after creating a learning path
+            generate_quiz_after_path = state["context"].get("generate_quiz_after_path", False)
 
-            # Add the response type
-            state["response_type"] = template_key
+            if generate_quiz_after_path and template_key == "learning_path" and "learning_path_id" in state["context"]:
+                logger.info("Detected generate_quiz_after_path flag, will generate quiz after learning path")
+
+                # First, generate the learning path response
+                response = await chain.ainvoke(template_inputs)
+                learning_path_response = response.content
+
+                # Now generate a quiz based on the learning path
+                try:
+                    # Get the learning path from the state
+                    learning_path = state["learning_path"]
+
+                    # Generate a quiz from the learning path
+                    quiz = self.quiz_generator.generate_quiz_from_learning_path(
+                        learning_path=learning_path,
+                        num_questions_per_topic=2
+                    )
+
+                    # Store the quiz in the state
+                    state["quiz"] = quiz
+
+                    # Add the quiz ID to the context
+                    if "id" in quiz:
+                        state["context"]["quiz_id"] = quiz["id"]
+
+                    # Get the quiz template
+                    quiz_template = self.response_templates["quiz"]
+                    quiz_inputs = {
+                        "user_input": "Generate a quiz based on the learning path",
+                        "quiz": quiz,
+                        "intent": state["intent"],
+                        "context": state["context"]
+                    }
+
+                    # Generate the quiz response
+                    quiz_response = await (quiz_template | self.llm).ainvoke(quiz_inputs)
+
+                    # Combine the responses
+                    state["response"] = f"{learning_path_response}\n\n---\n\n{quiz_response.content}"
+                    state["response_type"] = "learning_path_with_quiz"
+
+                    # Clear the flag
+                    state["context"]["generate_quiz_after_path"] = False
+
+                    logger.info("Successfully generated quiz after learning path")
+                except Exception as e:
+                    logger.error(f"Error generating quiz after learning path: {str(e)}")
+                    # Just use the learning path response if quiz generation fails
+                    state["response"] = learning_path_response
+                    state["response_type"] = template_key
+            else:
+                # Normal response generation
+                response = await chain.ainvoke(template_inputs)
+                state["response"] = response.content
+                state["response_type"] = template_key
 
             # Update the context with the last response type
-            state["context"]["last_response_type"] = template_key
+            state["context"]["last_response_type"] = state["response_type"]
 
-            logger.info(f"Generated response of type: {template_key}")
+            logger.info(f"Generated response of type: {state['response_type']}")
 
             # Add message to conversation history
             if "conversation_history" not in state["context"]:
@@ -582,7 +728,7 @@ class LearningCoachAgent:
             state["context"]["conversation_history"].append({
                 "role": "assistant",
                 "content": state["response"],
-                "response_type": template_key
+                "response_type": state["response_type"]
             })
 
             # Trim conversation history if it gets too long

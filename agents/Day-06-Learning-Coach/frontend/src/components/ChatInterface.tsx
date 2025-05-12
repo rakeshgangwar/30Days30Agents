@@ -19,7 +19,7 @@ import {
 } from './messages';
 
 // Define message types
-type MessageType = 'text' | 'learning_path' | 'resources' | 'quiz' | 'explanation' | 'error';
+type MessageType = 'text' | 'learning_path' | 'resources' | 'quiz' | 'explanation' | 'error' | 'learning_path_with_quiz';
 
 interface Message {
   id: string;
@@ -34,6 +34,8 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // Add state for context
+  const [context, setContext] = useState<Record<string, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const bgColor = useColorModeValue('gray.50', 'gray.800');
   const userBubbleColor = useColorModeValue('blue.100', 'blue.600');
@@ -146,10 +148,14 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // Send to API
+      // Send to API with context
       const response = await chatWithAgent({
         user_input: input,
+        context: context, // Pass the current context
       });
+
+      // Update context with the new context from the response
+      setContext(response.context);
 
       // Get the response type from the API response
       let messageType: MessageType = response.response_type as MessageType;
@@ -230,6 +236,11 @@ const ChatInterface = () => {
           <Box>
             {message.text && <TextMessage content={message.text} />}
             <QuizMessage data={message.data} />
+          </Box>
+        ) : message.type === 'learning_path_with_quiz' ? (
+          <Box>
+            {/* For combined learning path and quiz, we just render the text content which contains both */}
+            <TextMessage content={message.text} />
           </Box>
         ) : (
           <TextMessage content={message.text} />

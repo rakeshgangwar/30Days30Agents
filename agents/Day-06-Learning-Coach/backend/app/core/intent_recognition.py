@@ -108,6 +108,16 @@ class IntentRecognizer:
 
         Context (if available): {context}
 
+        IMPORTANT: Check the context for previous interactions and consider them when determining the intent.
+        - If the user previously created a learning path and now wants a quiz on the same topic, use the "generate_quiz" intent
+        - If the user wants to modify a previously created learning path, use the "update_learning_path" intent
+        - If the user's message contains multiple intents (e.g., "Create a learning path and then generate a quiz"),
+          choose the intent that hasn't been fulfilled yet based on the context
+
+        For multi-step requests like "Create a learning path for web development, then generate a quiz based on it":
+        1. If there's no learning path in the context yet, identify as "create_learning_path" with subject="web development"
+        2. If there's already a learning path in the context, identify as "generate_quiz" with topic from the learning path
+
         Respond with a JSON object that includes:
         1. The identified intent (must be one of the listed intents)
         2. A confidence score between 0 and 1
@@ -118,6 +128,7 @@ class IntentRecognizer:
         - For "Create a quiz about machine learning with 10 questions": topic="machine learning", num_questions=10
         - For "I'm a beginner in data science and want to become proficient": subject="data science", current_knowledge="beginner", goal="become proficient"
         - For "I prefer video tutorials and can study 3 hours per week": learning_style="visual", time_commitment="3 hours per week"
+        - For "Now make it more advanced": intent="update_learning_path", difficulty="advanced"
 
         {format_instructions}
         """

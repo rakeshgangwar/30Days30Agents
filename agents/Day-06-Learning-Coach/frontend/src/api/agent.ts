@@ -13,6 +13,12 @@ interface AgentResponse {
 }
 
 export const chatWithAgent = async (request: AgentRequest): Promise<AgentResponse> => {
-  const response = await api.post<AgentResponse>('/agent/chat', request);
+  // Ensure context is included in the request
+  const requestWithContext = {
+    ...request,
+    context: request.context || {}
+  };
+
+  const response = await api.post<AgentResponse>('/agent/chat', requestWithContext);
   return response.data;
 };
