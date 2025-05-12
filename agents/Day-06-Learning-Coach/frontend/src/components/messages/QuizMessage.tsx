@@ -7,7 +7,8 @@ import {
   HStack,
   Badge,
   Button,
-  Flex
+  Flex,
+  Alert
 } from '@chakra-ui/react';
 import { useColorModeValue } from '../ui/color-mode';
 import { CheckIcon, CloseIcon, TimeIcon, RepeatIcon } from '../ui/custom-icons';
@@ -16,6 +17,8 @@ import { Card, CardHeader, CardBody, CardFooter } from '../ui/card';
 import { Radio, RadioGroup } from '../ui/radio';
 import { Progress } from '../ui/progress';
 import { Tag } from '../ui/tag';
+import { saveQuizFromChat } from '../../api/quizzes';
+import { FiSave } from 'react-icons/fi';
 
 interface QuizQuestion {
   question: string;
@@ -42,6 +45,42 @@ const QuizMessage = ({ data }: QuizMessageProps) => {
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>(Array(data.questions.length).fill(-1));
   const [showResults, setShowResults] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'success' | 'error' | null>(null);
+
+  // Function to save the quiz
+  const handleSaveQuiz = async () => {
+    try {
+      setIsSaving(true);
+      await saveQuizFromChat(data);
+      setSaveSuccess(true);
+      setSaveMessage("Your quiz has been saved successfully");
+      setSaveStatus("success");
+
+      // Auto-hide the message after 5 seconds
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 5000);
+      
+      // Reset saveSuccess after 5 seconds so button becomes active again
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 5000);
+    } catch (error) {
+      console.error("Error saving quiz:", error);
+      setSaveMessage("There was an error saving your quiz");
+      setSaveStatus("error");
+
+      // Auto-hide the message after 5 seconds
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 5000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Color mode values
   const cardBg = useColorModeValue('white', 'gray.700');
@@ -127,20 +166,31 @@ const QuizMessage = ({ data }: QuizMessageProps) => {
         w="100%"
       >
         <Stack direction="column" align="stretch" gap={4}>
-          <Box>
-            <Flex justify="space-between" align="center">
-              <Heading size="md" color={headingColor}>{data.title}</Heading>
-              <Badge
-                colorScheme={getDifficultyColor(data.difficulty)}
-                fontSize="0.8em"
-                p={1}
-                borderRadius="md"
-              >
-                {data.difficulty}
-              </Badge>
-            </Flex>
-            <Text mt={2} color={textColor}>{data.description}</Text>
-          </Box>
+          <Stack gap={2}>
+            <Box>
+              <Flex justify="space-between" align="center">
+                <Heading size="md" color={headingColor}>{data.title}</Heading>
+                <Badge
+                  colorScheme={getDifficultyColor(data.difficulty)}
+                  fontSize="0.8em"
+                  p={1}
+                  borderRadius="md"
+                >
+                  {data.difficulty}
+                </Badge>
+              </Flex>
+              <Text mt={2} color={textColor}>{data.description}</Text>
+            </Box>
+
+            {saveMessage && (
+              <Alert.Root status={saveStatus || "info"}>
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Description>{saveMessage}</Alert.Description>
+                </Alert.Content>
+              </Alert.Root>
+            )}
+          </Stack>
 
           <HStack>
             <Tag size="md" variant="subtle" colorScheme="blue">
@@ -154,13 +204,23 @@ const QuizMessage = ({ data }: QuizMessageProps) => {
 
           <Divider />
 
-          <Button
-            colorScheme="blue"
-            onClick={handleStartQuiz}
-            alignSelf="center"
-          >
-            Start Quiz
-          </Button>
+          <Flex gap={4} alignSelf="center">
+            <Button
+              colorScheme="blue"
+              onClick={handleStartQuiz}
+            >
+              Start Quiz
+            </Button>
+
+            <Button
+              colorScheme="green"
+              onClick={handleSaveQuiz}
+              disabled={isSaving}
+            >
+              <Box as={FiSave} mr={2} />
+              {isSaving ? "Saving..." : saveSuccess ? "Saved" : "Save Quiz"}
+            </Button>
+          </Flex>
         </Stack>
       </Box>
     );
@@ -221,18 +281,18 @@ const QuizMessage = ({ data }: QuizMessageProps) => {
                         borderRadius="md"
                         bg={
                           optIndex === question.correct_answer
-                            ? {optionBgCorrect}
+                            ? optionBgCorrect
                             : optIndex === selectedAnswers[index] && optIndex !== question.correct_answer
-                            ? {optionBgIncorrect}
-                            : {optionBgLight}
+                            ? optionBgIncorrect
+                            : optionBgLight
                         }
-                        borderWidth="1px" borderColor={borderColor}
+                        borderWidth="1px"
                         borderColor={
                           optIndex === question.correct_answer
-                            ? {optionBorderCorrect}
+                            ? optionBorderCorrect
                             : optIndex === selectedAnswers[index] && optIndex !== question.correct_answer
-                            ? {optionBorderIncorrect}
-                            : {optionBorderLight}
+                            ? optionBorderIncorrect
+                            : optionBorderLight
                         }
                       >
                         <Text>{option}</Text>

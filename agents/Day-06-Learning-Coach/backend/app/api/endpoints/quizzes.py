@@ -138,21 +138,26 @@ async def generate_quiz(
     question_types: List[str] = ["multiple_choice"],
     learning_objectives: List[str] = [],
     user_id: Optional[str] = None,
+    existing_quiz: Optional[Dict[str, Any]] = None,
     db: Session = Depends(get_db)
 ):
     """
     Generate a new quiz based on the given parameters.
     """
     try:
-        # Generate the quiz
-        quiz = await quiz_generator.generate_quiz(
-            topic=topic,
-            difficulty=difficulty,
-            num_questions=num_questions,
-            question_types=question_types,
-            learning_objectives=learning_objectives,
-            user_id=user_id
-        )
+        # If we have an existing quiz, use that instead of generating a new one
+        if existing_quiz:
+            quiz = existing_quiz
+        else:
+            # Generate the quiz
+            quiz = await quiz_generator.generate_quiz(
+                topic=topic,
+                difficulty=difficulty,
+                num_questions=num_questions,
+                question_types=question_types,
+                learning_objectives=learning_objectives,
+                user_id=user_id
+            )
 
         # Save the quiz to the database
         try:

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   Heading,
@@ -5,15 +6,17 @@ import {
   Stack,
   HStack,
   Badge,
-  Link,
   Flex,
-  Tag,
   Button,
+  Alert
 } from '@chakra-ui/react';
 import { useColorModeValue } from '../ui/color-mode';
 import { ExternalLinkIcon, TimeIcon, InfoIcon } from '../ui/custom-icons';
 import { Divider } from '../ui/accordion';
 import { Card, CardHeader, CardBody, CardFooter } from '../ui/card';
+import { Tag } from '../ui/tag';
+import { saveResourcesFromChat } from '../../api/resources';
+import { FiSave } from 'react-icons/fi';
 
 interface Resource {
   title: string;
@@ -37,6 +40,39 @@ interface ResourcesMessageProps {
 }
 
 const ResourcesMessage = ({ data }: ResourcesMessageProps) => {
+  // State for saving resources
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'success' | 'error' | null>(null);
+
+  // Function to save resources
+  const handleSaveResources = async () => {
+    try {
+      setIsSaving(true);
+      await saveResourcesFromChat(data.resources);
+      setSaveSuccess(true);
+      setSaveMessage("Your resources have been saved successfully");
+      setSaveStatus("success");
+
+      // Auto-hide the message after 5 seconds
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 5000);
+    } catch (error) {
+      console.error("Error saving resources:", error);
+      setSaveMessage("There was an error saving your resources");
+      setSaveStatus("error");
+
+      // Auto-hide the message after 5 seconds
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 5000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Color mode values
   const cardBg = useColorModeValue('white', 'gray.700');
   const headingColor = useColorModeValue('blue.600', 'blue.300');
@@ -86,12 +122,35 @@ const ResourcesMessage = ({ data }: ResourcesMessageProps) => {
       w="100%"
     >
       <Stack direction="column" align="stretch" gap={4}>
-        <Box>
-          <Heading size="md" color={headingColor}>Learning Resources</Heading>
-          <Text mt={2} color={textColor}>
-            Found {data.total_count} resources for "{data.query}"
-          </Text>
-        </Box>
+        <Stack gap={2}>
+          <Flex justify="space-between" align="center">
+            <Box>
+              <Heading size="md" color={headingColor}>Learning Resources</Heading>
+              <Text mt={2} color={textColor}>
+                Found {data.total_count} resources for "{data.query}"
+              </Text>
+            </Box>
+
+            <Button
+              colorScheme="green"
+              size="sm"
+              onClick={handleSaveResources}
+              disabled={saveSuccess || isSaving}
+            >
+              <Box as={FiSave} mr={2} />
+              {isSaving ? "Saving..." : saveSuccess ? "Saved" : "Save Resources"}
+            </Button>
+          </Flex>
+
+          {saveMessage && (
+            <Alert.Root status={saveStatus || "info"}>
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Description>{saveMessage}</Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )}
+        </Stack>
 
         <Divider />
 
@@ -111,7 +170,7 @@ const ResourcesMessage = ({ data }: ResourcesMessageProps) => {
               </CardHeader>
 
               <CardBody py={2}>
-                <Text fontSize="sm" noOfLines={2}>{resource.description}</Text>
+                <Text fontSize="sm">{resource.description.substring(0, 100)}...</Text>
 
                 <HStack mt={2} gap={2} flexWrap="wrap">
                   <Tag size="sm" colorScheme={getDifficultyColor(resource.difficulty)}>
@@ -129,17 +188,21 @@ const ResourcesMessage = ({ data }: ResourcesMessageProps) => {
               </CardBody>
 
               <CardFooter pt={2}>
-                <Button
-                  as={Link}
+                <a
                   href={resource.url}
-                  isExternal
-                  size="sm"
-                  colorScheme="blue"
-                  width="100%"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ width: '100%', display: 'block' }}
                 >
-                  View Resource
-                  <Box as={ExternalLinkIcon} ml={2} />
-                </Button>
+                  <Button
+                    size="sm"
+                    colorScheme="blue"
+                    width="100%"
+                  >
+                    View Resource
+                    <Box as={ExternalLinkIcon} ml={2} />
+                  </Button>
+                </a>
               </CardFooter>
             </Card>
           ))}
