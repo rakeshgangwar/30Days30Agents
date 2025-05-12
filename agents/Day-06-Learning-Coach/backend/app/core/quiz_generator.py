@@ -386,7 +386,15 @@ class QuizGenerator:
             # Store the quiz
             self.quizzes[quiz_id] = result
 
+            # Log the quiz details for debugging
             logger.info(f"Generated quiz with ID: {quiz_id}")
+            logger.info(f"Quiz title: {result['title']}")
+            logger.info(f"Quiz topic: {result['topic']}")
+            logger.info(f"Quiz has {len(result['questions'])} questions")
+
+            # Log that the quiz is ready to be saved to the database
+            logger.info(f"Quiz ready for database storage: {quiz_id}")
+
             return result
         except Exception as e:
             logger.error(f"Error generating quiz: {str(e)}")

@@ -161,6 +161,11 @@ async def generate_quiz(
 
         # Save the quiz to the database
         try:
+            # Log the quiz data for debugging
+            print(f"Attempting to save quiz to database with ID: {quiz['id']}")
+            print(f"Quiz title: {quiz['title']}")
+            print(f"Quiz topic: {quiz['topic']}")
+
             # Create a new quiz record
             db_quiz = QuizModel(
                 id=quiz["id"],
@@ -179,12 +184,26 @@ async def generate_quiz(
             # Add to database and commit
             db.add(db_quiz)
             db.commit()
+            db.refresh(db_quiz)
 
             # Add the database ID to the result
             quiz["db_id"] = db_quiz.id
+
+            # Log successful save
+            print(f"Successfully saved quiz to database with ID: {db_quiz.id}")
+
+            # Verify the quiz was saved by querying it back
+            saved_quiz = db.query(QuizModel).filter(QuizModel.id == quiz["id"]).first()
+            if saved_quiz:
+                print(f"Verified quiz was saved: {saved_quiz.title}")
+            else:
+                print(f"WARNING: Quiz with ID {quiz['id']} not found in database after save!")
+
         except Exception as db_error:
             # Log the error but continue with the in-memory quiz
             print(f"Error saving quiz to database: {str(db_error)}")
+            import traceback
+            print(traceback.format_exc())
 
         return quiz
     except Exception as e:

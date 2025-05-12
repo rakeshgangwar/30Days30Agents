@@ -2,6 +2,9 @@
 Core agent implementation for the Learning Coach.
 """
 
+import logging
+import uuid
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional, TypedDict, Union, Callable
 from typing_extensions import Annotated
 
@@ -537,6 +540,51 @@ class LearningCoachAgent:
             logger.info(f"Adding resources to learning path: {state['context']['learning_path_id']}")
             # This would be implemented in a real system to update the learning path with these resources
 
+        # Save resources to the database
+        try:
+            from sqlalchemy.orm import Session
+            from app.db.base import get_db
+            from app.models.resource import Resource as ResourceModel
+
+            # Get user ID from context if available
+            user_id = state["context"].get("user_id")
+
+            # Get a database session
+            db = next(get_db())
+
+            # Save each resource
+            saved_count = 0
+            for resource in resources.get("resources", []):
+                try:
+                    # Create a new resource record
+                    db_resource = ResourceModel(
+                        id=resource.get("id", str(uuid.uuid4())),
+                        title=resource["title"],
+                        url=resource["url"],
+                        type=resource.get("type", "article"),
+                        description=resource.get("description", ""),
+                        difficulty=resource.get("difficulty", "beginner"),
+                        estimated_time=resource.get("estimated_time", "unknown"),
+                        topics=resource.get("topics", [topic]),
+                        source=resource.get("source", ""),
+                        user_id=int(user_id) if user_id and user_id.isdigit() else None
+                    )
+
+                    # Add to database and commit
+                    db.add(db_resource)
+                    db.commit()
+                    db.refresh(db_resource)
+                    saved_count += 1
+                except Exception as resource_error:
+                    logger.error(f"Error saving resource to database: {str(resource_error)}")
+                    # Continue with the next resource
+                    continue
+
+            logger.info(f"Saved {saved_count} resources to database")
+        except Exception as e:
+            logger.error(f"Error saving resources to database: {str(e)}")
+            # Continue with the in-memory resources if database save fails
+
         logger.info(f"Discovered {resources.get('total_count', 0)} resources for topic: {topic}")
         return state
 
@@ -632,8 +680,52 @@ class LearningCoachAgent:
         # Add the quiz ID to the context for future reference
         if "id" in quiz:
             state["context"]["quiz_id"] = quiz["id"]
+            logger.info(f"Added quiz ID to context: {quiz['id']}")
+        else:
+            logger.warning("Quiz does not have an ID!")
 
+        # Log quiz details for debugging
         logger.info(f"Generated quiz with ID: {quiz.get('id', 'unknown')}")
+        logger.info(f"Quiz title: {quiz.get('title', 'unknown')}")
+        logger.info(f"Quiz topic: {quiz.get('topic', 'unknown')}")
+        logger.info(f"Quiz has {len(quiz.get('questions', []))} questions")
+
+        # Save the quiz to the database
+        try:
+            from sqlalchemy.orm import Session
+            from app.db.base import get_db
+            from app.models.quiz import Quiz as QuizModel
+
+            # Get a database session
+            db = next(get_db())
+
+            # Create a new quiz record
+            db_quiz = QuizModel(
+                id=quiz["id"],
+                title=quiz["title"],
+                description=quiz["description"],
+                topic=quiz["topic"],
+                difficulty=quiz["difficulty"],
+                questions=quiz["questions"],
+                estimated_time_minutes=quiz["estimated_time_minutes"],
+                created_at=datetime.now(timezone.utc),
+                learning_objectives=quiz.get("learning_objectives", []),
+                tags=quiz.get("tags", []),
+                user_id=int(user_id) if user_id and user_id.isdigit() else None
+            )
+
+            # Add to database and commit
+            db.add(db_quiz)
+            db.commit()
+            db.refresh(db_quiz)
+
+            # Update the quiz ID in the context with the database ID
+            state["context"]["quiz_id"] = db_quiz.id
+            logger.info(f"Saved quiz to database with ID: {db_quiz.id}")
+        except Exception as e:
+            logger.error(f"Error saving quiz to database: {str(e)}")
+            # Continue with the in-memory quiz if database save fails
+
         return state
 
     async def _generate_response(self, state: AgentState) -> AgentState:
@@ -722,6 +814,45 @@ class LearningCoachAgent:
                     # Add the quiz ID to the context
                     if "id" in quiz:
                         state["context"]["quiz_id"] = quiz["id"]
+
+                    # Save the quiz to the database
+                    try:
+                        from sqlalchemy.orm import Session
+                        from app.db.base import get_db
+                        from app.models.quiz import Quiz as QuizModel
+
+                        # Get user ID from context if available
+                        user_id = state["context"].get("user_id")
+
+                        # Get a database session
+                        db = next(get_db())
+
+                        # Create a new quiz record
+                        db_quiz = QuizModel(
+                            id=quiz["id"],
+                            title=quiz["title"],
+                            description=quiz["description"],
+                            topic=quiz["topic"],
+                            difficulty=quiz.get("difficulty", "beginner"),
+                            questions=quiz["questions"],
+                            estimated_time_minutes=quiz.get("estimated_time_minutes", 10),
+                            created_at=datetime.now(timezone.utc),
+                            learning_objectives=quiz.get("learning_objectives", []),
+                            tags=quiz.get("tags", []),
+                            user_id=int(user_id) if user_id and user_id.isdigit() else None
+                        )
+
+                        # Add to database and commit
+                        db.add(db_quiz)
+                        db.commit()
+                        db.refresh(db_quiz)
+
+                        # Update the quiz ID in the context with the database ID
+                        state["context"]["quiz_id"] = db_quiz.id
+                        logger.info(f"Saved quiz from learning path to database with ID: {db_quiz.id}")
+                    except Exception as e:
+                        logger.error(f"Error saving quiz from learning path to database: {str(e)}")
+                        # Continue with the in-memory quiz if database save fails
 
                     # Get the quiz template
                     quiz_template = self.response_templates["quiz"]
