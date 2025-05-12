@@ -225,8 +225,11 @@ const QuizzesPage = () => {
                   colorScheme="blue"
                   size="sm"
                   width="full"
+                  asChild
                 >
-                  {quiz.last_attempt ? 'Retake Quiz' : 'Start Quiz'}
+                  <a href={`/quizzes/${quiz.id}`}>
+                    {quiz.last_attempt ? 'Retake Quiz' : 'Start Quiz'}
+                  </a>
                 </Button>
               </Card.Footer>
             </Card.Root>

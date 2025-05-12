@@ -50,15 +50,15 @@ export const getQuizzes = async (
 ): Promise<Quiz[]> => {
   let url = '/quizzes';
   const params = new URLSearchParams();
-  
+
   if (topic) params.append('topic', topic);
   if (difficulty) params.append('difficulty', difficulty);
   if (user_id) params.append('user_id', user_id.toString());
-  
+
   if (params.toString()) {
     url += `?${params.toString()}`;
   }
-  
+
   const response = await api.get<Quiz[]>(url);
   return response.data;
 };
@@ -79,8 +79,8 @@ export const submitQuizAttempt = async (
   user_id?: number
 ): Promise<QuizAttempt> => {
   const response = await api.post<QuizAttempt>(`/quizzes/${quiz_id}/submit`, {
-    answers,
-    user_id: user_id?.toString()
+    answers: answers,
+    user_id: user_id?.toString() || "anonymous"
   });
   return response.data;
 };
@@ -96,7 +96,7 @@ export const saveQuizFromChat = async (quiz: any): Promise<Quiz> => {
     question_types: ['multiple_choice'],
     learning_objectives: quiz.learning_objectives || []
   };
-  
+
   // We're not actually generating a new quiz, but using the API endpoint
   // to save the existing quiz to the database
   const response = await api.post<Quiz>('/quizzes/generate', {
@@ -104,6 +104,6 @@ export const saveQuizFromChat = async (quiz: any): Promise<Quiz> => {
     // Include the existing quiz data
     existing_quiz: quiz
   });
-  
+
   return response.data;
 };

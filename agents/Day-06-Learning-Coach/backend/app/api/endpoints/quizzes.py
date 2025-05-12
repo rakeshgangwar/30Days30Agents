@@ -90,6 +90,7 @@ def get_quizzes(
                     "topic": quiz.topic,
                     "difficulty": quiz.difficulty,
                     "questions": quiz.questions,
+                    "question_count": len(quiz.questions) if quiz.questions else 0,
                     "estimated_time_minutes": quiz.estimated_time_minutes,
                     "created_at": quiz.created_at.isoformat() if quiz.created_at else None,
                     "user_id": quiz.user_id,
@@ -120,6 +121,28 @@ def get_quiz(
     Get a specific quiz by ID.
     """
     try:
+        # First try to get the quiz from the database
+        db_quiz = db.query(QuizModel).filter(QuizModel.id == quiz_id).first()
+
+        if db_quiz:
+            # Convert the database model to a dictionary
+            quiz = {
+                "id": db_quiz.id,
+                "title": db_quiz.title,
+                "description": db_quiz.description,
+                "topic": db_quiz.topic,
+                "difficulty": db_quiz.difficulty,
+                "questions": db_quiz.questions,
+                "question_count": len(db_quiz.questions) if db_quiz.questions else 0,
+                "estimated_time_minutes": db_quiz.estimated_time_minutes,
+                "created_at": db_quiz.created_at.isoformat() if db_quiz.created_at else None,
+                "user_id": db_quiz.user_id,
+                "learning_objectives": db_quiz.learning_objectives,
+                "tags": db_quiz.tags
+            }
+            return quiz
+
+        # If not found in database, try the in-memory storage
         quiz = quiz_generator.get_quiz(quiz_id)
         if not quiz:
             raise HTTPException(status_code=404, detail="Quiz not found")
@@ -210,22 +233,49 @@ async def generate_quiz(
         raise HTTPException(status_code=500, detail=f"Error generating quiz: {str(e)}")
 
 
+class QuizSubmitRequest(BaseModel):
+    """Quiz submission request schema."""
+    answers: List[int]
+    user_id: Optional[str] = None
+
 @router.post("/{quiz_id}/submit", response_model=Dict[str, Any])
 def submit_quiz_attempt(
     quiz_id: str,
-    answers: List[int],
-    user_id: str,
+    request: QuizSubmitRequest,
     db: Session = Depends(get_db)
 ):
     """
     Submit a quiz attempt and get the results.
     """
     try:
+        # First check if the quiz exists in the database
+        db_quiz = db.query(QuizModel).filter(QuizModel.id == quiz_id).first()
+
+        if db_quiz:
+            # Convert the database model to a dictionary for the quiz generator
+            quiz = {
+                "id": db_quiz.id,
+                "title": db_quiz.title,
+                "description": db_quiz.description,
+                "topic": db_quiz.topic,
+                "difficulty": db_quiz.difficulty,
+                "questions": db_quiz.questions,
+                "question_count": len(db_quiz.questions) if db_quiz.questions else 0,
+                "estimated_time_minutes": db_quiz.estimated_time_minutes,
+                "created_at": db_quiz.created_at.isoformat() if db_quiz.created_at else None,
+                "user_id": db_quiz.user_id,
+                "learning_objectives": db_quiz.learning_objectives,
+                "tags": db_quiz.tags
+            }
+
+            # Add the quiz to the quiz generator's in-memory storage
+            quiz_generator.quizzes[quiz_id] = quiz
+
         # Get the result from the quiz generator
         result = quiz_generator.submit_quiz_attempt(
             quiz_id=quiz_id,
-            user_id=user_id,
-            answers=answers
+            user_id=request.user_id or "anonymous",
+            answers=request.answers
         )
 
         # Save the attempt to the database
@@ -234,8 +284,8 @@ def submit_quiz_attempt(
             db_quiz_attempt = QuizAttemptModel(
                 id=str(uuid.uuid4()),
                 quiz_id=quiz_id,
-                user_id=int(user_id) if user_id and user_id.isdigit() else None,
-                answers=answers,
+                user_id=int(request.user_id) if request.user_id and request.user_id.isdigit() else None,
+                answers=request.answers,
                 score=result.get("score", 0),
                 correct_answers=result.get("correct_answers", 0),
                 total_questions=result.get("total_questions", 0),
@@ -268,11 +318,49 @@ def get_quiz_attempts(
     Get all attempts for a specific quiz, optionally filtered by user_id.
     """
     try:
-        attempts = quiz_generator.get_quiz_attempts(
-            quiz_id=quiz_id,
-            user_id=user_id
-        )
-        return attempts
+        # First check if the quiz exists in the database
+        db_quiz = db.query(QuizModel).filter(QuizModel.id == quiz_id).first()
+        if not db_quiz:
+            # If not in database, check if it exists in the quiz generator
+            if quiz_id not in quiz_generator.quizzes:
+                raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
+
+        # Get attempts from the database
+        query = db.query(QuizAttemptModel).filter(QuizAttemptModel.quiz_id == quiz_id)
+        if user_id:
+            query = query.filter(QuizAttemptModel.user_id == int(user_id) if user_id.isdigit() else None)
+
+        db_attempts = query.all()
+
+        # Convert database attempts to the response model format
+        attempts = []
+        for attempt in db_attempts:
+            attempts.append({
+                "quiz_id": attempt.quiz_id,
+                "user_id": str(attempt.user_id) if attempt.user_id else None,
+                "answers": attempt.answers,
+                "score": attempt.score,
+                "completed": True,
+                "date": attempt.completed_at.isoformat() if attempt.completed_at else None
+            })
+
+        # If we have attempts from the database, return them
+        if attempts:
+            return attempts
+
+        # Otherwise, try to get attempts from the quiz generator
+        try:
+            attempts = quiz_generator.get_quiz_attempts(
+                quiz_id=quiz_id,
+                user_id=user_id
+            )
+            return attempts
+        except AttributeError:
+            # If the method doesn't exist, return an empty list
+            return []
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving quiz attempts: {str(e)}")
 

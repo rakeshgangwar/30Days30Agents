@@ -710,6 +710,123 @@ class QuizGenerator:
         logger.info(f"Retrieving all quiz results for user: {user_id}")
         return [result for result in self.quiz_results.values() if result.get("user_id") == user_id]
 
+    def get_quiz_attempts(self, quiz_id: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get all attempts for a specific quiz.
+
+        Args:
+            quiz_id: The ID of the quiz
+            user_id: Optional user ID to filter by
+
+        Returns:
+            List of quiz attempts
+        """
+        logger.info(f"Retrieving attempts for quiz ID: {quiz_id}")
+
+        # Check if the quiz exists
+        if quiz_id not in self.quizzes:
+            logger.error(f"Quiz with ID {quiz_id} not found")
+            raise ValueError(f"Quiz with ID {quiz_id} not found")
+
+        # Filter results by quiz ID
+        results = [
+            result for result in self.quiz_results.values()
+            if result.get("quiz_id") == quiz_id
+        ]
+
+        # Further filter by user ID if provided
+        if user_id:
+            results = [
+                result for result in results
+                if result.get("user_id") == user_id
+            ]
+
+        # Convert to the expected format
+        attempts = []
+        for result in results:
+            attempts.append({
+                "quiz_id": result.get("quiz_id"),
+                "user_id": result.get("user_id"),
+                "answers": result.get("answers", []),
+                "score": result.get("score", 0),
+                "completed": True,
+                "date": result.get("completed_at")
+            })
+
+        return attempts
+
+    def submit_quiz_attempt(
+        self,
+        quiz_id: str,
+        user_id: str,
+        answers: List[int]
+    ) -> Dict[str, Any]:
+        """Submit a quiz attempt and get the results.
+
+        Args:
+            quiz_id: The ID of the quiz
+            user_id: The ID of the user
+            answers: The user's answers
+
+        Returns:
+            Dict containing the quiz result
+        """
+        logger.info(f"Submitting quiz attempt for quiz ID: {quiz_id}")
+
+        # Check if the quiz exists
+        if quiz_id not in self.quizzes:
+            logger.error(f"Quiz with ID {quiz_id} not found")
+            raise ValueError(f"Quiz with ID {quiz_id} not found")
+
+        quiz = self.quizzes[quiz_id]
+
+        # Basic validation
+        if len(answers) != len(quiz["questions"]):
+            logger.error(f"Number of answers ({len(answers)}) does not match number of questions ({len(quiz['questions'])})")
+            raise ValueError(f"Number of answers ({len(answers)}) does not match number of questions ({len(quiz['questions'])})")
+
+        # Simple evaluation logic
+        correct_answers = 0
+        question_feedback = []
+
+        for i, (question, answer) in enumerate(zip(quiz["questions"], answers)):
+            is_correct = answer == question["correct_answer"]
+            if is_correct:
+                correct_answers += 1
+
+            feedback = question["explanation"] if is_correct else f"The correct answer is: {question['options'][question['correct_answer']]}. {question['explanation']}"
+            question_feedback.append({
+                "question_index": i,
+                "correct": is_correct,
+                "feedback": feedback
+            })
+
+        total_questions = len(quiz["questions"])
+        score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+
+        # Create the result
+        result = {
+            "quiz_id": quiz_id,
+            "user_id": user_id,
+            "score": score,
+            "correct_answers": correct_answers,
+            "total_questions": total_questions,
+            "answers": answers,
+            "feedback": {
+                "strengths": ["Good attempt!"] if score >= 50 else [],
+                "weaknesses": ["Need more practice"] if score < 50 else [],
+                "suggestions": ["Review the material and try again"]
+            },
+            "question_feedback": question_feedback,
+            "completed_at": datetime.utcnow().isoformat()
+        }
+
+        # Store the result
+        result_id = str(uuid.uuid4())
+        self.quiz_results[result_id] = result
+
+        logger.info(f"Evaluated quiz with score: {score:.1f}%")
+        return result
+
     def generate_quiz_from_learning_path(
         self,
         learning_path: Dict[str, Any],
