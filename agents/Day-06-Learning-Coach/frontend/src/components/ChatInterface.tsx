@@ -197,7 +197,7 @@ const ChatInterface = () => {
           borderRadius="lg"
           bg={userBubbleColor}
         >
-          <Text>{message.text}</Text>
+          <TextMessage content={message.text} />
           <Text fontSize="xs" color={mutedTextColor} textAlign="right" mt={1}>
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </Text>
@@ -215,21 +215,21 @@ const ChatInterface = () => {
       >
         {message.type === 'learning_path' && message.data ? (
           <Box>
-            {message.text && <Text mb={4}>{message.text}</Text>}
+            {message.text && <TextMessage content={message.text} />}
             <LearningPathMessage data={message.data} />
           </Box>
         ) : message.type === 'resources' && message.data ? (
           <Box>
-            {message.text && <Text mb={4}>{message.text}</Text>}
+            {message.text && <TextMessage content={message.text} />}
             <ResourcesMessage data={message.data} />
           </Box>
         ) : message.type === 'quiz' && message.data ? (
           <Box>
-            {message.text && <Text mb={4}>{message.text}</Text>}
+            {message.text && <TextMessage content={message.text} />}
             <QuizMessage data={message.data} />
           </Box>
         ) : (
-          <Text>{message.text}</Text>
+          <TextMessage content={message.text} />
         )}
         <Text fontSize="xs" color={mutedTextColor} textAlign="right" mt={1}>
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
