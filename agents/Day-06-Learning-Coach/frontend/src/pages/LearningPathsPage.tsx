@@ -1,0 +1,189 @@
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Heading,
+  Text,
+  Container,
+  SimpleGrid,
+  Card,
+  Button,
+  Badge,
+  Flex,
+  Alert,
+  Spinner,
+  Tag,
+  HStack,
+  Icon,
+} from '@chakra-ui/react';
+import { useColorModeValue } from '../components/ui/color-mode';
+import { FiClock } from 'react-icons/fi';
+
+interface LearningPathTopic {
+  name: string;
+  order: number;
+}
+
+interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  topics: LearningPathTopic[];
+  user_id: string;
+  created_at: string;
+  progress: {
+    completed_topics: number;
+    total_topics: number;
+  };
+}
+
+const LearningPathsPage = () => {
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+
+  useEffect(() => {
+    const fetchLearningPaths = async () => {
+      try {
+        // Replace with actual API call when backend is ready
+        const response = await fetch('/api/v1/paths');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch learning paths');
+        }
+
+        const data = await response.json();
+        setLearningPaths(data);
+      } catch (err) {
+        console.error('Error fetching learning paths:', err);
+        setError('Failed to load learning paths. Please try again later.');
+
+        // For development: mock data until backend is ready
+        setLearningPaths([
+          {
+            id: '1',
+            title: 'Introduction to Python',
+            description: 'A beginner\'s guide to Python programming',
+            user_id: '1',
+            created_at: new Date().toISOString(),
+            topics: [
+              { name: 'Python Basics', order: 1 },
+              { name: 'Data Structures', order: 2 },
+              { name: 'Functions', order: 3 },
+            ],
+            progress: {
+              completed_topics: 1,
+              total_topics: 3,
+            },
+          },
+          {
+            id: '2',
+            title: 'Web Development Fundamentals',
+            description: 'Learn the basics of HTML, CSS, and JavaScript',
+            user_id: '1',
+            created_at: new Date().toISOString(),
+            topics: [
+              { name: 'HTML Basics', order: 1 },
+              { name: 'CSS Styling', order: 2 },
+              { name: 'JavaScript Fundamentals', order: 3 },
+              { name: 'Responsive Design', order: 4 },
+            ],
+            progress: {
+              completed_topics: 2,
+              total_topics: 4,
+            },
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLearningPaths();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Container maxW="container.lg" py={8}>
+        <Flex justify="center" align="center" minH="50vh">
+          <Spinner size="xl" />
+        </Flex>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxW="container.lg" py={8}>
+      <Box textAlign="center" mb={8}>
+        <Heading as="h1" size="xl" mb={4}>
+          Learning Paths
+        </Heading>
+        <Text fontSize="lg" color="gray.600">
+          Your personalized learning journeys
+        </Text>
+      </Box>
+
+      {error && (
+        <Alert.Root status="error" mb={6} borderRadius="md">
+          <Alert.Indicator />
+          <Alert.Title>Error!</Alert.Title>
+          <Alert.Description>{error}</Alert.Description>
+        </Alert.Root>
+
+      )}
+
+      {learningPaths.length === 0 ? (
+        <Box textAlign="center" p={8} borderWidth="1px" borderRadius="lg">
+          <Text mb={4}>You don't have any learning paths yet.</Text>
+          <Button colorScheme="blue" asChild>
+            <a href="/chat">Chat with Learning Coach to create one</a>
+          </Button>
+        </Box>
+      ) : (
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
+          {learningPaths.map((path) => (
+            <Card.Root key={path.id} bg={cardBg} borderColor={borderColor} borderWidth="1px" borderRadius="lg" overflow="hidden">
+              <Card.Header>
+                <Heading size="md">{path.title}</Heading>
+              </Card.Header>
+              <Card.Body>
+                <Text mb={4}>{path.description}</Text>
+                <HStack mb={2}>
+                  <Tag.Root size="sm" colorScheme="blue">
+                    <Tag.Label>
+                      <Icon as={FiClock} mr={1} />
+                      {path.topics.length} topics
+                    </Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root size="sm" colorScheme="green">
+                    <Tag.Label>
+                      {Math.round((path.progress.completed_topics / path.progress.total_topics) * 100)}% complete
+                    </Tag.Label>
+                  </Tag.Root>
+                </HStack>
+                <Box mt={4}>
+                  <Text fontWeight="medium" mb={2}>Topics:</Text>
+                  {path.topics.map((topic, index) => (
+                    <Flex key={index} align="center" mb={1}>
+                      <Badge mr={2} colorScheme="blue">{topic.order}</Badge>
+                      <Text>{topic.name}</Text>
+                    </Flex>
+                  ))}
+                </Box>
+              </Card.Body>
+              <Card.Footer>
+                <Button colorScheme="blue" size="sm" width="full">
+                  Continue Learning
+                </Button>
+              </Card.Footer>
+            </Card.Root>
+          ))}
+        </SimpleGrid>
+      )}
+    </Container>
+  );
+};
+
+export default LearningPathsPage;

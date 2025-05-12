@@ -17,7 +17,7 @@ const HomePage = () => {
         </Button>
       </VStack>
 
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={8}>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} rowGap={8}>
         <FeatureCard
           title="Personalized Learning Paths"
           description="Create customized learning journeys based on your goals and interests."
