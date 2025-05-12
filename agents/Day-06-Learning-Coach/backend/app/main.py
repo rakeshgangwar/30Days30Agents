@@ -2,9 +2,24 @@
 Main application entry point for the Learning Coach Agent API.
 """
 
+import os
+import logging
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Log environment variables (without showing actual values)
+logger.info("Environment variables loaded")
+logger.info(f"OPENAI_API_KEY: {'Set' if os.getenv('OPENAI_API_KEY') else 'Not set'}")
+logger.info(f"OPENAI_MODEL: {os.getenv('OPENAI_MODEL', 'Not set')}")
 
 app = FastAPI(
     title="Learning Coach Agent API",

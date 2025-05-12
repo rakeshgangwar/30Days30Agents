@@ -23,11 +23,16 @@ def main() -> None:
     """Run the application."""
     # Load environment variables
     load_dotenv()
-    
+
+    # Log environment variables (without showing actual values)
+    logger.info("Environment variables loaded")
+    logger.info(f"OPENAI_API_KEY: {'Set' if os.getenv('OPENAI_API_KEY') else 'Not set'}")
+    logger.info(f"OPENAI_MODEL: {os.getenv('OPENAI_MODEL', 'Not set')}")
+
     # Initialize database
     logger.info("Initializing database")
     init_db()
-    
+
     # Run the API server
     logger.info("Starting API server")
     uvicorn.run(
