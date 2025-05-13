@@ -31,6 +31,7 @@ Helps users manage their social media presence by drafting posts, suggesting con
 - URL shorteners
 - Analytics platforms (Google Analytics, platform-specific analytics)
 - Customer Relationship Management (CRM) systems
+- https://github.com/inovector/mixpost
 
 ## Architecture Considerations
 

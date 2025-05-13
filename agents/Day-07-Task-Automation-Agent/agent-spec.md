@@ -29,6 +29,8 @@ Automates repetitive digital tasks and workflows based on user instructions, pot
 - Messaging platforms (Slack API, Discord API)
 - Cloud storage (Google Drive, Dropbox)
 - Operating system interactions (file system, shell commands - use with extreme caution)
+- https://github.com/rakeshgangwar/beehive-mcp-server
+- https://github.com/muesli/beehive
 
 ## Architecture Considerations
 

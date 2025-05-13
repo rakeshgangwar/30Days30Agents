@@ -31,6 +31,7 @@ Helps users track personal expenses, monitor budgets, categorize transactions, a
 - Receipt scanning tools (OCR)
 - Budgeting apps (YNAB, Mint APIs if available)
 - Investment tracking platforms
+- https://www.firefly-iii.org/
 
 ## Architecture Considerations
 

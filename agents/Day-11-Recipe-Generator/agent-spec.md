@@ -31,6 +31,7 @@ Generates personalized recipes based on available ingredients, dietary restricti
 - Grocery store APIs (for checking ingredient availability or ordering)
 - Nutrition analysis APIs
 - Smart kitchen appliances
+- https://mealie.io/
 
 ## Architecture Considerations
 

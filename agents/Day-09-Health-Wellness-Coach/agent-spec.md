@@ -56,6 +56,9 @@ Provides personalized recommendations for fitness routines, healthy eating, stre
 - Database for storing user data
 - Web search for finding exercises, recipes, or health information
 - Potential integration with fitness tracker APIs
+- https://wger.readthedocs.io/en/latest/index.html
+- https://github.com/rakeshgangwar/strava-mcp-server
+
 
 ### Output Formatting
 - Structured workout plans with exercises, sets, reps, rest times

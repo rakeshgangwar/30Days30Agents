@@ -30,6 +30,8 @@ Aggregates news articles from various sources based on user-defined topics and p
 - Note-taking apps (Evernote, Notion) for saving articles
 - Fact-checking APIs
 - Language translation APIs
+- https://www.freshrss.org/
+- https://github.com/rakeshgangwar/freshrss-server
 
 ## Architecture Considerations
 

@@ -31,6 +31,10 @@ Assists users in planning trips by suggesting destinations, finding flights and 
 - Booking platforms (direct booking capabilities - complex)
 - Travel review sites (TripAdvisor, Yelp APIs)
 - Ride-sharing or public transport APIs
+- https://dev.opentripmap.org/product
+- https://tripadvisor-content-api.readme.io/reference/overview
+- https://github.com/unseen1980/awesome-travel
+
 
 ## Architecture Considerations
 
