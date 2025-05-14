@@ -10,264 +10,62 @@ cases:
       value: true
     LLMResultEvaluator:
       name: LLMResultEvaluator
-      reason: The result does not list files, which does not address the task. The
-        error message is unclear and provides technical details without resolution
-        steps. No steps taken towards listing files.
+      reason: 1. The result directly addresses the task by providing a plan to monitor
+        and log changes to a website. 2. The steps detailed are logical and appropriate,
+        outlining how to identify, monitor, and log changes, including using CSS selectors
+        and specific conditions. 3. The result is clear and understandable, with a
+        request for additional information to further personalize the monitoring task.
       source:
         arguments: null
         name: LLMResultEvaluator
-      value: false
-  attributes: {}
-  expected_output:
-    result: Successfully listed files in the current directory
-    steps_taken:
-    - List files in current directory
-    success: true
-  inputs:
-    context: null
-    task_description: List all files in the current directory
-  labels: {}
-  metadata:
-    category: file_operation
-    difficulty: easy
-    expected_tools:
-    - list_files
-    timeout_seconds: 5
-  metrics:
-    input_tokens: 2354
-    output_tokens: 208
-    requests: 2
-  name: list_files
-  output:
-    result: "Error: 1 validation error for TaskResult\nsummary\n  Input should be\
-      \ a valid string [type=string_type, input_value=AgentRunResult(output='He...)\\\
-      n14. src (directory)'), input_type=AgentRunResult]\n    For further information\
-      \ visit https://errors.pydantic.dev/2.11/v/string_type"
-    steps_taken: []
-    success: false
-  scores:
-    PerformanceEvaluator:
-      name: PerformanceEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: PerformanceEvaluator
-      value: 0.6899687999999999
-    SuccessEvaluator:
-      name: SuccessEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: SuccessEvaluator
-      value: 0.0
-    ToolUsageEvaluator:
-      name: ToolUsageEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: ToolUsageEvaluator
-      value: 0.0
-  span_id: 4183994ec2f1bbb7
-  task_duration: 3.103023
-  total_duration: 6.188811
-  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
-- assertions:
-    IsInstance:
-      name: IsInstance
-      reason: null
-      source:
-        arguments:
-        - TaskOutput
-        name: IsInstance
       value: true
-    LLMResultEvaluator:
-      name: LLMResultEvaluator
-      reason: 1. The result did not address the task as it resulted in a validation
-        error. 2. The steps taken are not provided, suggesting that logical steps
-        appropriate for reading a file were not taken. 3. The error message is clear
-        and understandable, but it does not accomplish the task described.
-      source:
-        arguments: null
-        name: LLMResultEvaluator
-      value: false
   attributes: {}
   expected_output:
-    result: Successfully read the contents of README.md
+    result: Webpage changes have been logged successfully.
     steps_taken:
-    - Read file README.md
+    - Monitor the website for changes
+    - Log any detected changes
     success: true
   inputs:
     context: null
-    task_description: Read the contents of the README.md file
-  labels: {}
-  metadata:
-    category: file_operation
-    difficulty: easy
-    expected_tools:
-    - read_file
-    timeout_seconds: 5
-  metrics:
-    cached_tokens: 3072
-    input_tokens: 4350
-    output_tokens: 424
-    requests: 2
-  name: read_file
-  output:
-    result: "Error: 1 validation error for TaskResult\nsummary\n  Input should be\
-      \ a valid string [type=string_type, input_value=AgentRunResult(output='Th...Task\
-      \ Automation Agent.'), input_type=AgentRunResult]\n    For further information\
-      \ visit https://errors.pydantic.dev/2.11/v/string_type"
-    steps_taken: []
-    success: false
-  scores:
-    PerformanceEvaluator:
-      name: PerformanceEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: PerformanceEvaluator
-      value: 0.4516643
-    SuccessEvaluator:
-      name: SuccessEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: SuccessEvaluator
-      value: 0.0
-    ToolUsageEvaluator:
-      name: ToolUsageEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: ToolUsageEvaluator
-      value: 0.0
-  span_id: 36d246aa5e9e35b5
-  task_duration: 5.483802
-  total_duration: 8.021054
-  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
-- assertions:
-    IsInstance:
-      name: IsInstance
-      reason: null
-      source:
-        arguments:
-        - TaskOutput
-        name: IsInstance
-      value: true
-    LLMResultEvaluator:
-      name: LLMResultEvaluator
-      reason: '1. The result does not fulfill the task of making a GET request to
-        the given URL as it indicates an error.
-
-        2. No steps are shown to perform the GET request, so it''s unclear what was
-        attempted.
-
-        3. The error message is clear but irrelevant to the task because it doesn''t
-        provide information about the GET request''s execution.'
-      source:
-        arguments: null
-        name: LLMResultEvaluator
-      value: false
-  attributes: {}
-  expected_output:
-    result: Successfully made GET request
-    steps_taken:
-    - Make GET request to https://jsonplaceholder.typicode.com/todos/1
-    success: true
-  inputs:
-    context: null
-    task_description: Make a GET request to https://jsonplaceholder.typicode.com/todos/1
-  labels: {}
-  metadata:
-    category: api_request
-    difficulty: medium
-    expected_tools:
-    - make_get_request
-    timeout_seconds: 10
-  metrics:
-    input_tokens: 2400
-    output_tokens: 174
-    requests: 2
-  name: make_api_request
-  output:
-    result: "Error: 1 validation error for TaskResult\nsummary\n  Input should be\
-      \ a valid string [type=string_type, input_value=AgentRunResult(output='Th...pleted\"\
-      : false\\n}\\n```'), input_type=AgentRunResult]\n    For further information\
-      \ visit https://errors.pydantic.dev/2.11/v/string_type"
-    steps_taken: []
-    success: false
-  scores:
-    PerformanceEvaluator:
-      name: PerformanceEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: PerformanceEvaluator
-      value: 0.82003045
-    SuccessEvaluator:
-      name: SuccessEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: SuccessEvaluator
-      value: 0.0
-    ToolUsageEvaluator:
-      name: ToolUsageEvaluator
-      reason: null
-      source:
-        arguments: null
-        name: ToolUsageEvaluator
-      value: 0.0
-  span_id: 9d7d6f7824556416
-  task_duration: 3.600149
-  total_duration: 6.549309
-  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
-- assertions:
-    IsInstance:
-      name: IsInstance
-      reason: null
-      source:
-        arguments:
-        - TaskOutput
-        name: IsInstance
-      value: true
-    LLMResultEvaluator:
-      name: LLMResultEvaluator
-      reason: 1. The result does not address the task described in the input as the
-        task automation failed completely. 2. No steps were taken, so there is no
-        opportunity to evaluate their logical appropriateness. 3. The result is clear
-        and understandable, as it clearly indicates an error occurred due to exceeding
-        the maximum number of retries.
-      source:
-        arguments: null
-        name: LLMResultEvaluator
-      value: false
-  attributes: {}
-  expected_output:
-    result: Successfully set up website monitoring
-    steps_taken:
-    - Set up web monitor for https://example.com
-    success: true
-  inputs:
-    context: null
-    task_description: Set up monitoring for the website https://example.com to check
-      for changes to the title
+    task_description: Monitor and log changes to a competitor's website.
   labels: {}
   metadata:
     category: web_monitoring
-    difficulty: hard
+    difficulty: medium
     expected_tools:
-    - setup_web_monitor
-    timeout_seconds: 15
+    - web_monitoring_tool
+    timeout_seconds: 120
   metrics:
-    input_tokens: 2564
-    output_tokens: 262
-    requests: 2
-  name: monitor_website
+    input_tokens: 1126
+    output_tokens: 344
+    requests: 1
+  name: Case 1
   output:
-    result: 'Error: Tool exceeded max retries count of 1'
-    steps_taken: []
-    success: false
+    result: AgentRunResult(output='To effectively monitor and log changes to a competitor\'s
+      website, we can set up a web monitoring task. This will involve checking for
+      changes in specific elements of their website. Here\'s how we can do it:\n\n1.
+      Identify the URL of the competitor\'s website.\n2. Determine the specific elements
+      on the page we want to monitor (e.g., prices, news section).\n3. Use a CSS selector
+      to target these elements.\n4. Set up a task to compare these elements against
+      a target value or condition, such as "greater_than" or "less_than".\n5. Specify
+      an action to take when a condition is met, such as logging the changes to a
+      file.\n\nCould you provide the URL of the competitor\'s website and any specific
+      elements you are interested in monitoring? Additionally, let me know the condition
+      and action required when changes are detected.')
+    steps_taken:
+    - AgentRunResult(output='To effectively monitor and log changes to a competitor\'s
+      website, we can set up a web monitoring task. This will involve checking for
+      changes in specific elements of their website. Here\'s how we can do it:\n\n1.
+      Identify the URL of the competitor\'s website.\n2. Determine the specific elements
+      on the page we want to monitor (e.g., prices, news section).\n3. Use a CSS selector
+      to target these elements.\n4. Set up a task to compare these elements against
+      a target value or condition, such as "greater_than" or "less_than".\n5. Specify
+      an action to take when a condition is met, such as logging the changes to a
+      file.\n\nCould you provide the URL of the competitor\'s website and any specific
+      elements you are interested in monitoring? Additionally, let me know the condition
+      and action required when changes are detected.')
+    success: true
   scores:
     PerformanceEvaluator:
       name: PerformanceEvaluator
@@ -275,14 +73,14 @@ cases:
       source:
         arguments: null
         name: PerformanceEvaluator
-      value: 0.8578982666666667
+      value: 0.9804167791666667
     SuccessEvaluator:
       name: SuccessEvaluator
       reason: null
       source:
         arguments: null
         name: SuccessEvaluator
-      value: 0.0
+      value: 1.0
     ToolUsageEvaluator:
       name: ToolUsageEvaluator
       reason: null
@@ -290,8 +88,378 @@ cases:
         arguments: null
         name: ToolUsageEvaluator
       value: 0.0
-  span_id: c0e0b06b8533456d
-  task_duration: 4.263763
-  total_duration: 8.094845
-  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
+  span_id: 18135bd3fbd25f0e
+  task_duration: 4.702516
+  total_duration: 6.57459
+  trace_id: 0196cdc49747d4521eaebbc6e9fe03f4
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: The output addresses the task by asking for necessary information to
+        schedule the meeting, the steps taken are logical as they request relevant
+        details to proceed, and the result is clear and easily understandable.
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: true
+  attributes: {}
+  expected_output:
+    result: Meeting scheduled successfully across all time zones.
+    steps_taken:
+    - Check availability of all team members
+    - Select the optimal time slot
+    - Schedule the meeting
+    success: true
+  inputs:
+    context:
+      available_times:
+      - '2023-01-10T10:00:00'
+      - '2023-01-10T15:00:00'
+      team_members:
+      - Alice
+      - Bob
+      - Charlie
+    task_description: Schedule a meeting between team members across different time
+      zones.
+  labels: {}
+  metadata:
+    category: scheduling
+    difficulty: medium
+    expected_tools:
+    - calendar_tool
+    timeout_seconds: 180
+  metrics:
+    input_tokens: 1128
+    output_tokens: 134
+    requests: 1
+  name: Case 2
+  output:
+    result: AgentRunResult(output="To schedule a meeting across different time zones,
+      we'll need the following information:\n\n1. The names and email addresses of
+      all team members to be invited.\n2. The time zones of each member.\n3. Preferred
+      dates and times for the meeting.\n4. Duration of the meeting.\n\nPlease provide
+      this information so we can proceed.")
+    steps_taken:
+    - AgentRunResult(output="To schedule a meeting across different time zones, we'll
+      need the following information:\n\n1. The names and email addresses of all team
+      members to be invited.\n2. The time zones of each member.\n3. Preferred dates
+      and times for the meeting.\n4. Duration of the meeting.\n\nPlease provide this
+      information so we can proceed.")
+    success: true
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.9933655777777778
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 1.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: aed0ade5eb17fd22
+  task_duration: 2.388825
+  total_duration: 4.198896
+  trace_id: 0196cdc49747d4521eaebbc6e9fe03f4
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: '1. The result partially addresses the task. It outlines steps to process
+        the dataset but does not perform any actual processing as described.
+
+        2. The steps are logical: identifying the dataset, reading it, filtering invalid
+        entries, and calculating summary statistics are appropriate.
+
+        3. The result is clear and understandable, requesting more details for proper
+        execution.'
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: false
+  attributes: {}
+  expected_output:
+    result: Data processed and summary statistics calculated.
+    steps_taken:
+    - Download the dataset
+    - Filter out invalid entries
+    - Calculate summary statistics
+    success: true
+  inputs:
+    context:
+      dataset_url: http://example.com/dataset.csv
+    task_description: Process a dataset by filtering out invalid entries and calculating
+      summary statistics.
+  labels: {}
+  metadata:
+    category: data_processing
+    difficulty: hard
+    expected_tools:
+    - data_processing_library
+    timeout_seconds: 300
+  metrics:
+    input_tokens: 1132
+    output_tokens: 276
+    requests: 1
+  name: Case 3
+  output:
+    result: 'AgentRunResult(output=''To process a dataset by filtering out invalid
+      entries and calculating summary statistics, we\''ll need to follow these steps:\n\n1.
+      **Identify the Dataset**: We\''ll need access to the dataset. Could you please
+      provide the file name or format?\n   \n2. **Read the Dataset**: We\''ll read
+      the contents of the dataset file.\n   \n3. **Filter Invalid Entries**: Define
+      what constitutes an "invalid entry" so we can filter them out.\n   \n4. **Calculate
+      Summary Statistics**: Decide on the summary statistics to calculate (e.g., mean,
+      median, mode, standard deviation).\n\nPlease provide more details about the
+      dataset and the criteria for filtering invalid entries so we can proceed.'')'
+    steps_taken:
+    - 'AgentRunResult(output=''To process a dataset by filtering out invalid entries
+      and calculating summary statistics, we\''ll need to follow these steps:\n\n1.
+      **Identify the Dataset**: We\''ll need access to the dataset. Could you please
+      provide the file name or format?\n   \n2. **Read the Dataset**: We\''ll read
+      the contents of the dataset file.\n   \n3. **Filter Invalid Entries**: Define
+      what constitutes an "invalid entry" so we can filter them out.\n   \n4. **Calculate
+      Summary Statistics**: Decide on the summary statistics to calculate (e.g., mean,
+      median, mode, standard deviation).\n\nPlease provide more details about the
+      dataset and the criteria for filtering invalid entries so we can proceed.'')'
+    success: true
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.994661085
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 1.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: 5cc9deff940d230e
+  task_duration: 3.203703
+  total_duration: 4.613789
+  trace_id: 0196cdc49747d4521eaebbc6e9fe03f4
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: 1. The result discusses setting up a daily backup, which directly addresses
+        the task in the input.\n2. The steps listed (identifying files, preparing
+        credentials, writing a script, scheduling) are logical and appropriate for
+        setting up a daily backup task.\n3. The result is clear and understandable,
+        providing a logical sequence of steps to follow.
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: true
+  attributes: {}
+  expected_output:
+    result: Daily backup completed to cloud storage.
+    steps_taken:
+    - Identify files to backup
+    - Transfer files to cloud storage
+    success: true
+  inputs:
+    context:
+      cloud_storage: Google Drive
+      local_directory: /var/data/
+    task_description: Perform daily backup of specific files from a local directory
+      to a cloud storage.
+  labels: {}
+  metadata:
+    category: file_operation
+    difficulty: easy
+    expected_tools:
+    - file_operation_tool
+    - cloud_storage_api
+    timeout_seconds: 200
+  metrics:
+    input_tokens: 1136
+    output_tokens: 232
+    requests: 1
+  name: Case 4
+  output:
+    result: AgentRunResult(output="To set up a daily backup of specific files from
+      a local directory to a cloud storage, I need to follow these steps:\n\n1. Identify
+      the files to be backed up.\n2. Choose a cloud storage service to use and prepare
+      the credentials or API needed for access.\n3. Write a script to upload the files
+      to the cloud storage.\n4. Schedule the task to run daily.\n\nLet's get started
+      by listing your files in the local directory. Could you please specify which
+      directory the files are located in, and provide details about the cloud storage
+      service you wish to use?")
+    steps_taken:
+    - AgentRunResult(output="To set up a daily backup of specific files from a local
+      directory to a cloud storage, I need to follow these steps:\n\n1. Identify the
+      files to be backed up.\n2. Choose a cloud storage service to use and prepare
+      the credentials or API needed for access.\n3. Write a script to upload the files
+      to the cloud storage.\n4. Schedule the task to run daily.\n\nLet's get started
+      by listing your files in the local directory. Could you please specify which
+      directory the files are located in, and provide details about the cloud storage
+      service you wish to use?")
+    success: true
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.9913701975
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 1.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: a2da91c73e90cafb
+  task_duration: 3.452263
+  total_duration: 5.212789
+  trace_id: 0196cdc49747d4521eaebbc6e9fe03f4
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: 1. The result addresses the task by outlining steps to send a report
+        to a Slack channel via API. 2. The steps are logical, involving data retrieval,
+        formatting, API usage, and scheduling. 3. The explanation is clear and mentions
+        necessary requirements like API token and channel ID.
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: true
+  attributes: {}
+  expected_output:
+    result: Report sent successfully to Slack channel.
+    steps_taken:
+    - Format the report content
+    - Send the report using Slack API
+    success: true
+  inputs:
+    context:
+      report_content: Sales Data
+      slack_channel: '#reports'
+    task_description: Send a daily report to a designated Slack channel using an API.
+  labels: {}
+  metadata:
+    category: api_request
+    difficulty: easy
+    expected_tools:
+    - slack_api
+    timeout_seconds: 60
+  metrics:
+    input_tokens: 1132
+    output_tokens: 372
+    requests: 1
+  name: Case 5
+  output:
+    result: 'AgentRunResult(output="To set up a daily report to be sent to a designated
+      Slack channel using an API, I''ll need to perform the following steps:\n\n1.
+      Create a report content or retrieve report data.\n2. Format the report content
+      if necessary.\n3. Use Slack''s API to send a message to the channel.\n4. Set
+      up a scheduled task to automate this process daily.\n\nHere''s how this can
+      be achieved: \n\n### Requirements:\n- **Slack API Access**: You''ll need a Slack
+      API token and the Slack channel ID where you want to send the report.\n- **Report
+      Content**: I''ll assume that the report content is generated or fetched from
+      somewhere (e.g., a file or an API).\n\nDo you have a specific API endpoint that
+      generates or holds the report data, or should we assume a predefined content
+      for now? Also, can you provide the Slack API token and channel ID (or confirm
+      these will be handled externally)?")'
+    steps_taken:
+    - 'AgentRunResult(output="To set up a daily report to be sent to a designated
+      Slack channel using an API, I''ll need to perform the following steps:\n\n1.
+      Create a report content or retrieve report data.\n2. Format the report content
+      if necessary.\n3. Use Slack''s API to send a message to the channel.\n4. Set
+      up a scheduled task to automate this process daily.\n\nHere''s how this can
+      be achieved: \n\n### Requirements:\n- **Slack API Access**: You''ll need a Slack
+      API token and the Slack channel ID where you want to send the report.\n- **Report
+      Content**: I''ll assume that the report content is generated or fetched from
+      somewhere (e.g., a file or an API).\n\nDo you have a specific API endpoint that
+      generates or holds the report data, or should we assume a predefined content
+      for now? Also, can you provide the Slack API token and channel ID (or confirm
+      these will be handled externally)?")'
+    success: true
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.9631199416666667
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 1.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: d9df7af25d2feca9
+  task_duration: 4.425934
+  total_duration: 6.482296
+  trace_id: 0196cdc49747d4521eaebbc6e9fe03f4
 name: task_automation_function

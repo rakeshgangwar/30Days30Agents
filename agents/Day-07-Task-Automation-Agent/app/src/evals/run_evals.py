@@ -56,9 +56,12 @@ async def task_automation_function(task_input: TaskInput) -> TaskOutput:
             result = await process_user_input(task_input.task_description)
 
         # Convert the result to the expected output format
+        # Ensure result.summary is a string
+        summary = str(result.summary) if result.summary is not None else ""
+
         output = TaskOutput(
             success=result.success,
-            result=result.summary,
+            result=summary,
             steps_taken=[str(r) for r in result.results]
         )
 

@@ -15,9 +15,9 @@ from pydantic_ai import Agent, RunContext, ModelRetry
 from pydantic_ai.mcp import MCPServerStdio
 
 # Import our models
-from src.models.user_task import TaskResult
-from src.models.dependencies import AppDependencies
-from src.beehive.mcp_server import BeehiveMCPServer
+from models.user_task import TaskResult
+from models.dependencies import AppDependencies
+from beehive.mcp_server import BeehiveMCPServer
 
 # Load environment variables
 load_dotenv()
@@ -242,12 +242,15 @@ async def process_user_input(user_input: str) -> TaskResult:
                 deps=deps
             )
 
+            # Convert result to string if it's not already
+            result_str = str(result)
+
             # Create a TaskResult object
             task_result = TaskResult(
                 task="Task execution",
                 success=True,
-                results=[result],
-                summary=result
+                results=[result_str],
+                summary=result_str
             )
     except Exception as e:
         # Handle any errors
