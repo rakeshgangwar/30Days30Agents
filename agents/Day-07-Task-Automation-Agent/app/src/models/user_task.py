@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class UserTaskInput(BaseModel):
     """
     Represents a user's task request after parsing and parameter collection.
-    
+
     This model is used to structure the user's natural language input into
     a format that can be processed by the agent.
     """
@@ -26,7 +26,7 @@ class UserTaskInput(BaseModel):
         default_factory=list,
         description="List of parameter names that are required but not yet provided"
     )
-    
+
     def is_complete(self) -> bool:
         """Check if all required parameters have been provided."""
         return len(self.missing_parameters) == 0
@@ -34,7 +34,7 @@ class UserTaskInput(BaseModel):
 class PlannedStep(BaseModel):
     """
     Represents a single step in the execution plan for a task.
-    
+
     Each step specifies a tool to use, an action to perform with that tool,
     and parameters to pass to the tool.
     """
@@ -48,7 +48,7 @@ class PlannedStep(BaseModel):
         default_factory=dict,
         description="Parameters to pass to the tool for this action"
     )
-    
+
     def __str__(self) -> str:
         """String representation of the planned step."""
         return f"{self.tool}.{self.action}({', '.join(f'{k}={v}' for k, v in self.params.items())})"
@@ -56,7 +56,7 @@ class PlannedStep(BaseModel):
 class TaskResult(BaseModel):
     """
     Represents the result of executing a task.
-    
+
     This includes whether the task was successful, the results of each step,
     and a summary of the overall execution.
     """
@@ -76,4 +76,8 @@ class TaskResult(BaseModel):
     error: Optional[str] = Field(
         default=None,
         description="Error message if the task failed"
+    )
+    message_history: Optional[Any] = Field(
+        default=None,
+        description="Message history for continuing the conversation"
     )

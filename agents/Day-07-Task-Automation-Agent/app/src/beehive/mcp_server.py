@@ -34,11 +34,15 @@ class BeehiveMCPServer:
         args = config.get("args", [])
         env = config.get("env", {})
 
+        # Merge with current environment
+        full_env = os.environ.copy()
+        full_env.update(env)
+
         # Create the MCP server
         server = MCPServerStdio(
             command=command,
             args=args,
-            env=env
+            env=full_env
         )
 
         return server
@@ -75,6 +79,7 @@ class BeehiveMCPServer:
             "/Users/rakeshgangwar/Projects/beehive-mcp-server/src/beehive-mcp.js"
         )
 
+        # Use the provided configuration that works for other MCP clients
         return {
             "autoApprove": [],
             "disabled": False,
