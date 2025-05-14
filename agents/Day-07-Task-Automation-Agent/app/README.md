@@ -85,11 +85,67 @@ python examples/file_operations.py
 
 # Run the web monitor example
 python examples/web_monitor.py
+
+# Run the Beehive MCP example
+python examples/beehive_mcp_example.py
 ```
+
+## Evaluations
+
+The Task Automation Agent includes a comprehensive evaluation framework built on Pydantic Evals. This framework allows you to:
+
+1. Generate test datasets for different types of tasks
+2. Run evaluations on the agent's performance
+3. Analyze the results using custom evaluators
+
+### Running Evaluations
+
+To run evaluations on the agent:
+
+```bash
+# Generate an example dataset
+python scripts/generate_example_dataset.py
+
+# Run evaluations using the example dataset
+python scripts/run_evals.py
+
+# Run evaluations with custom parameters
+python scripts/run_evals.py --dataset data/evals/example_dataset.yaml --output data/evals/report.yaml --concurrency 2
+```
+
+### Custom Evaluators
+
+The evaluation framework includes several custom evaluators:
+
+- **SuccessEvaluator**: Checks if the task was completed successfully
+- **ToolUsageEvaluator**: Verifies if the expected tools were used
+- **PerformanceEvaluator**: Measures the execution time against the expected timeout
+- **LLMResultEvaluator**: Uses an LLM to judge the quality of the task result
 
 ## Beehive Integration
 
 This agent integrates with Beehive via the MCP server for event-driven task execution. You'll need to have the [beehive-mcp-server](https://github.com/rakeshgangwar/beehive-mcp-server) running to use these features.
+
+### MCP Server Integration
+
+The agent uses the Model Context Protocol (MCP) to communicate with the Beehive server. This is implemented using the `MCPServerStdio` class from PydanticAI, which runs the server as a subprocess and communicates with it over stdin/stdout.
+
+To use the Beehive MCP server:
+
+1. Make sure you have the Beehive MCP server installed and configured
+2. Install the MCP dependencies:
+
+```bash
+uv add "pydantic-ai-slim[mcp]" "mcp[cli]"
+```
+
+3. Run the example:
+
+```bash
+python examples/beehive_mcp_example.py
+```
+
+The Beehive MCP server configuration is defined in the `BeehiveMCPServer` class in `src/beehive/mcp_server.py`. You can customize this configuration to match your Beehive MCP server setup.
 
 ## License
 

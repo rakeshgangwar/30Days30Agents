@@ -13,9 +13,9 @@ from dotenv import load_dotenv
 # Add the parent directory to the path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models.user_task import TaskResult
-from models.dependencies import AppDependencies
-from main import agent, process_user_input
+from src.models.user_task import TaskResult
+from src.models.dependencies import AppDependencies
+from src.main import agent, process_user_input
 
 # Load environment variables
 load_dotenv()

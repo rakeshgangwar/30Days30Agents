@@ -5,9 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "logfire>=3.15.1",
     "mcp[cli]>=1.8.1",
     "pydantic>=2.11.4",
     "pydantic-ai>=0.2.3",
+    "pydantic-ai-slim[mcp]>=0.2.3",
+    "pydantic-evals>=0.2.3",
     "python-dotenv>=1.1.0",
     "requests>=2.32.3",
     "streamlit>=1.45.1",

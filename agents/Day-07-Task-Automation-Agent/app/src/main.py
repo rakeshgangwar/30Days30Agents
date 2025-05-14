@@ -8,13 +8,16 @@ PydanticAI for intelligent processing and Beehive for event-driven task executio
 import os
 import asyncio
 import requests
+import json
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext, ModelRetry
+from pydantic_ai.mcp import MCPServerStdio
 
 # Import our models
-from models.user_task import TaskResult
-from models.dependencies import AppDependencies
+from src.models.user_task import TaskResult
+from src.models.dependencies import AppDependencies
+from src.beehive.mcp_server import BeehiveMCPServer
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +30,11 @@ agent = Agent(
     system_prompt="You are a task automation agent that helps users automate repetitive tasks. "
                  "You can interact with files, APIs, and set up automated workflows using Beehive."
 )
+
+# Create and register the Beehive MCP server
+beehive_config = BeehiveMCPServer.get_default_config()
+beehive_server = BeehiveMCPServer.create_server(beehive_config)
+BeehiveMCPServer.register_server_with_agent(agent, beehive_server)
 
 # File operations tools
 @agent.tool
@@ -225,19 +233,31 @@ async def process_user_input(user_input: str) -> TaskResult:
     # Create dependencies
     deps = AppDependencies.from_env()
 
-    # Parse the user input to understand the task
-    result = await agent.run(
-        user_input,
-        deps=deps
-    )
+    try:
+        # Run the agent with the MCP server
+        async with agent.run_mcp_servers():
+            # Parse the user input to understand the task
+            result = await agent.run(
+                user_input,
+                deps=deps
+            )
 
-    # Create a TaskResult object
-    task_result = TaskResult(
-        task="Task execution",
-        success=True,
-        results=[result],
-        summary=result
-    )
+            # Create a TaskResult object
+            task_result = TaskResult(
+                task="Task execution",
+                success=True,
+                results=[result],
+                summary=result
+            )
+    except Exception as e:
+        # Handle any errors
+        task_result = TaskResult(
+            task="Task execution",
+            success=False,
+            results=[],
+            summary=f"Error: {str(e)}",
+            error=str(e)
+        )
 
     return task_result
 

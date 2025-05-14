@@ -1,0 +1,297 @@
+cases:
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: The result does not list files, which does not address the task. The
+        error message is unclear and provides technical details without resolution
+        steps. No steps taken towards listing files.
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: false
+  attributes: {}
+  expected_output:
+    result: Successfully listed files in the current directory
+    steps_taken:
+    - List files in current directory
+    success: true
+  inputs:
+    context: null
+    task_description: List all files in the current directory
+  labels: {}
+  metadata:
+    category: file_operation
+    difficulty: easy
+    expected_tools:
+    - list_files
+    timeout_seconds: 5
+  metrics:
+    input_tokens: 2354
+    output_tokens: 208
+    requests: 2
+  name: list_files
+  output:
+    result: "Error: 1 validation error for TaskResult\nsummary\n  Input should be\
+      \ a valid string [type=string_type, input_value=AgentRunResult(output='He...)\\\
+      n14. src (directory)'), input_type=AgentRunResult]\n    For further information\
+      \ visit https://errors.pydantic.dev/2.11/v/string_type"
+    steps_taken: []
+    success: false
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.6899687999999999
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 0.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: 4183994ec2f1bbb7
+  task_duration: 3.103023
+  total_duration: 6.188811
+  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: 1. The result did not address the task as it resulted in a validation
+        error. 2. The steps taken are not provided, suggesting that logical steps
+        appropriate for reading a file were not taken. 3. The error message is clear
+        and understandable, but it does not accomplish the task described.
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: false
+  attributes: {}
+  expected_output:
+    result: Successfully read the contents of README.md
+    steps_taken:
+    - Read file README.md
+    success: true
+  inputs:
+    context: null
+    task_description: Read the contents of the README.md file
+  labels: {}
+  metadata:
+    category: file_operation
+    difficulty: easy
+    expected_tools:
+    - read_file
+    timeout_seconds: 5
+  metrics:
+    cached_tokens: 3072
+    input_tokens: 4350
+    output_tokens: 424
+    requests: 2
+  name: read_file
+  output:
+    result: "Error: 1 validation error for TaskResult\nsummary\n  Input should be\
+      \ a valid string [type=string_type, input_value=AgentRunResult(output='Th...Task\
+      \ Automation Agent.'), input_type=AgentRunResult]\n    For further information\
+      \ visit https://errors.pydantic.dev/2.11/v/string_type"
+    steps_taken: []
+    success: false
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.4516643
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 0.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: 36d246aa5e9e35b5
+  task_duration: 5.483802
+  total_duration: 8.021054
+  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: '1. The result does not fulfill the task of making a GET request to
+        the given URL as it indicates an error.
+
+        2. No steps are shown to perform the GET request, so it''s unclear what was
+        attempted.
+
+        3. The error message is clear but irrelevant to the task because it doesn''t
+        provide information about the GET request''s execution.'
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: false
+  attributes: {}
+  expected_output:
+    result: Successfully made GET request
+    steps_taken:
+    - Make GET request to https://jsonplaceholder.typicode.com/todos/1
+    success: true
+  inputs:
+    context: null
+    task_description: Make a GET request to https://jsonplaceholder.typicode.com/todos/1
+  labels: {}
+  metadata:
+    category: api_request
+    difficulty: medium
+    expected_tools:
+    - make_get_request
+    timeout_seconds: 10
+  metrics:
+    input_tokens: 2400
+    output_tokens: 174
+    requests: 2
+  name: make_api_request
+  output:
+    result: "Error: 1 validation error for TaskResult\nsummary\n  Input should be\
+      \ a valid string [type=string_type, input_value=AgentRunResult(output='Th...pleted\"\
+      : false\\n}\\n```'), input_type=AgentRunResult]\n    For further information\
+      \ visit https://errors.pydantic.dev/2.11/v/string_type"
+    steps_taken: []
+    success: false
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.82003045
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 0.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: 9d7d6f7824556416
+  task_duration: 3.600149
+  total_duration: 6.549309
+  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
+- assertions:
+    IsInstance:
+      name: IsInstance
+      reason: null
+      source:
+        arguments:
+        - TaskOutput
+        name: IsInstance
+      value: true
+    LLMResultEvaluator:
+      name: LLMResultEvaluator
+      reason: 1. The result does not address the task described in the input as the
+        task automation failed completely. 2. No steps were taken, so there is no
+        opportunity to evaluate their logical appropriateness. 3. The result is clear
+        and understandable, as it clearly indicates an error occurred due to exceeding
+        the maximum number of retries.
+      source:
+        arguments: null
+        name: LLMResultEvaluator
+      value: false
+  attributes: {}
+  expected_output:
+    result: Successfully set up website monitoring
+    steps_taken:
+    - Set up web monitor for https://example.com
+    success: true
+  inputs:
+    context: null
+    task_description: Set up monitoring for the website https://example.com to check
+      for changes to the title
+  labels: {}
+  metadata:
+    category: web_monitoring
+    difficulty: hard
+    expected_tools:
+    - setup_web_monitor
+    timeout_seconds: 15
+  metrics:
+    input_tokens: 2564
+    output_tokens: 262
+    requests: 2
+  name: monitor_website
+  output:
+    result: 'Error: Tool exceeded max retries count of 1'
+    steps_taken: []
+    success: false
+  scores:
+    PerformanceEvaluator:
+      name: PerformanceEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: PerformanceEvaluator
+      value: 0.8578982666666667
+    SuccessEvaluator:
+      name: SuccessEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: SuccessEvaluator
+      value: 0.0
+    ToolUsageEvaluator:
+      name: ToolUsageEvaluator
+      reason: null
+      source:
+        arguments: null
+        name: ToolUsageEvaluator
+      value: 0.0
+  span_id: c0e0b06b8533456d
+  task_duration: 4.263763
+  total_duration: 8.094845
+  trace_id: 0196cdc06626a00a96e9fe358f5cbf52
+name: task_automation_function
