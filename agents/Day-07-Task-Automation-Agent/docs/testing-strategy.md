@@ -18,8 +18,12 @@ This document outlines the testing strategy for the Task Automation Agent, which
 ### 2.1. Unit Testing
 
 *   **PydanticAI Layer**:
-    *   Test individual Pydantic models for validation logic (input parsing, output structuring).
-    *   Test functions responsible for prompt engineering and LLM interaction (mocking LLM responses).
+    *   Test individual Pydantic models for validation logic (input parsing, output structuring), including models that define required parameters for various task types.
+    *   Test functions responsible for prompt engineering and LLM interaction (mocking LLM responses), specifically for:
+        *   Initial intent and entity extraction.
+        *   Identifying missing required parameters.
+        *   Generating clarification questions for the user.
+        *   Incorporating user's subsequent responses to fill missing parameters.
     *   Test individual PydanticAI tools:
         *   Mock external dependencies (APIs, file system, Beehive MCP server).
         *   Verify correct parameter handling, execution logic, and output generation.
@@ -51,15 +55,16 @@ This document outlines the testing strategy for the Task Automation Agent, which
 
 *   **Objective**: Test complete user journeys and complex automation scenarios.
 *   **Methodology**:
-    *   Use the sample prompts from [`user-journey.md`](./user-journey.md) and [`agent-spec.md`](../agent-spec.md:13) as test cases.
-    *   Simulate user input through the chosen UI (CLI/Streamlit) or API.
-    *   Verify the entire flow: input -> PydanticAI parsing & planning -> tool/Beehive execution -> output/notification.
+    *   Use the sample prompts from [`user-journey.md`](./user-journey.md) (including multi-step scenarios) and [`agent-spec.md`](../agent-spec.md:13) as test cases.
+    *   Simulate user input through the chosen UI (CLI/Streamlit) or API, including sequences of inputs where the agent prompts for more information.
+    *   Verify the entire flow: initial input -> iterative parameter collection (if needed) -> PydanticAI planning -> tool/Beehive execution -> output/notification.
     *   Examples:
         *   "Check my unread emails, summarize important ones, and draft replies." (Tests EmailTool, LLMTool, PydanticAI orchestration).
         *   "Monitor this website for price drops on product X and notify me." (Tests PydanticAI planning, BeehiveControlTool, MCP, Beehive Web & Email Hives).
         *   "Every morning, get the weather forecast and send it to my Slack channel." (Tests PydanticAI planning, BeehiveControlTool, MCP, Beehive scheduling, Weather & Slack Hives).
 *   **Focus Areas**:
-    *   Correctness of the final outcome.
+    *   Accuracy of parameter collection during iterative dialogue.
+    *   Correctness of the final outcome after all parameters are gathered.
     *   Timeliness of execution (especially for scheduled/monitoring tasks).
     *   Accuracy of notifications and reports.
     *   Graceful handling of errors at any stage of the workflow.
@@ -94,7 +99,10 @@ This document outlines the testing strategy for the Task Automation Agent, which
 *   **Development/Testing Environment**: Isolated environment with mocked services where possible, and sandboxed access to real services for integration tests.
 *   **Staging Environment**: A pre-production environment that closely mirrors the production setup for E2E and UAT.
 *   **Test Data**:
-    *   A diverse set of natural language prompts covering various intents, entities, and complexities.
+    *   A diverse set of natural language prompts, including:
+        *   Complete prompts with all necessary information.
+        *   Incomplete prompts designed to trigger parameter collection dialogues.
+        *   Variations in phrasing for the same intent.
     *   Sample files (PDFs, text files) for extraction and manipulation tasks.
     *   Mock API responses for unit and some integration tests.
     *   Configuration for test email accounts, Slack channels, RSS feeds, etc.

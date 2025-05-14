@@ -5,12 +5,16 @@ This document outlines typical user journeys and how the Task Automation Agent, 
 ## User Journey Overview
 
 1.  **User Input**: The user provides a task description in natural language via a UI (Streamlit/CLI) or API.
-2.  **PydanticAI - Parsing & Understanding**:
-    *   The PydanticAI layer receives the input.
-    *   An LLM (e.g., GPT-4) processes the text, guided by Pydantic models, to extract intent, entities, parameters, and desired actions.
-    *   The output is a structured representation of the task (e.g., a `UserTaskInput` Pydantic model).
+2.  **PydanticAI - Parsing, Understanding & Parameter Collection**:
+    *   The PydanticAI layer receives the initial user input.
+    *   An LLM (e.g., GPT-4) processes the text, guided by Pydantic models, to extract intent, entities, and any provided parameters.
+    *   **Parameter Check & Prompting**: If the extracted information is insufficient to define a complete task (i.e., required parameters for the identified intent are missing), the PydanticAI agent will:
+        *   Identify the missing required parameters based on predefined Pydantic models for specific task types or tool signatures.
+        *   Prompt the user for the missing information (e.g., "To monitor a website, I need the URL. What is the website address?").
+        *   Receive subsequent user inputs and update its understanding of the task. This step can be iterative until all necessary parameters are collected.
+    *   The final output is a complete and structured representation of the task (e.g., a `UserTaskInput` Pydantic model with all required fields populated).
 3.  **PydanticAI - Planning & Decomposition**:
-    *   The PydanticAI agent, using its LLM capabilities and defined logic (potentially `Pydantic Graph`), decomposes the structured task into a sequence of executable steps (`PlannedStep` models).
+    *   Once all necessary parameters are collected, the PydanticAI agent, using its LLM capabilities and defined logic (potentially `Pydantic Graph`), decomposes the structured task into a sequence of executable steps (`PlannedStep` models).
     *   Each step might involve calling a PydanticAI tool or delegating to Beehive.
 4.  **Tool/Engine Selection**:
     *   **PydanticAI Tools**: For tasks requiring direct execution by the agent (e.g., complex logic, immediate web scraping not suitable for Beehive, custom file operations).
@@ -29,7 +33,36 @@ This document outlines typical user journeys and how the Task Automation Agent, 
 
 These examples are drawn from [`agent-spec.md`](../agent-spec.md:13).
 
-### 1. "Check my unread emails, summarize important ones, and draft replies."
+### 1. Multi-Step Input: "Monitor a website for me."
+
+*   **User (Initial Input)**: "Monitor a website for me."
+*   **PydanticAI - Parsing & Understanding (Iteration 1)**:
+    *   Intent: Web monitoring.
+    *   Missing Parameters: URL, monitoring condition (e.g., price drop, content change), notification method.
+    *   Agent Prompts User: "Okay, I can help with that! Which website URL would you like me to monitor?"
+*   **User (Input 2)**: "`https://example.com/productX`"
+*   **PydanticAI - Parsing & Understanding (Iteration 2)**:
+    *   URL: `https://example.com/productX`
+    *   Missing Parameters: Monitoring condition, notification method.
+    *   Agent Prompts User: "Got it. What should I monitor for? For example, a price drop to a certain amount, or a change in specific text?"
+*   **User (Input 3)**: "A price drop below $50."
+*   **PydanticAI - Parsing & Understanding (Iteration 3)**:
+    *   Monitoring Condition: Price < $50.
+    *   Missing Parameters: Notification method.
+    *   Agent Prompts User: "Understood. And how would you like to be notified if the price drops below $50? For example, by email?"
+*   **User (Input 4)**: "Yes, email me."
+*   **PydanticAI - Parsing & Understanding (Final)**:
+    *   Notification Method: Email (agent might use a default/configured user email or ask for it if not known).
+    *   Structured Output: `UserTaskInput(action="monitor_website_price", url="https://example.com/productX", price_target={"value": 50, "condition": "less_than"}, notification_method="email")`
+*   **PydanticAI - Planning & Decomposition**:
+    1.  `PlannedStep(tool="BeehiveControlTool", action="setup_web_monitor", params={"url": "https://example.com/productX", "css_selector_price": "span.price", "target_value": 50, "condition": "less_than", "callback_action": "send_email", "callback_params": {"to": user_email, "subject": "Price Drop Alert!"}})`
+*   **Tool/Engine Selection**:
+    *   `BeehiveControlTool`.
+*   **Execution**:
+    *   PydanticAI agent uses `BeehiveControlTool` to configure the task in Beehive.
+*   **Output**: User receives confirmation.
+
+### 2. "Check my unread emails, summarize important ones, and draft replies."
 
 *   **User Input**: "Check my unread emails from today related to 'Project Alpha', summarize them, and draft a polite 'will look into this' reply for each."
 *   **PydanticAI - Parsing & Understanding**:

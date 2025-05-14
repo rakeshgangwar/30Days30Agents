@@ -28,24 +28,29 @@ The agent will have a two-tiered architecture:
 
 ### Phase 1: Core PydanticAI Agent Setup & Basic Task Handling
 
-*   **Objective**: Establish the PydanticAI agent and enable it to understand and plan simple tasks.
+*   **Objective**: Establish the PydanticAI agent and enable it to understand and plan simple tasks, including iterative parameter collection.
 *   **Tasks**:
     1.  Initialize PydanticAI agent.
     2.  Define core Pydantic models for:
-        *   User task requests (e.g., `UserTaskInput`).
+        *   User task requests (e.g., `UserTaskInput`, including required parameters).
         *   Agent's planned steps (e.g., `PlannedStep`, `ToolCall`).
         *   Task outputs/results (e.g., `TaskResult`).
-    3.  Implement initial natural language parsing to convert user queries into `UserTaskInput`.
-        *   Focus on extracting intent and key entities.
-    4.  Develop basic task decomposition logic within the PydanticAI agent.
-        *   For a given `UserTaskInput`, generate a sequence of `PlannedStep` objects.
+    3.  Implement initial natural language parsing and parameter collection logic:
+        *   Focus on extracting intent and any provided entities/parameters.
+        *   Define Pydantic models for different task types, specifying required parameters.
+        *   Implement logic to identify missing required parameters based on the detected intent.
+        *   Develop the capability to generate clarification questions to prompt the user for missing parameters.
+        *   Enable the agent to process subsequent user inputs to fill these missing parameters iteratively.
+    4.  Develop basic task decomposition logic within the PydanticAI agent, handling iterative parameter collection:
+        *   This will now operate on a `UserTaskInput` model that is confirmed to have all required parameters.
+        *   For a given complete `UserTaskInput`, generate a sequence of `PlannedStep` objects.
     5.  Define a few simple PydanticAI tools:
         *   Example: A tool for simple file system operations (e.g., list files in a directory).
         *   Example: A tool for making a generic GET request to an API.
     6.  Implement basic execution logic for these tools within PydanticAI.
 *   **Key `agent-spec.md` Features Addressed**:
-    *   Natural language understanding (initial).
-    *   Task decomposition (initial).
+    *   Natural language understanding (initial, including parameter collection).
+    *   Task decomposition (initial, including iterative parameter collection).
     *   Interaction with APIs (basic).
     *   Workflow execution (simple, PydanticAI-internal).
 
@@ -70,14 +75,18 @@ The agent will have a two-tiered architecture:
 
 *   **Objective**: Enhance the agent's capabilities with more complex task handling, error management, and user interaction.
 *   **Tasks**:
-    1.  Improve natural language understanding for more complex commands and conditional logic.
-    2.  Implement robust error handling and retry mechanisms in both PydanticAI tools and Beehive interactions.
-    3.  Develop mechanisms for monitoring long-running tasks (both within PydanticAI and Beehive via MCP).
-    4.  Integrate more PydanticAI tools for direct interactions (e.g., advanced file manipulation, web browser automation if needed).
-    5.  Implement secure storage for API credentials and configurations ([`agents/Day-07-Task-Automation-Agent/agent-spec.md:44`](agents/Day-07-Task-Automation-Agent/agent-spec.md:44)).
-    6.  Develop output formatting for clear user communication (confirmations, progress, errors) ([`agents/Day-07-Task-Automation-Agent/agent-spec.md:60-64`](agents/Day-07-Task-Automation-Agent/agent-spec.md:60-64)).
-    7.  Explore PydanticAI's `Pydantic Graph` for managing complex, multi-step workflows with conditional logic.
-    8.  Implement memory management for storing defined workflows and user preferences ([`agents/Day-07-Task-Automation-Agent/agent-spec.md:66-70`](agents/Day-07-Task-Automation-Agent/agent-spec.md:66-70)).
+    1.  Refine and enhance the iterative parameter collection dialogue:
+        *   Improve the naturalness and intelligence of clarification questions.
+        *   Handle ambiguous user responses during parameter collection.
+        *   Allow users to correct previously provided parameters during the dialogue.
+    2.  Improve natural language understanding for more complex commands and conditional logic within a single utterance (once all parameters are assumed to be gathered or being gathered).
+    3.  Implement robust error handling and retry mechanisms in both PydanticAI tools and Beehive interactions.
+    4.  Develop mechanisms for monitoring long-running tasks (both within PydanticAI and Beehive via MCP).
+    5.  Integrate more PydanticAI tools for direct interactions (e.g., advanced file manipulation, web browser automation if needed).
+    6.  Implement secure storage for API credentials and configurations ([`agents/Day-07-Task-Automation-Agent/agent-spec.md:44`](agents/Day-07-Task-Automation-Agent/agent-spec.md:44)).
+    7.  Develop output formatting for clear user communication (confirmations, progress, errors) ([`agents/Day-07-Task-Automation-Agent/agent-spec.md:60-64`](agents/Day-07-Task-Automation-Agent/agent-spec.md:60-64)).
+    8.  Explore PydanticAI's `Pydantic Graph` for managing complex, multi-step workflows with conditional logic.
+    9.  Implement memory management for storing defined workflows and user preferences ([`agents/Day-07-Task-Automation-Agent/agent-spec.md:66-70`](agents/Day-07-Task-Automation-Agent/agent-spec.md:66-70)).
 *   **Key `agent-spec.md` Features Addressed**:
     *   All remaining key features, including advanced decision logic, tool integration, output formatting, memory management, and error handling.
 
@@ -96,9 +105,9 @@ The agent will have a two-tiered architecture:
 *   **Interaction with APIs or web interfaces**: PydanticAI tools, Beehive Hives (via MCP).
 *   **Workflow execution and monitoring**: PydanticAI orchestrates, Beehive executes specific tasks, monitoring via MCP and Pydantic Logfire.
 *   **Scheduling of automated tasks**: Primarily handled by Beehive's event-driven nature, triggered/configured by PydanticAI.
-*   **Input Processing**: PydanticAI models for parsing and structuring.
-*   **Knowledge Representation**: Pydantic models for workflows, secure storage for credentials. Beehive's configuration for its tasks.
-*   **Decision Logic**: PydanticAI agent logic, tool selection, parameter binding. Pydantic Graph for complex flows.
+*   **Input Processing**: PydanticAI models for initial parsing, iterative parameter collection, and final structured task representation.
+*   **Knowledge Representation**: Pydantic models for workflows (including required parameters for task types), secure storage for credentials. Beehive's configuration for its tasks.
+*   **Decision Logic**: PydanticAI agent logic for intent recognition, parameter validation, dialogue management for parameter collection, tool selection, parameter binding. Pydantic Graph for complex flows.
 *   **Tool Integration**: PydanticAI's tool system, Beehive Hives, MCP server as the bridge.
 *   **Output Formatting**: PydanticAI structures outputs, UI presents them.
 *   **Memory Management**: PydanticAI for workflow definitions/state, user preferences. Beehive for its task states.
