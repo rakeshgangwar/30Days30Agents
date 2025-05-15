@@ -1,0 +1,19 @@
+{
+  "name": "actual-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for Actual Finance",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "node dist/test.js"
+  },
+  "dependencies": {
+    "@actual-app/api": "^25.5.0",
+    "@modelcontextprotocol/sdk": "^1.11.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "typescript": "^5.8.3"
+  }
+}
