@@ -1,0 +1,32 @@
+{
+  "name": "beehive-mcp-server",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Beehive",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "start:mcp": "node src/beehive-mcp.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "beehive",
+    "automation",
+    "agent"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.2",
+    "axios": "^1.6.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
