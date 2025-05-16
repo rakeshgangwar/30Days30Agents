@@ -1,0 +1,881 @@
+paths:
+  /api/v2/check-permission/:
+    get:
+      operationId: check_permission_retrieve
+      description: Checks whether the user has a django permission
+      parameters:
+      - in: query
+        name: permission
+        schema:
+          type: string
+        description: The name of the django permission such as "exercises.change_muscle"
+      tags:
+      - check-permission
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionResponse'
+          description: ''
+        '400':
+          description: Please pass a permission name in the 'permission' parameter
+  /api/v2/deletion-log/:
+    get:
+      operationId: deletion_log_list
+      description: |-
+        API endpoint for exercise deletion logs
+
+        This lists objects that where deleted on a wger instance and should be deleted
+        as well when performing a sync (e.g. because many exercises where submitted at
+        once or an image was uploaded that hasn't a CC license)
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: model_type
+        schema:
+          type: string
+          enum:
+          - base
+          - image
+          - translation
+          - video
+        description: |-
+          * `base` - base
+          * `translation` - translation
+          * `image` - image
+          * `video` - video
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - deletion-log
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDeletionLogList'
+          description: ''
+  /api/v2/deletion-log/{id}/:
+    get:
+      operationId: deletion_log_retrieve
+      description: |-
+        API endpoint for exercise deletion logs
+
+        This lists objects that where deleted on a wger instance and should be deleted
+        as well when performing a sync (e.g. because many exercises where submitted at
+        once or an image was uploaded that hasn't a CC license)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this deletion log.
+        required: true
+      tags:
+      - deletion-log
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionLog'
+          description: ''
+  /api/v2/language/:
+    get:
+      operationId: language_list
+      description: API endpoint for the languages used in the application
+      parameters:
+      - in: query
+        name: full_name
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: short_name
+        schema:
+          type: string
+      tags:
+      - language
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLanguageList'
+          description: ''
+  /api/v2/language/{id}/:
+    get:
+      operationId: language_retrieve
+      description: API endpoint for the languages used in the application
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this language.
+        required: true
+      tags:
+      - language
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
+          description: ''
+  /api/v2/license/:
+    get:
+      operationId: license_list
+      description: API endpoint for license objects
+      parameters:
+      - in: query
+        name: full_name
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: short_name
+        schema:
+          type: string
+      - in: query
+        name: url
+        schema:
+          type: string
+      tags:
+      - license
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLicenseList'
+          description: ''
+  /api/v2/license/{id}/:
+    get:
+      operationId: license_retrieve
+      description: API endpoint for license objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this license.
+        required: true
+      tags:
+      - license
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+          description: ''
+  /api/v2/login/:
+    post:
+      operationId: login_create
+      description: |-
+        API login endpoint. Returns a token that can subsequently passed in the
+        header.
+
+        Note that it is recommended to use token authorization instead.
+      tags:
+      - login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/login'
+          description: ''
+  /api/v2/min-app-version/:
+    get:
+      operationId: min_app_version_retrieve
+      description: Returns the minimum required version of flutter app to access this
+        server.
+      tags:
+      - min-app-version
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+  /api/v2/min-server-version/:
+    get:
+      operationId: min_server_version_retrieve
+      description: Returns the minimum required version of the server to perform sync
+        requests
+      tags:
+      - min-server-version
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+  /api/v2/register/:
+    post:
+      operationId: register_create
+      description: API endpoint
+      tags:
+      - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/login'
+          description: ''
+  /api/v2/schema:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v2/slot-entry/{id}/:
+    put:
+      operationId: slot_entry_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this slot entry.
+        required: true
+      tags:
+      - slot-entry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotEntryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SlotEntryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SlotEntryRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotEntry'
+          description: ''
+  /api/v2/slot/{id}/:
+    put:
+      operationId: slot_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this slot.
+        required: true
+      tags:
+      - slot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SlotRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SlotRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Slot'
+          description: ''
+  /api/v2/token:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v2/token/refresh:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v2/token/verify:
+    post:
+      operationId: token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v2/userprofile/:
+    get:
+      operationId: userprofile_list
+      description: Customized list view, that returns only the current user's data
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - userprofile
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserprofileList'
+          description: ''
+    post:
+      operationId: userprofile_create
+      description: |-
+        API endpoint for the user profile
+
+        This endpoint works somewhat differently than the others since it always
+        returns the data for the currently logged-in user's profile. To update
+        the profile, use a POST request with the new data, not a PATCH.
+      tags:
+      - userprofile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserprofileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserprofileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserprofileRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userprofile'
+          description: ''
+  /api/v2/userprofile/{id}/:
+    get:
+      operationId: userprofile_retrieve
+      description: |-
+        API endpoint for the user profile
+
+        This endpoint works somewhat differently than the others since it always
+        returns the data for the currently logged-in user's profile. To update
+        the profile, use a POST request with the new data, not a PATCH.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user profile.
+        required: true
+      tags:
+      - userprofile
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userprofile'
+          description: ''
+    put:
+      operationId: userprofile_update
+      description: |-
+        API endpoint for the user profile
+
+        This endpoint works somewhat differently than the others since it always
+        returns the data for the currently logged-in user's profile. To update
+        the profile, use a POST request with the new data, not a PATCH.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user profile.
+        required: true
+      tags:
+      - userprofile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserprofileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserprofileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserprofileRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userprofile'
+          description: ''
+    patch:
+      operationId: userprofile_partial_update
+      description: |-
+        API endpoint for the user profile
+
+        This endpoint works somewhat differently than the others since it always
+        returns the data for the currently logged-in user's profile. To update
+        the profile, use a POST request with the new data, not a PATCH.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user profile.
+        required: true
+      tags:
+      - userprofile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserprofileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserprofileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserprofileRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userprofile'
+          description: ''
+    delete:
+      operationId: userprofile_destroy
+      description: |-
+        API endpoint for the user profile
+
+        This endpoint works somewhat differently than the others since it always
+        returns the data for the currently logged-in user's profile. To update
+        the profile, use a POST request with the new data, not a PATCH.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user profile.
+        required: true
+      tags:
+      - userprofile
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/userprofile/verify-email/:
+    get:
+      operationId: userprofile_verify_email_retrieve
+      description: Return the username
+      tags:
+      - userprofile
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userprofile'
+          description: ''
+  /api/v2/version/:
+    get:
+      operationId: version_retrieve
+      description: Returns the application's version
+      tags:
+      - version
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
