@@ -1,0 +1,1806 @@
+  /api/v2/exercise/:
+    get:
+      operationId: exercise_list
+      description: |-
+        API endpoint for exercise objects.
+
+        For a read-only endpoint with all the information of an exercise, see /api/v2/exerciseinfo/
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: equipment
+        schema:
+          type: array
+          items:
+            type: integer
+        explode: true
+        style: form
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: muscles
+        schema:
+          type: array
+          items:
+            type: integer
+        explode: true
+        style: form
+      - in: query
+        name: muscles_secondary
+        schema:
+          type: array
+          items:
+            type: integer
+        explode: true
+        style: form
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - exercise
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExerciseBaseList'
+          description: ''
+    post:
+      operationId: exercise_create
+      description: |-
+        API endpoint for exercise objects.
+
+        For a read-only endpoint with all the information of an exercise, see /api/v2/exerciseinfo/
+      tags:
+      - exercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseBaseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseBaseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseBaseRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseBase'
+          description: ''
+  /api/v2/exercise-translation/:
+    get:
+      operationId: exercise_translation_list
+      description: API endpoint for editing or adding exercise translation objects.
+      parameters:
+      - in: query
+        name: created
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: description
+        schema:
+          type: string
+      - in: query
+        name: exercise
+        schema:
+          type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - exercise-translation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExerciseTranslationList'
+          description: ''
+    post:
+      operationId: exercise_translation_create
+      description: API endpoint for editing or adding exercise translation objects.
+      tags:
+      - exercise-translation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseTranslationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseTranslationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseTranslationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseTranslation'
+          description: ''
+  /api/v2/exercise-translation/{id}/:
+    get:
+      operationId: exercise_translation_retrieve
+      description: API endpoint for editing or adding exercise translation objects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this translation.
+        required: true
+      tags:
+      - exercise-translation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseTranslation'
+          description: ''
+    put:
+      operationId: exercise_translation_update
+      description: API endpoint for editing or adding exercise translation objects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this translation.
+        required: true
+      tags:
+      - exercise-translation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseTranslationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseTranslationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseTranslationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseTranslation'
+          description: ''
+    patch:
+      operationId: exercise_translation_partial_update
+      description: API endpoint for editing or adding exercise translation objects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this translation.
+        required: true
+      tags:
+      - exercise-translation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseTranslationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseTranslationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseTranslationRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseTranslation'
+          description: ''
+    delete:
+      operationId: exercise_translation_destroy
+      description: API endpoint for editing or adding exercise translation objects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this translation.
+        required: true
+      tags:
+      - exercise-translation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/exercise/{id}/:
+    get:
+      operationId: exercise_retrieve
+      description: |-
+        API endpoint for exercise objects.
+
+        For a read-only endpoint with all the information of an exercise, see /api/v2/exerciseinfo/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise.
+        required: true
+      tags:
+      - exercise
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseBase'
+          description: ''
+    put:
+      operationId: exercise_update
+      description: |-
+        API endpoint for exercise objects.
+
+        For a read-only endpoint with all the information of an exercise, see /api/v2/exerciseinfo/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise.
+        required: true
+      tags:
+      - exercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseBaseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseBaseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseBaseRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseBase'
+          description: ''
+    patch:
+      operationId: exercise_partial_update
+      description: |-
+        API endpoint for exercise objects.
+
+        For a read-only endpoint with all the information of an exercise, see /api/v2/exerciseinfo/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise.
+        required: true
+      tags:
+      - exercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseBaseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseBaseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseBaseRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseBase'
+          description: ''
+    delete:
+      operationId: exercise_destroy
+      description: |-
+        API endpoint for exercise objects.
+
+        For a read-only endpoint with all the information of an exercise, see /api/v2/exerciseinfo/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise.
+        required: true
+      tags:
+      - exercise
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/exercisealias/:
+    get:
+      operationId: exercisealias_list
+      description: API endpoint for exercise aliases objects
+      parameters:
+      - in: query
+        name: alias
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: translation
+        schema:
+          type: integer
+      tags:
+      - exercisealias
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExerciseAliasList'
+          description: ''
+    post:
+      operationId: exercisealias_create
+      description: API endpoint for exercise aliases objects
+      tags:
+      - exercisealias
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseAliasRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseAliasRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseAliasRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseAlias'
+          description: ''
+  /api/v2/exercisealias/{id}/:
+    get:
+      operationId: exercisealias_retrieve
+      description: API endpoint for exercise aliases objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this alias.
+        required: true
+      tags:
+      - exercisealias
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseAlias'
+          description: ''
+    put:
+      operationId: exercisealias_update
+      description: API endpoint for exercise aliases objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this alias.
+        required: true
+      tags:
+      - exercisealias
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseAliasRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseAliasRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseAliasRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseAlias'
+          description: ''
+    patch:
+      operationId: exercisealias_partial_update
+      description: API endpoint for exercise aliases objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this alias.
+        required: true
+      tags:
+      - exercisealias
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseAliasRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseAliasRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseAliasRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseAlias'
+          description: ''
+    delete:
+      operationId: exercisealias_destroy
+      description: API endpoint for exercise aliases objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this alias.
+        required: true
+      tags:
+      - exercisealias
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/exercisecomment/:
+    get:
+      operationId: exercisecomment_list
+      description: API endpoint for exercise comment objects
+      parameters:
+      - in: query
+        name: comment
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: translation
+        schema:
+          type: integer
+      tags:
+      - exercisecomment
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExerciseCommentList'
+          description: ''
+    post:
+      operationId: exercisecomment_create
+      description: API endpoint for exercise comment objects
+      tags:
+      - exercisecomment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseCommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseCommentRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseComment'
+          description: ''
+  /api/v2/exercisecomment/{id}/:
+    get:
+      operationId: exercisecomment_retrieve
+      description: API endpoint for exercise comment objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise comment.
+        required: true
+      tags:
+      - exercisecomment
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseComment'
+          description: ''
+    put:
+      operationId: exercisecomment_update
+      description: API endpoint for exercise comment objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise comment.
+        required: true
+      tags:
+      - exercisecomment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseCommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseCommentRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseComment'
+          description: ''
+    patch:
+      operationId: exercisecomment_partial_update
+      description: API endpoint for exercise comment objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise comment.
+        required: true
+      tags:
+      - exercisecomment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseCommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseCommentRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseComment'
+          description: ''
+    delete:
+      operationId: exercisecomment_destroy
+      description: API endpoint for exercise comment objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise comment.
+        required: true
+      tags:
+      - exercisecomment
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/exerciseimage/:
+    get:
+      operationId: exerciseimage_list
+      description: API endpoint for exercise image objects
+      parameters:
+      - in: query
+        name: exercise
+        schema:
+          type: integer
+      - in: query
+        name: is_main
+        schema:
+          type: boolean
+      - in: query
+        name: license
+        schema:
+          type: integer
+      - in: query
+        name: license_author
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - exerciseimage
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExerciseImageList'
+          description: ''
+    post:
+      operationId: exerciseimage_create
+      description: API endpoint for exercise image objects
+      tags:
+      - exerciseimage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseImageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseImageRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseImage'
+          description: ''
+  /api/v2/exerciseimage/{id}/:
+    get:
+      operationId: exerciseimage_retrieve
+      description: API endpoint for exercise image objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise image.
+        required: true
+      tags:
+      - exerciseimage
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseImage'
+          description: ''
+    put:
+      operationId: exerciseimage_update
+      description: API endpoint for exercise image objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise image.
+        required: true
+      tags:
+      - exerciseimage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseImageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseImageRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseImage'
+          description: ''
+    patch:
+      operationId: exerciseimage_partial_update
+      description: API endpoint for exercise image objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise image.
+        required: true
+      tags:
+      - exerciseimage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseImageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseImageRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseImage'
+          description: ''
+    delete:
+      operationId: exerciseimage_destroy
+      description: API endpoint for exercise image objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise image.
+        required: true
+      tags:
+      - exerciseimage
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/exerciseimage/{id}/thumbnails/:
+    get:
+      operationId: exerciseimage_thumbnails_retrieve
+      description: Return a list of the image's thumbnails
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise image.
+        required: true
+      tags:
+      - exerciseimage
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseImage'
+          description: ''
+  /api/v2/workoutlog/{id}/:
+    put:
+      operationId: workoutlog_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this workout log.
+        required: true
+      tags:
+      - workoutlog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutLogRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WorkoutLogRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WorkoutLogRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutLog'
+          description: ''
+  /api/v2/workoutsession/{id}/:
+    put:
+      operationId: workoutsession_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this workout session.
+        required: true
+      tags:
+      - workoutsession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutSessionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WorkoutSessionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WorkoutSessionRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutSession'
+          description: ''
+  /api/v2/variation/:
+    get:
+      operationId: variation_list
+      description: API endpoint for exercise variation objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - variation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExerciseVariationList'
+          description: ''
+    post:
+      operationId: variation_create
+      description: API endpoint for exercise variation objects
+      tags:
+      - variation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVariation'
+          description: ''
+  /api/v2/variation/{id}/:
+    get:
+      operationId: variation_retrieve
+      description: API endpoint for exercise variation objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this variation.
+        required: true
+      tags:
+      - variation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVariation'
+          description: ''
+    put:
+      operationId: variation_update
+      description: API endpoint for exercise variation objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this variation.
+        required: true
+      tags:
+      - variation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVariation'
+          description: ''
+    patch:
+      operationId: variation_partial_update
+      description: API endpoint for exercise variation objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this variation.
+        required: true
+      tags:
+      - variation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVariation'
+          description: ''
+    delete:
+      operationId: variation_destroy
+      description: API endpoint for exercise variation objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this variation.
+        required: true
+      tags:
+      - variation
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/video/:
+    get:
+      operationId: video_list
+      description: API endpoint for exercise video objects
+      parameters:
+      - in: query
+        name: exercise
+        schema:
+          type: integer
+      - in: query
+        name: is_main
+        schema:
+          type: boolean
+      - in: query
+        name: license
+        schema:
+          type: integer
+      - in: query
+        name: license_author
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - video
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExerciseVideoList'
+          description: ''
+    post:
+      operationId: video_create
+      description: API endpoint for exercise video objects
+      tags:
+      - video
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseVideoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseVideoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseVideoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVideo'
+          description: ''
+  /api/v2/video/{id}/:
+    get:
+      operationId: video_retrieve
+      description: API endpoint for exercise video objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise video.
+        required: true
+      tags:
+      - video
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVideo'
+          description: ''
+    put:
+      operationId: video_update
+      description: API endpoint for exercise video objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise video.
+        required: true
+      tags:
+      - video
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseVideoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExerciseVideoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExerciseVideoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVideo'
+          description: ''
+    patch:
+      operationId: video_partial_update
+      description: API endpoint for exercise video objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise video.
+        required: true
+      tags:
+      - video
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseVideoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseVideoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExerciseVideoRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseVideo'
+          description: ''
+    delete:
+      operationId: video_destroy
+      description: API endpoint for exercise video objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exercise video.
+        required: true
+      tags:
+      - video
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/templates/:
+    get:
+      operationId: templates_list
+      description: API endpoint for routine template objects
+      parameters:
+      - in: query
+        name: created
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: description
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - templates
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoutineList'
+          description: ''
+  /api/v2/templates/{id}/:
+    get:
+      operationId: templates_retrieve
+      description: API endpoint for routine template objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this routine.
+        required: true
+      tags:
+      - templates
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Routine'
+          description: ''
+  /api/v2/public-templates/:
+    get:
+      operationId: public_templates_list
+      description: API endpoint for public routine templates objects
+      parameters:
+      - in: query
+        name: created
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: description
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - public-templates
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoutineList'
+          description: ''
+  /api/v2/public-templates/{id}/:
+    get:
+      operationId: public_templates_retrieve
+      description: API endpoint for public routine templates objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this routine.
+        required: true
+      tags:
+      - public-templates
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Routine'
+          description: ''
+  /api/v2/gallery/:
+    get:
+      operationId: gallery_list
+      description: API endpoint for gallery image
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: description
+        schema:
+          type: string
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - gallery
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedImageList'
+          description: ''
+    post:
+      operationId: gallery_create
+      description: API endpoint for gallery image
+      tags:
+      - gallery
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ImageRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+          description: ''
+  /api/v2/gallery/{id}/:
+    get:
+      operationId: gallery_retrieve
+      description: API endpoint for gallery image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this image.
+        required: true
+      tags:
+      - gallery
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+          description: ''
+    put:
+      operationId: gallery_update
+      description: API endpoint for gallery image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this image.
+        required: true
+      tags:
+      - gallery
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ImageRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+          description: ''
+    patch:
+      operationId: gallery_partial_update
+      description: API endpoint for gallery image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this image.
+        required: true
+      tags:
+      - gallery
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedImageRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+          description: ''
+    delete:
+      operationId: gallery_destroy
+      description: API endpoint for gallery image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this image.
+        required: true
+      tags:
+      - gallery
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/day/{id}/:
+    put:
+      operationId: day_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this day.
+        required: true
+      tags:
+      - day
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DayRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DayRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DayRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Day'
+          description: ''
+  /api/v2/routine/{id}/:
+    put:
+      operationId: routine_update
+      description: API endpoint for routine objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this routine.
+        required: true
+      tags:
+      - routine
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutineRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoutineRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoutineRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Routine'
+          description: ''

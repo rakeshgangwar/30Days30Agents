@@ -1,0 +1,1922 @@
+  /api/v2/weight-config/:
+    get:
+      operationId: weight_config_list
+      description: API endpoint for weight config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - weight-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWeightConfigList'
+          description: ''
+    post:
+      operationId: weight_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - weight-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeightConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WeightConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WeightConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightConfig'
+          description: ''
+  /api/v2/weight-config/{id}/:
+    get:
+      operationId: weight_config_retrieve
+      description: API endpoint for weight config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this weight config.
+        required: true
+      tags:
+      - weight-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightConfig'
+          description: ''
+    put:
+      operationId: weight_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this weight config.
+        required: true
+      tags:
+      - weight-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeightConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WeightConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WeightConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightConfig'
+          description: ''
+    patch:
+      operationId: weight_config_partial_update
+      description: API endpoint for weight config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this weight config.
+        required: true
+      tags:
+      - weight-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWeightConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWeightConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWeightConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightConfig'
+          description: ''
+    delete:
+      operationId: weight_config_destroy
+      description: API endpoint for weight config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this weight config.
+        required: true
+      tags:
+      - weight-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/sets-config/{id}/:
+    put:
+      operationId: sets_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this sets config.
+        required: true
+      tags:
+      - sets-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetNrConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetNrConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetNrConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetNrConfig'
+          description: ''
+  /api/v2/repetitions-config/:
+    get:
+      operationId: repetitions_config_list
+      description: API endpoint for reps config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - repetitions-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRepetitionsConfigList'
+          description: ''
+    post:
+      operationId: repetitions_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - repetitions-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepetitionsConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RepetitionsConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RepetitionsConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepetitionsConfig'
+          description: ''
+  /api/v2/repetitions-config/{id}/:
+    get:
+      operationId: repetitions_config_retrieve
+      description: API endpoint for reps config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this repetitions config.
+        required: true
+      tags:
+      - repetitions-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepetitionsConfig'
+          description: ''
+    put:
+      operationId: repetitions_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this repetitions config.
+        required: true
+      tags:
+      - repetitions-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepetitionsConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RepetitionsConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RepetitionsConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepetitionsConfig'
+          description: ''
+    patch:
+      operationId: repetitions_config_partial_update
+      description: API endpoint for reps config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this repetitions config.
+        required: true
+      tags:
+      - repetitions-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRepetitionsConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRepetitionsConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRepetitionsConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepetitionsConfig'
+          description: ''
+    delete:
+      operationId: repetitions_config_destroy
+      description: API endpoint for reps config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this repetitions config.
+        required: true
+      tags:
+      - repetitions-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/rest-config/:
+    get:
+      operationId: rest_config_list
+      description: API endpoint for set config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - rest-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRestConfigList'
+          description: ''
+    post:
+      operationId: rest_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - rest-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RestConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RestConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestConfig'
+          description: ''
+  /api/v2/rest-config/{id}/:
+    get:
+      operationId: rest_config_retrieve
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this rest config.
+        required: true
+      tags:
+      - rest-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestConfig'
+          description: ''
+    put:
+      operationId: rest_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this rest config.
+        required: true
+      tags:
+      - rest-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RestConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RestConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestConfig'
+          description: ''
+    patch:
+      operationId: rest_config_partial_update
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this rest config.
+        required: true
+      tags:
+      - rest-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRestConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRestConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRestConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestConfig'
+          description: ''
+    delete:
+      operationId: rest_config_destroy
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this rest config.
+        required: true
+      tags:
+      - rest-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/rir-config/:
+    get:
+      operationId: rir_config_list
+      description: API endpoint for set config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - rir-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRiRConfigList'
+          description: ''
+    post:
+      operationId: rir_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - rir-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiRConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RiRConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RiRConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiRConfig'
+          description: ''
+  /api/v2/rir-config/{id}/:
+    get:
+      operationId: rir_config_retrieve
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ri r config.
+        required: true
+      tags:
+      - rir-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiRConfig'
+          description: ''
+    put:
+      operationId: rir_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ri r config.
+        required: true
+      tags:
+      - rir-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiRConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RiRConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RiRConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiRConfig'
+          description: ''
+    patch:
+      operationId: rir_config_partial_update
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ri r config.
+        required: true
+      tags:
+      - rir-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRiRConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRiRConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRiRConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiRConfig'
+          description: ''
+    delete:
+      operationId: rir_config_destroy
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ri r config.
+        required: true
+      tags:
+      - rir-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/max-repetitions-config/:
+    get:
+      operationId: max_repetitions_config_list
+      description: API endpoint for max reps config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - max-repetitions-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMaxRepetitionsConfigList'
+          description: ''
+    post:
+      operationId: max_repetitions_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - max-repetitions-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxRepetitionsConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxRepetitionsConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxRepetitionsConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRepetitionsConfig'
+          description: ''
+  /api/v2/max-repetitions-config/{id}/:
+    get:
+      operationId: max_repetitions_config_retrieve
+      description: API endpoint for max reps config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max repetitions config.
+        required: true
+      tags:
+      - max-repetitions-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRepetitionsConfig'
+          description: ''
+    put:
+      operationId: max_repetitions_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max repetitions config.
+        required: true
+      tags:
+      - max-repetitions-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxRepetitionsConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxRepetitionsConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxRepetitionsConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRepetitionsConfig'
+          description: ''
+    patch:
+      operationId: max_repetitions_config_partial_update
+      description: API endpoint for max reps config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max repetitions config.
+        required: true
+      tags:
+      - max-repetitions-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRepetitionsConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRepetitionsConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRepetitionsConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRepetitionsConfig'
+          description: ''
+    delete:
+      operationId: max_repetitions_config_destroy
+      description: API endpoint for max reps config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max repetitions config.
+        required: true
+      tags:
+      - max-repetitions-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/max-rest-config/:
+    get:
+      operationId: max_rest_config_list
+      description: API endpoint for max rest config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - max-rest-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMaxRestConfigList'
+          description: ''
+    post:
+      operationId: max_rest_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - max-rest-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxRestConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxRestConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxRestConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRestConfig'
+          description: ''
+  /api/v2/max-rest-config/{id}/:
+    get:
+      operationId: max_rest_config_retrieve
+      description: API endpoint for max rest config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max rest config.
+        required: true
+      tags:
+      - max-rest-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRestConfig'
+          description: ''
+    put:
+      operationId: max_rest_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max rest config.
+        required: true
+      tags:
+      - max-rest-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxRestConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxRestConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxRestConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRestConfig'
+          description: ''
+    patch:
+      operationId: max_rest_config_partial_update
+      description: API endpoint for max rest config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max rest config.
+        required: true
+      tags:
+      - max-rest-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRestConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRestConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRestConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRestConfig'
+          description: ''
+    delete:
+      operationId: max_rest_config_destroy
+      description: API endpoint for max rest config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max rest config.
+        required: true
+      tags:
+      - max-rest-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/max-rir-config/:
+    get:
+      operationId: max_rir_config_list
+      description: API endpoint for set config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - max-rir-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMaxRiRConfigList'
+          description: ''
+    post:
+      operationId: max_rir_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - max-rir-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxRiRConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxRiRConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxRiRConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRiRConfig'
+          description: ''
+  /api/v2/max-rir-config/{id}/:
+    get:
+      operationId: max_rir_config_retrieve
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max ri r config.
+        required: true
+      tags:
+      - max-rir-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRiRConfig'
+          description: ''
+    put:
+      operationId: max_rir_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max ri r config.
+        required: true
+      tags:
+      - max-rir-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxRiRConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxRiRConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxRiRConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRiRConfig'
+          description: ''
+    patch:
+      operationId: max_rir_config_partial_update
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max ri r config.
+        required: true
+      tags:
+      - max-rir-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRiRConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRiRConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxRiRConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxRiRConfig'
+          description: ''
+    delete:
+      operationId: max_rir_config_destroy
+      description: API endpoint for set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max ri r config.
+        required: true
+      tags:
+      - max-rir-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/max-sets-config/:
+    get:
+      operationId: max_sets_config_list
+      description: API endpoint for max set config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - max-sets-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMaxSetNrConfigList'
+          description: ''
+    post:
+      operationId: max_sets_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - max-sets-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxSetNrConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxSetNrConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxSetNrConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxSetNrConfig'
+          description: ''
+  /api/v2/max-sets-config/{id}/:
+    get:
+      operationId: max_sets_config_retrieve
+      description: API endpoint for max set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max sets config.
+        required: true
+      tags:
+      - max-sets-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxSetNrConfig'
+          description: ''
+    put:
+      operationId: max_sets_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max sets config.
+        required: true
+      tags:
+      - max-sets-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxSetNrConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxSetNrConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxSetNrConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxSetNrConfig'
+          description: ''
+    patch:
+      operationId: max_sets_config_partial_update
+      description: API endpoint for max set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max sets config.
+        required: true
+      tags:
+      - max-sets-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxSetNrConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxSetNrConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxSetNrConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxSetNrConfig'
+          description: ''
+    delete:
+      operationId: max_sets_config_destroy
+      description: API endpoint for max set config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max sets config.
+        required: true
+      tags:
+      - max-sets-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/max-weight-config/:
+    get:
+      operationId: max_weight_config_list
+      description: API endpoint for max weight config objects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - max-weight-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMaxWeightConfigList'
+          description: ''
+    post:
+      operationId: max_weight_config_create
+      description: Check for creation (PUT, POST)
+      tags:
+      - max-weight-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxWeightConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxWeightConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxWeightConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxWeightConfig'
+          description: ''
+  /api/v2/max-weight-config/{id}/:
+    get:
+      operationId: max_weight_config_retrieve
+      description: API endpoint for max weight config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max weight config.
+        required: true
+      tags:
+      - max-weight-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxWeightConfig'
+          description: ''
+    put:
+      operationId: max_weight_config_update
+      description: Check for updates (PUT, PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max weight config.
+        required: true
+      tags:
+      - max-weight-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxWeightConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaxWeightConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaxWeightConfigRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxWeightConfig'
+          description: ''
+    patch:
+      operationId: max_weight_config_partial_update
+      description: API endpoint for max weight config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max weight config.
+        required: true
+      tags:
+      - max-weight-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxWeightConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxWeightConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMaxWeightConfigRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxWeightConfig'
+          description: ''
+    delete:
+      operationId: max_weight_config_destroy
+      description: API endpoint for max weight config objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this max weight config.
+        required: true
+      tags:
+      - max-weight-config
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/weightentry/:
+    get:
+      operationId: weightentry_list
+      description: API endpoint for nutrition plan objects
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: id__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: weight
+        schema:
+          type: number
+      - in: query
+        name: weight__gt
+        schema:
+          type: number
+      - in: query
+        name: weight__gte
+        schema:
+          type: number
+      - in: query
+        name: weight__lt
+        schema:
+          type: number
+      - in: query
+        name: weight__lte
+        schema:
+          type: number
+      tags:
+      - weightentry
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWeightEntryList'
+          description: ''
+    post:
+      operationId: weightentry_create
+      description: API endpoint for nutrition plan objects
+      tags:
+      - weightentry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeightEntryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WeightEntryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WeightEntryRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightEntry'
+          description: ''
+  /api/v2/weightentry/{id}/:
+    get:
+      operationId: weightentry_retrieve
+      description: API endpoint for nutrition plan objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Weight entry.
+        required: true
+      tags:
+      - weightentry
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightEntry'
+          description: ''
+    put:
+      operationId: weightentry_update
+      description: API endpoint for nutrition plan objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Weight entry.
+        required: true
+      tags:
+      - weightentry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeightEntryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WeightEntryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WeightEntryRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightEntry'
+          description: ''
+    patch:
+      operationId: weightentry_partial_update
+      description: API endpoint for nutrition plan objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Weight entry.
+        required: true
+      tags:
+      - weightentry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWeightEntryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWeightEntryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWeightEntryRequest'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightEntry'
+          description: ''
+    delete:
+      operationId: weightentry_destroy
+      description: API endpoint for nutrition plan objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Weight entry.
+        required: true
+      tags:
+      - weightentry
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/weightunit/:
+    get:
+      operationId: weightunit_list
+      description: API endpoint for weight unit objects
+      parameters:
+      - in: query
+        name: language
+        schema:
+          type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - weightunit
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWeightUnitList'
+          description: ''
+  /api/v2/weightunit/{id}/:
+    get:
+      operationId: weightunit_retrieve
+      description: API endpoint for weight unit objects
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this weight unit.
+        required: true
+      tags:
+      - weightunit
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightUnit'
+          description: ''

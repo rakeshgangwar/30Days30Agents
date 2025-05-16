@@ -1,0 +1,6058 @@
+components:
+  schemas:
+    Day:
+      type: object
+      description: Day serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        routine:
+          type: integer
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        name:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+          maxLength: 1000
+        is_rest:
+          type: boolean
+        need_logs_to_advance:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/DayTypeEnum'
+        config:
+          nullable: true
+      required:
+      - id
+      - routine
+    DayRequest:
+      type: object
+      description: Day serializer
+      properties:
+        routine:
+          type: integer
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        name:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+          maxLength: 1000
+        is_rest:
+          type: boolean
+        need_logs_to_advance:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/DayTypeEnum'
+        config:
+          nullable: true
+      required:
+      - routine
+    DayTypeEnum:
+      enum:
+      - custom
+      - enom
+      - amrap
+      - hiit
+      - tabata
+      - edt
+      - rft
+      - afap
+      type: string
+      description: |-
+        * `custom` - Custom
+        * `enom` - Enom
+        * `amrap` - Amrap
+        * `hiit` - Hiit
+        * `tabata` - Tabata
+        * `edt` - Edt
+        * `rft` - Rft
+        * `afap` - Afap
+    DeletionLog:
+      type: object
+      description: Deletion log serializer
+      properties:
+        model_type:
+          $ref: '#/components/schemas/ModelTypeEnum'
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        replaced_by:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+          description: UUID of the object replaced by the deleted one. At the moment
+            only available for exercises
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+        comment:
+          type: string
+          maxLength: 200
+      required:
+      - model_type
+      - replaced_by
+      - timestamp
+      - uuid
+    Equipment:
+      type: object
+      description: Equipment serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 50
+      required:
+      - id
+      - name
+    ExerciseAlias:
+      type: object
+      description: ExerciseAlias serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        translation:
+          type: integer
+          title: Exercise
+        alias:
+          type: string
+          title: Alias for an exercise
+          maxLength: 200
+      required:
+      - alias
+      - id
+      - translation
+      - uuid
+    ExerciseAliasRequest:
+      type: object
+      description: ExerciseAlias serializer
+      properties:
+        translation:
+          type: integer
+          title: Exercise
+        alias:
+          type: string
+          minLength: 1
+          title: Alias for an exercise
+          maxLength: 200
+      required:
+      - alias
+      - translation
+    ExerciseBase:
+      type: object
+      description: Exercise base serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        last_update:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        category:
+          type: integer
+        muscles:
+          type: array
+          items:
+            type: integer
+            title: Primary muscles
+          title: Primary muscles
+        muscles_secondary:
+          type: array
+          items:
+            type: integer
+            title: Secondary muscles
+          title: Secondary muscles
+        equipment:
+          type: array
+          items:
+            type: integer
+        variations:
+          type: integer
+          nullable: true
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+      required:
+      - category
+      - created
+      - id
+      - last_update
+      - uuid
+    ExerciseBaseRequest:
+      type: object
+      description: Exercise base serializer
+      properties:
+        category:
+          type: integer
+        muscles:
+          type: array
+          items:
+            type: integer
+            title: Primary muscles
+          title: Primary muscles
+        muscles_secondary:
+          type: array
+          items:
+            type: integer
+            title: Secondary muscles
+          title: Secondary muscles
+        equipment:
+          type: array
+          items:
+            type: integer
+        variations:
+          type: integer
+          nullable: true
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+      required:
+      - category
+    ExerciseCategory:
+      type: object
+      description: ExerciseCategory serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    ExerciseComment:
+      type: object
+      description: ExerciseComment serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        translation:
+          type: integer
+          title: Exercise
+        comment:
+          type: string
+          description: A comment about how to correctly do this exercise.
+          maxLength: 200
+      required:
+      - comment
+      - id
+      - translation
+      - uuid
+    ExerciseCommentRequest:
+      type: object
+      description: ExerciseComment serializer
+      properties:
+        translation:
+          type: integer
+          title: Exercise
+        comment:
+          type: string
+          minLength: 1
+          description: A comment about how to correctly do this exercise.
+          maxLength: 200
+      required:
+      - comment
+      - translation
+    ExerciseImage:
+      type: object
+      description: ExerciseImage serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        exercise:
+          type: integer
+        exercise_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          description: Only PNG and JPEG formats are supported
+        is_main:
+          type: boolean
+          title: Main picture
+          description: Tick the box if you want to set this image as the main one
+            for the exercise (will be shown e.g. in the search). The first image is
+            automatically marked by the system.
+        style:
+          allOf:
+          - $ref: '#/components/schemas/StyleEnum'
+          description: |-
+            The art style of your image
+
+            * `1` - Line
+            * `2` - 3D
+            * `3` - Low-poly
+            * `4` - Photo
+            * `5` - Other
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+        author_history:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - author_history
+      - exercise
+      - exercise_uuid
+      - id
+      - image
+      - uuid
+    ExerciseImageRequest:
+      type: object
+      description: ExerciseImage serializer
+      properties:
+        exercise:
+          type: integer
+        image:
+          type: string
+          format: binary
+          description: Only PNG and JPEG formats are supported
+        is_main:
+          type: boolean
+          title: Main picture
+          description: Tick the box if you want to set this image as the main one
+            for the exercise (will be shown e.g. in the search). The first image is
+            automatically marked by the system.
+        style:
+          allOf:
+          - $ref: '#/components/schemas/StyleEnum'
+          description: |-
+            The art style of your image
+
+            * `1` - Line
+            * `2` - 3D
+            * `3` - Low-poly
+            * `4` - Photo
+            * `5` - Other
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+      required:
+      - exercise
+      - image
+    ExerciseInfo:
+      type: object
+      description: Exercise info serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        last_update:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        last_update_global:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/ExerciseCategory'
+          readOnly: true
+        muscles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Muscle'
+          readOnly: true
+        muscles_secondary:
+          type: array
+          items:
+            $ref: '#/components/schemas/Muscle'
+          readOnly: true
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+          readOnly: true
+        license:
+          allOf:
+          - $ref: '#/components/schemas/Nested'
+          readOnly: true
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseImage'
+          readOnly: true
+        translations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseTranslationBaseInfo'
+          readOnly: true
+        variations:
+          type: integer
+          readOnly: true
+        videos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseVideoInfo'
+          readOnly: true
+        author_history:
+          type: array
+          items:
+            type: string
+        total_authors_history:
+          type: array
+          items:
+            type: string
+      required:
+      - author_history
+      - category
+      - created
+      - equipment
+      - id
+      - images
+      - last_update
+      - last_update_global
+      - license
+      - muscles
+      - muscles_secondary
+      - total_authors_history
+      - translations
+      - uuid
+      - variations
+      - videos
+    ExerciseInfoAlias:
+      type: object
+      description: Exercise alias serializer for info endpoint
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        alias:
+          type: string
+          title: Alias for an exercise
+          maxLength: 200
+      required:
+      - alias
+      - id
+      - uuid
+    ExerciseSearchItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        base_id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        image:
+          type: string
+        image_thumbnail:
+          type: string
+      required:
+      - base_id
+      - category
+      - id
+      - image
+      - image_thumbnail
+      - name
+    ExerciseSearchResponse:
+      type: object
+      properties:
+        value:
+          type: string
+        data:
+          $ref: '#/components/schemas/ExerciseSearchItemResponse'
+      required:
+      - data
+      - value
+    ExerciseTranslation:
+      type: object
+      description: Exercise translation serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        exercise:
+          type: integer
+        description:
+          type: string
+          minLength: 40
+          maxLength: 2000
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        language:
+          type: integer
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+      required:
+      - created
+      - description
+      - exercise
+      - id
+      - language
+      - name
+      - uuid
+    ExerciseTranslationBaseInfo:
+      type: object
+      description: Exercise translation serializer for the base info endpoint
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        exercise:
+          type: integer
+        description:
+          type: string
+          minLength: 40
+          maxLength: 2000
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        language:
+          type: integer
+        aliases:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseInfoAlias'
+          readOnly: true
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseComment'
+          readOnly: true
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+        author_history:
+          type: array
+          items:
+            type: string
+      required:
+      - aliases
+      - author_history
+      - created
+      - description
+      - exercise
+      - id
+      - language
+      - name
+      - notes
+      - uuid
+    ExerciseTranslationRequest:
+      type: object
+      description: Exercise translation serializer
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        exercise:
+          type: integer
+        description:
+          type: string
+          minLength: 40
+          maxLength: 2000
+        language:
+          type: integer
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+      required:
+      - description
+      - exercise
+      - language
+      - name
+    ExerciseVariation:
+      type: object
+      description: Exercise variation serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+      required:
+      - id
+    ExerciseVideo:
+      type: object
+      description: ExerciseVideo serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        exercise:
+          type: integer
+        exercise_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        video:
+          type: string
+          format: uri
+        is_main:
+          type: boolean
+          title: Main video
+        size:
+          type: integer
+          readOnly: true
+        duration:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        width:
+          type: integer
+          readOnly: true
+        height:
+          type: integer
+          readOnly: true
+        codec:
+          type: string
+          readOnly: true
+        codec_long:
+          type: string
+          readOnly: true
+          title: Codec, long name
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+        author_history:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - author_history
+      - codec
+      - codec_long
+      - duration
+      - exercise
+      - exercise_uuid
+      - height
+      - id
+      - size
+      - uuid
+      - video
+      - width
+    ExerciseVideoInfo:
+      type: object
+      description: ExerciseVideo serializer for the info endpoint
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        exercise:
+          type: integer
+        video:
+          type: string
+          format: uri
+        is_main:
+          type: boolean
+          title: Main video
+        size:
+          type: integer
+          readOnly: true
+        duration:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        width:
+          type: integer
+          readOnly: true
+        height:
+          type: integer
+          readOnly: true
+        codec:
+          type: string
+          readOnly: true
+        codec_long:
+          type: string
+          readOnly: true
+          title: Codec, long name
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+        author_history:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - author_history
+      - codec
+      - codec_long
+      - duration
+      - exercise
+      - height
+      - id
+      - size
+      - uuid
+      - video
+      - width
+    ExerciseVideoRequest:
+      type: object
+      description: ExerciseVideo serializer
+      properties:
+        exercise:
+          type: integer
+        video:
+          type: string
+          format: binary
+        is_main:
+          type: boolean
+          title: Main video
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+      required:
+      - exercise
+      - video
+    FreetimeIntensityEnum:
+      enum:
+      - '1'
+      - '2'
+      - '3'
+      type: string
+      description: |-
+        * `1` - Low
+        * `2` - Medium
+        * `3` - High
+    GenderEnum:
+      enum:
+      - '1'
+      - '2'
+      type: string
+      description: |-
+        * `1` - Male
+        * `2` - Female
+    Image:
+      type: object
+      description: Exercise serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date:
+          type: string
+          format: date
+        image:
+          type: string
+          format: uri
+          description: Only PNG and JPEG formats are supported
+        description:
+          type: string
+          maxLength: 1000
+        height:
+          type: integer
+          readOnly: true
+        width:
+          type: integer
+          readOnly: true
+      required:
+      - height
+      - id
+      - image
+      - width
+    ImageRequest:
+      type: object
+      description: Exercise serializer
+      properties:
+        date:
+          type: string
+          format: date
+        image:
+          type: string
+          format: binary
+          description: Only PNG and JPEG formats are supported
+        description:
+          type: string
+          maxLength: 1000
+      required:
+      - image
+    ImpressionEnum:
+      enum:
+      - '1'
+      - '2'
+      - '3'
+      type: string
+      description: |-
+        * `1` - Bad
+        * `2` - Neutral
+        * `3` - Good
+    Ingredient:
+      type: object
+      description: Ingredient serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        remote_id:
+          type: string
+          nullable: true
+          maxLength: 200
+        source_name:
+          type: string
+          nullable: true
+          maxLength: 200
+        source_url:
+          type: string
+          format: uri
+          nullable: true
+          title: Link
+          description: Link to product
+          maxLength: 200
+        code:
+          type: string
+          nullable: true
+          maxLength: 200
+        name:
+          type: string
+          maxLength: 200
+          minLength: 3
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        last_update:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        last_imported:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Date
+        energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: In kcal per 100g
+        protein:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        carbohydrates:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        carbohydrates_sugar:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          title: Sugar content in carbohydrates
+          description: In g per 100g of product
+        fat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        fat_saturated:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          title: Saturated fat content in fats
+          description: In g per 100g of product
+        fiber:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          description: In g per 100g of product
+        sodium:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          description: In g per 100g of product
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+        language:
+          type: integer
+          readOnly: true
+      required:
+      - carbohydrates
+      - created
+      - energy
+      - fat
+      - id
+      - language
+      - last_imported
+      - last_update
+      - name
+      - protein
+      - uuid
+    IngredientImage:
+      type: object
+      description: Image serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        ingredient_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        ingredient_uuid:
+          type: string
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          description: Only PNG and JPEG formats are supported
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        last_update:
+          type: string
+          format: date-time
+          readOnly: true
+        size:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        width:
+          type: integer
+          readOnly: true
+        height:
+          type: integer
+          readOnly: true
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+      required:
+      - created
+      - height
+      - id
+      - image
+      - ingredient_id
+      - ingredient_uuid
+      - last_update
+      - size
+      - uuid
+      - width
+    IngredientImageRequest:
+      type: object
+      description: Image serializer
+      properties:
+        image:
+          type: string
+          format: binary
+          description: Only PNG and JPEG formats are supported
+        size:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+      required:
+      - image
+      - size
+    IngredientInfo:
+      type: object
+      description: Ingredient info serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        remote_id:
+          type: string
+          nullable: true
+          maxLength: 200
+        source_name:
+          type: string
+          nullable: true
+          maxLength: 200
+        source_url:
+          type: string
+          format: uri
+          nullable: true
+          title: Link
+          description: Link to product
+          maxLength: 200
+        code:
+          type: string
+          nullable: true
+          maxLength: 200
+        name:
+          type: string
+          maxLength: 200
+          minLength: 3
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        last_update:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        last_imported:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Date
+        energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: In kcal per 100g
+        protein:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        carbohydrates:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        carbohydrates_sugar:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          title: Sugar content in carbohydrates
+          description: In g per 100g of product
+        fat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        fat_saturated:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          title: Saturated fat content in fats
+          description: In g per 100g of product
+        fiber:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          description: In g per 100g of product
+        sodium:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          description: In g per 100g of product
+        weight_units:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientWeightUnitInfo'
+        language:
+          allOf:
+          - $ref: '#/components/schemas/Nested'
+          readOnly: true
+        image:
+          allOf:
+          - $ref: '#/components/schemas/IngredientImage'
+          readOnly: true
+        license:
+          allOf:
+          - $ref: '#/components/schemas/Nested'
+          readOnly: true
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+      required:
+      - carbohydrates
+      - created
+      - energy
+      - fat
+      - id
+      - image
+      - language
+      - last_imported
+      - last_update
+      - license
+      - name
+      - protein
+      - uuid
+      - weight_units
+    IngredientInfoRequest:
+      type: object
+      description: Ingredient info serializer
+      properties:
+        remote_id:
+          type: string
+          nullable: true
+          maxLength: 200
+        source_name:
+          type: string
+          nullable: true
+          maxLength: 200
+        source_url:
+          type: string
+          format: uri
+          nullable: true
+          title: Link
+          description: Link to product
+          maxLength: 200
+        code:
+          type: string
+          nullable: true
+          maxLength: 200
+        name:
+          type: string
+          minLength: 3
+          maxLength: 200
+        energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: In kcal per 100g
+        protein:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        carbohydrates:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        carbohydrates_sugar:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          title: Sugar content in carbohydrates
+          description: In g per 100g of product
+        fat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          description: In g per 100g of product
+        fat_saturated:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          title: Saturated fat content in fats
+          description: In g per 100g of product
+        fiber:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          description: In g per 100g of product
+        sodium:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+          description: In g per 100g of product
+        weight_units:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientWeightUnitInfoRequest'
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+      required:
+      - carbohydrates
+      - energy
+      - fat
+      - name
+      - protein
+      - weight_units
+    IngredientSearchItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        image:
+          type: string
+        image_thumbnail:
+          type: string
+      required:
+      - category
+      - id
+      - image
+      - image_thumbnail
+      - name
+    IngredientSearchResponse:
+      type: object
+      properties:
+        value:
+          type: string
+        data:
+          $ref: '#/components/schemas/IngredientSearchItemResponse'
+      required:
+      - data
+      - value
+    IngredientWeightUnit:
+      type: object
+      description: IngredientWeightUnit serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Unit amount, e.g. "1 Cup" or "1/2 spoon"
+        gram:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Amount in grams
+        ingredient:
+          type: integer
+          readOnly: true
+        unit:
+          type: integer
+          title: Weight unit
+      required:
+      - gram
+      - id
+      - ingredient
+      - unit
+    IngredientWeightUnitInfo:
+      type: object
+      description: IngredientWeightUnit info serializer
+      properties:
+        gram:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Amount in grams
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Unit amount, e.g. "1 Cup" or "1/2 spoon"
+        unit:
+          allOf:
+          - $ref: '#/components/schemas/Nested'
+          readOnly: true
+      required:
+      - gram
+      - unit
+    IngredientWeightUnitInfoRequest:
+      type: object
+      description: IngredientWeightUnit info serializer
+      properties:
+        gram:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Amount in grams
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Unit amount, e.g. "1 Cup" or "1/2 spoon"
+      required:
+      - gram
+    IngredientWeightUnitRequest:
+      type: object
+      description: IngredientWeightUnit serializer
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Unit amount, e.g. "1 Cup" or "1/2 spoon"
+        gram:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Amount in grams
+        unit:
+          type: integer
+          title: Weight unit
+      required:
+      - gram
+      - unit
+    Language:
+      type: object
+      description: Language serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        short_name:
+          type: string
+          title: Language short name
+          description: ISO 639-1
+          maxLength: 2
+        full_name:
+          type: string
+          title: Language full name
+          maxLength: 30
+        full_name_en:
+          type: string
+          title: Language full name in English
+          maxLength: 30
+      required:
+      - full_name
+      - full_name_en
+      - id
+      - short_name
+    License:
+      type: object
+      description: License serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          description: If a license has been localized, e.g. the Creative Commons
+            licenses for the different countries, add them as separate entries here.
+          maxLength: 60
+        short_name:
+          type: string
+          title: Short name, e.g. CC-BY-SA 3
+          maxLength: 15
+        url:
+          type: string
+          format: uri
+          nullable: true
+          title: Link
+          description: Link to license text or other information
+          maxLength: 200
+      required:
+      - full_name
+      - id
+      - short_name
+    LogItem:
+      type: object
+      description: LogItem serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        plan:
+          type: integer
+          title: Nutrition plan
+        meal:
+          type: integer
+          nullable: true
+        ingredient:
+          type: integer
+        weight_unit:
+          type: integer
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+          title: Date and Time (Approx.)
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - id
+      - ingredient
+      - plan
+    LogItemRequest:
+      type: object
+      description: LogItem serializer
+      properties:
+        plan:
+          type: integer
+          title: Nutrition plan
+        meal:
+          type: integer
+          nullable: true
+        ingredient:
+          type: integer
+        weight_unit:
+          type: integer
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+          title: Date and Time (Approx.)
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - ingredient
+      - plan
+    MaxRepetitionsConfig:
+      type: object
+      description: Max Repetition Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    MaxRepetitionsConfigRequest:
+      type: object
+      description: Max Repetition Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    MaxRestConfig:
+      type: object
+      description: Rest Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 600
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    MaxRestConfigRequest:
+      type: object
+      description: Rest Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 600
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    MaxRiRConfig:
+      type: object
+      description: RiR Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    MaxRiRConfigRequest:
+      type: object
+      description: RiR Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    MaxSetNrConfig:
+      type: object
+      description: Max Set Nr config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 50
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    MaxSetNrConfigRequest:
+      type: object
+      description: Max Set Nr config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 50
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    MaxWeightConfig:
+      type: object
+      description: Max Weight Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    MaxWeightConfigRequest:
+      type: object
+      description: Max Weight Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    Meal:
+      type: object
+      description: Meal serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        plan:
+          type: integer
+          title: Nutrition plan
+        order:
+          type: integer
+          readOnly: true
+        time:
+          type: string
+          format: time
+          nullable: true
+          title: Time (approx)
+        name:
+          type: string
+          description: Give meals a textual description / name such as "Breakfast"
+            or "after workout"
+          maxLength: 25
+      required:
+      - id
+      - order
+      - plan
+    MealInfo:
+      type: object
+      description: Meal info serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        plan:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+          readOnly: true
+        time:
+          type: string
+          format: time
+          nullable: true
+          title: Time (approx)
+        name:
+          type: string
+          description: Give meals a textual description / name such as "Breakfast"
+            or "after workout"
+          maxLength: 25
+        meal_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealItemInfo'
+        nutritional_values:
+          allOf:
+          - $ref: '#/components/schemas/NutritionalValues'
+          readOnly: true
+      required:
+      - id
+      - meal_items
+      - nutritional_values
+      - order
+      - plan
+    MealInfoRequest:
+      type: object
+      description: Meal info serializer
+      properties:
+        time:
+          type: string
+          format: time
+          nullable: true
+          title: Time (approx)
+        name:
+          type: string
+          description: Give meals a textual description / name such as "Breakfast"
+            or "after workout"
+          maxLength: 25
+        meal_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealItemInfoRequest'
+      required:
+      - meal_items
+    MealItem:
+      type: object
+      description: MealItem serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        meal:
+          type: integer
+          title: Nutrition plan
+        ingredient:
+          type: integer
+        weight_unit:
+          type: integer
+          nullable: true
+        order:
+          type: integer
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - id
+      - ingredient
+      - meal
+      - order
+    MealItemInfo:
+      type: object
+      description: Meal Item info serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        meal:
+          type: integer
+          readOnly: true
+        ingredient:
+          type: integer
+          readOnly: true
+        ingredient_obj:
+          allOf:
+          - $ref: '#/components/schemas/IngredientInfo'
+          readOnly: true
+        weight_unit:
+          type: integer
+          readOnly: true
+        weight_unit_obj:
+          allOf:
+          - $ref: '#/components/schemas/IngredientWeightUnit'
+          readOnly: true
+        image:
+          allOf:
+          - $ref: '#/components/schemas/IngredientImage'
+          readOnly: true
+        order:
+          type: integer
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - id
+      - image
+      - ingredient
+      - ingredient_obj
+      - meal
+      - order
+      - weight_unit
+      - weight_unit_obj
+    MealItemInfoRequest:
+      type: object
+      description: Meal Item info serializer
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+      required:
+      - amount
+    MealItemRequest:
+      type: object
+      description: MealItem serializer
+      properties:
+        meal:
+          type: integer
+          title: Nutrition plan
+        ingredient:
+          type: integer
+        weight_unit:
+          type: integer
+          nullable: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - ingredient
+      - meal
+    MealRequest:
+      type: object
+      description: Meal serializer
+      properties:
+        plan:
+          type: integer
+          title: Nutrition plan
+        time:
+          type: string
+          format: time
+          nullable: true
+          title: Time (approx)
+        name:
+          type: string
+          description: Give meals a textual description / name such as "Breakfast"
+            or "after workout"
+          maxLength: 25
+      required:
+      - plan
+    Measurement:
+      type: object
+      description: Measurement serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        category:
+          type: integer
+          title: User
+        date:
+          type: string
+          format: date
+        value:
+          type: number
+          format: double
+          maximum: 5000
+          minimum: 0
+        notes:
+          type: string
+          title: Description
+          maxLength: 100
+      required:
+      - category
+      - id
+      - value
+    MeasurementRequest:
+      type: object
+      description: Measurement serializer
+      properties:
+        category:
+          type: integer
+          title: User
+        date:
+          type: string
+          format: date
+        value:
+          type: number
+          format: double
+          maximum: 5000
+          minimum: 0
+        notes:
+          type: string
+          title: Description
+          maxLength: 100
+      required:
+      - category
+      - value
+    ModelTypeEnum:
+      enum:
+      - base
+      - translation
+      - image
+      - video
+      type: string
+      description: |-
+        * `base` - base
+        * `translation` - translation
+        * `image` - image
+        * `video` - video
+    Muscle:
+      type: object
+      description: Muscle serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          description: In latin, e.g. "Pectoralis major"
+          maxLength: 50
+        name_en:
+          type: string
+          title: Alternative name
+          description: A more basic name for the muscle
+          maxLength: 50
+        is_front:
+          type: boolean
+        image_url_main:
+          type: string
+        image_url_secondary:
+          type: string
+      required:
+      - id
+      - image_url_main
+      - image_url_secondary
+      - name
+    Nested:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          description: If a license has been localized, e.g. the Creative Commons
+            licenses for the different countries, add them as separate entries here.
+          maxLength: 60
+        short_name:
+          type: string
+          title: Short name, e.g. CC-BY-SA 3
+          maxLength: 15
+        url:
+          type: string
+          format: uri
+          nullable: true
+          title: Link
+          description: Link to license text or other information
+          maxLength: 200
+      required:
+      - full_name
+      - id
+      - short_name
+    NestedRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - name
+    NullEnum:
+      enum:
+      - null
+    NutritionPlan:
+      type: object
+      description: Nutritional plan serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        creation_date:
+          type: string
+          format: date
+          readOnly: true
+        description:
+          type: string
+          description: A description of the goal of the plan, e.g. "Gain mass" or
+            "Prepare for summer"
+          maxLength: 80
+        only_logging:
+          type: boolean
+        goal_energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_protein:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_carbohydrates:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fat:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fiber:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+      required:
+      - creation_date
+      - id
+    NutritionPlanInfo:
+      type: object
+      description: Nutritional plan info serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        creation_date:
+          type: string
+          format: date
+          readOnly: true
+        description:
+          type: string
+          description: A description of the goal of the plan, e.g. "Gain mass" or
+            "Prepare for summer"
+          maxLength: 80
+        only_logging:
+          type: boolean
+        goal_energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_protein:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_carbohydrates:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fat:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fiber:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealInfo'
+      required:
+      - creation_date
+      - id
+      - meals
+    NutritionPlanInfoRequest:
+      type: object
+      description: Nutritional plan info serializer
+      properties:
+        description:
+          type: string
+          description: A description of the goal of the plan, e.g. "Gain mass" or
+            "Prepare for summer"
+          maxLength: 80
+        only_logging:
+          type: boolean
+        goal_energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_protein:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_carbohydrates:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fat:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fiber:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealInfoRequest'
+      required:
+      - meals
+    NutritionPlanRequest:
+      type: object
+      description: Nutritional plan serializer
+      properties:
+        description:
+          type: string
+          description: A description of the goal of the plan, e.g. "Gain mass" or
+            "Prepare for summer"
+          maxLength: 80
+        only_logging:
+          type: boolean
+        goal_energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_protein:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_carbohydrates:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fat:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fiber:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+    NutritionalValues:
+      type: object
+      description: Nutritional values serializer
+      properties:
+        energy:
+          type: number
+          format: double
+        protein:
+          type: number
+          format: double
+        carbohydrates:
+          type: number
+          format: double
+        carbohydrates_sugar:
+          type: number
+          format: double
+        fat:
+          type: number
+          format: double
+        fat_saturated:
+          type: number
+          format: double
+        fiber:
+          type: number
+          format: double
+        sodium:
+          type: number
+          format: double
+      required:
+      - carbohydrates
+      - carbohydrates_sugar
+      - energy
+      - fat
+      - fat_saturated
+      - fiber
+      - protein
+      - sodium
+    NutritionalValuesRequest:
+      type: object
+      description: Nutritional values serializer
+      properties:
+        energy:
+          type: number
+          format: double
+        protein:
+          type: number
+          format: double
+        carbohydrates:
+          type: number
+          format: double
+        carbohydrates_sugar:
+          type: number
+          format: double
+        fat:
+          type: number
+          format: double
+        fat_saturated:
+          type: number
+          format: double
+        fiber:
+          type: number
+          format: double
+        sodium:
+          type: number
+          format: double
+      required:
+      - carbohydrates
+      - carbohydrates_sugar
+      - energy
+      - fat
+      - fat_saturated
+      - fiber
+      - protein
+      - sodium
+    OperationEnum:
+      enum:
+      - +
+      - '-'
+      - r
+      type: string
+      description: |-
+        * `+` - Plus
+        * `-` - Minus
+        * `r` - Replace
+    PaginatedDayList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Day'
+    PaginatedDeletionLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeletionLog'
+    PaginatedEquipmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+    PaginatedExerciseAliasList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseAlias'
+    PaginatedExerciseBaseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseBase'
+    PaginatedExerciseCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseCategory'
+    PaginatedExerciseCommentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseComment'
+    PaginatedExerciseImageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseImage'
+    PaginatedExerciseInfoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseInfo'
+    PaginatedExerciseTranslationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseTranslation'
+    PaginatedExerciseVariationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseVariation'
+    PaginatedExerciseVideoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseVideo'
+    PaginatedImageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+    PaginatedIngredientImageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientImage'
+    PaginatedIngredientInfoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientInfo'
+    PaginatedIngredientList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+    PaginatedIngredientWeightUnitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientWeightUnit'
+    PaginatedLanguageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Language'
+    PaginatedLicenseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/License'
+    PaginatedLogItemList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogItem'
+    PaginatedMaxRepetitionsConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaxRepetitionsConfig'
+    PaginatedMaxRestConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaxRestConfig'
+    PaginatedMaxRiRConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaxRiRConfig'
+    PaginatedMaxSetNrConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaxSetNrConfig'
+    PaginatedMaxWeightConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaxWeightConfig'
+    PaginatedMealItemList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealItem'
+    PaginatedMealList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meal'
+    PaginatedMeasurementList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Measurement'
+    PaginatedMuscleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Muscle'
+    PaginatedNutritionPlanInfoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NutritionPlanInfo'
+    PaginatedNutritionPlanList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NutritionPlan'
+    PaginatedRepetitionUnitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepetitionUnit'
+    PaginatedRepetitionsConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepetitionsConfig'
+    PaginatedRestConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RestConfig'
+    PaginatedRiRConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiRConfig'
+    PaginatedRoutineList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Routine'
+    PaginatedRoutineWeightUnitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutineWeightUnit'
+    PaginatedSetNrConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SetNrConfig'
+    PaginatedSlotEntryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlotEntry'
+    PaginatedSlotList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Slot'
+    PaginatedUnitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Unit'
+    PaginatedUserprofileList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Userprofile'
+    PaginatedWeightConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeightConfig'
+    PaginatedWeightEntryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeightEntry'
+    PaginatedWeightUnitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeightUnit'
+    PaginatedWorkoutLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkoutLog'
+    PaginatedWorkoutSessionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkoutSession'
+    PatchedDayRequest:
+      type: object
+      description: Day serializer
+      properties:
+        routine:
+          type: integer
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        name:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+          maxLength: 1000
+        is_rest:
+          type: boolean
+        need_logs_to_advance:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/DayTypeEnum'
+        config:
+          nullable: true
+    PatchedExerciseAliasRequest:
+      type: object
+      description: ExerciseAlias serializer
+      properties:
+        translation:
+          type: integer
+          title: Exercise
+        alias:
+          type: string
+          minLength: 1
+          title: Alias for an exercise
+          maxLength: 200
+    PatchedExerciseBaseRequest:
+      type: object
+      description: Exercise base serializer
+      properties:
+        category:
+          type: integer
+        muscles:
+          type: array
+          items:
+            type: integer
+            title: Primary muscles
+          title: Primary muscles
+        muscles_secondary:
+          type: array
+          items:
+            type: integer
+            title: Secondary muscles
+          title: Secondary muscles
+        equipment:
+          type: array
+          items:
+            type: integer
+        variations:
+          type: integer
+          nullable: true
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+    PatchedExerciseCommentRequest:
+      type: object
+      description: ExerciseComment serializer
+      properties:
+        translation:
+          type: integer
+          title: Exercise
+        comment:
+          type: string
+          minLength: 1
+          description: A comment about how to correctly do this exercise.
+          maxLength: 200
+    PatchedExerciseImageRequest:
+      type: object
+      description: ExerciseImage serializer
+      properties:
+        exercise:
+          type: integer
+        image:
+          type: string
+          format: binary
+          description: Only PNG and JPEG formats are supported
+        is_main:
+          type: boolean
+          title: Main picture
+          description: Tick the box if you want to set this image as the main one
+            for the exercise (will be shown e.g. in the search). The first image is
+            automatically marked by the system.
+        style:
+          allOf:
+          - $ref: '#/components/schemas/StyleEnum'
+          description: |-
+            The art style of your image
+
+            * `1` - Line
+            * `2` - 3D
+            * `3` - Low-poly
+            * `4` - Photo
+            * `5` - Other
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+    PatchedExerciseTranslationRequest:
+      type: object
+      description: Exercise translation serializer
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        exercise:
+          type: integer
+        description:
+          type: string
+          minLength: 40
+          maxLength: 2000
+        language:
+          type: integer
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+    PatchedExerciseVideoRequest:
+      type: object
+      description: ExerciseVideo serializer
+      properties:
+        exercise:
+          type: integer
+        video:
+          type: string
+          format: binary
+        is_main:
+          type: boolean
+          title: Main video
+        license:
+          type: integer
+        license_title:
+          type: string
+          title: The original title of this object, if available
+          maxLength: 300
+        license_object_url:
+          type: string
+          format: uri
+          title: Link to original object, if available
+          maxLength: 200
+        license_author:
+          type: string
+          nullable: true
+          title: Author(s)
+          description: If you are not the author, enter the name or source here.
+          maxLength: 3500
+        license_author_url:
+          type: string
+          format: uri
+          title: Link to author profile, if available
+          maxLength: 200
+        license_derivative_source_url:
+          type: string
+          format: uri
+          title: Link to the original source, if this is a derivative work
+          description: Note that a derivative work is one which is not only based
+            on a previous work, but which also contains sufficient new, creative content
+            to entitle it to its own copyright.
+          maxLength: 200
+    PatchedImageRequest:
+      type: object
+      description: Exercise serializer
+      properties:
+        date:
+          type: string
+          format: date
+        image:
+          type: string
+          format: binary
+          description: Only PNG and JPEG formats are supported
+        description:
+          type: string
+          maxLength: 1000
+    PatchedLogItemRequest:
+      type: object
+      description: LogItem serializer
+      properties:
+        plan:
+          type: integer
+          title: Nutrition plan
+        meal:
+          type: integer
+          nullable: true
+        ingredient:
+          type: integer
+        weight_unit:
+          type: integer
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+          title: Date and Time (Approx.)
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+    PatchedMaxRepetitionsConfigRequest:
+      type: object
+      description: Max Repetition Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedMaxRestConfigRequest:
+      type: object
+      description: Rest Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 600
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedMaxRiRConfigRequest:
+      type: object
+      description: RiR Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedMaxSetNrConfigRequest:
+      type: object
+      description: Max Set Nr config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 50
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedMaxWeightConfigRequest:
+      type: object
+      description: Max Weight Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedMealItemRequest:
+      type: object
+      description: MealItem serializer
+      properties:
+        meal:
+          type: integer
+          title: Nutrition plan
+        ingredient:
+          type: integer
+        weight_unit:
+          type: integer
+          nullable: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+    PatchedMealRequest:
+      type: object
+      description: Meal serializer
+      properties:
+        plan:
+          type: integer
+          title: Nutrition plan
+        time:
+          type: string
+          format: time
+          nullable: true
+          title: Time (approx)
+        name:
+          type: string
+          description: Give meals a textual description / name such as "Breakfast"
+            or "after workout"
+          maxLength: 25
+    PatchedMeasurementRequest:
+      type: object
+      description: Measurement serializer
+      properties:
+        category:
+          type: integer
+          title: User
+        date:
+          type: string
+          format: date
+        value:
+          type: number
+          format: double
+          maximum: 5000
+          minimum: 0
+        notes:
+          type: string
+          title: Description
+          maxLength: 100
+    PatchedNutritionPlanInfoRequest:
+      type: object
+      description: Nutritional plan info serializer
+      properties:
+        description:
+          type: string
+          description: A description of the goal of the plan, e.g. "Gain mass" or
+            "Prepare for summer"
+          maxLength: 80
+        only_logging:
+          type: boolean
+        goal_energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_protein:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_carbohydrates:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fat:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fiber:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealInfoRequest'
+    PatchedNutritionPlanRequest:
+      type: object
+      description: Nutritional plan serializer
+      properties:
+        description:
+          type: string
+          description: A description of the goal of the plan, e.g. "Gain mass" or
+            "Prepare for summer"
+          maxLength: 80
+        only_logging:
+          type: boolean
+        goal_energy:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_protein:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_carbohydrates:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fat:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        goal_fiber:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+    PatchedRepetitionsConfigRequest:
+      type: object
+      description: Repetition Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedRestConfigRequest:
+      type: object
+      description: Rest Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 1800
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedRiRConfigRequest:
+      type: object
+      description: RiR Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedRoutineRequest:
+      type: object
+      description: Routine serializer
+      properties:
+        name:
+          type: string
+          maxLength: 25
+        description:
+          type: string
+          maxLength: 1000
+        start:
+          type: string
+          format: date
+          title: Start date
+        end:
+          type: string
+          format: date
+          title: End date
+        fit_in_week:
+          type: boolean
+        is_template:
+          type: boolean
+          title: Workout template
+          description: Marking a workout as a template will freeze it and allow you
+            to make copies of it
+        is_public:
+          type: boolean
+          title: Public template
+          description: A public template is available to other users
+    PatchedSetNrConfigRequest:
+      type: object
+      description: Set Nr config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 50
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedSlotEntryRequest:
+      type: object
+      description: Slot entry serializer
+      properties:
+        slot:
+          type: integer
+        exercise:
+          type: integer
+        type:
+          $ref: '#/components/schemas/SlotEntryTypeEnum'
+        repetition_unit:
+          type: integer
+          nullable: true
+        repetition_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        weight_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        weight_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        comment:
+          type: string
+          maxLength: 100
+        config:
+          nullable: true
+    PatchedSlotRequest:
+      type: object
+      description: Slot
+      properties:
+        day:
+          type: integer
+          title: Exercise day
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        comment:
+          type: string
+          maxLength: 200
+        config:
+          nullable: true
+    PatchedUnitRequest:
+      type: object
+      description: Measurement unit serializer
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        unit:
+          type: string
+          minLength: 1
+          maxLength: 30
+    PatchedUserprofileRequest:
+      type: object
+      description: Workout session serializer
+      properties:
+        email_verified:
+          type: boolean
+        weight_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        repetitions_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        show_comments:
+          type: boolean
+          title: Show exercise comments
+          description: Check to show exercise comments on the workout view
+        show_english_ingredients:
+          type: boolean
+          title: Also use ingredients in English
+          description: |-
+            Check to also show ingredients in English while creating
+            a nutritional plan. These ingredients are extracted from a list provided
+            by the US Department of Agriculture. It is extremely complete, with around
+            7000 entries, but can be somewhat overwhelming and make the search difficult.
+        workout_reminder_active:
+          type: boolean
+          title: Activate workout reminders
+          description: Check to activate automatic reminders for workouts. You need
+            to provide a valid email for this to work.
+        workout_reminder:
+          type: integer
+          maximum: 30
+          minimum: 1
+          title: Remind before expiration
+          description: The number of days you want to be reminded before a workout
+            expires.
+        workout_duration:
+          type: integer
+          maximum: 30
+          minimum: 1
+          title: Default duration of workouts
+          description: Default duration in weeks of workouts not in a schedule. Used
+            for email workout reminders.
+        notification_language:
+          type: integer
+          description: Language to use when sending you email notifications, e.g.
+            email reminders for workouts. This does not affect the language used on
+            the website.
+        age:
+          type: integer
+          maximum: 100
+          minimum: 10
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          title: Date of Birth
+        height:
+          type: integer
+          maximum: 230
+          minimum: 140
+          nullable: true
+          title: Height (cm)
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sleep_hours:
+          type: integer
+          maximum: 10
+          minimum: 4
+          nullable: true
+          title: Hours of sleep
+          description: The average hours of sleep per day
+        work_hours:
+          type: integer
+          maximum: 15
+          minimum: 1
+          nullable: true
+          title: Work
+          description: Average hours per day
+        work_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sport_hours:
+          type: integer
+          maximum: 30
+          minimum: 1
+          nullable: true
+          title: Sport
+          description: Average hours per week
+        sport_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        freetime_hours:
+          type: integer
+          maximum: 15
+          minimum: 1
+          nullable: true
+          title: Free time
+          description: Average hours per day
+        freetime_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        calories:
+          type: integer
+          maximum: 5000
+          minimum: 1500
+          nullable: true
+          title: Total daily calories
+          description: Total caloric intake, including e.g. any surplus
+        weight_unit:
+          $ref: '#/components/schemas/WeightUnitEnum'
+        ro_access:
+          type: boolean
+          title: Allow external access
+          description: Allow external users to access your workouts and logs in a
+            read-only mode. You need to set this before you can share links e.g. to
+            social media.
+        num_days_weight_reminder:
+          type: integer
+          maximum: 30
+          minimum: 0
+          title: Automatic reminders for weight entries
+          description: Number of days after the last weight entry (enter 0 to deactivate)
+    PatchedWeightConfigRequest:
+      type: object
+      description: Weight Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+    PatchedWeightEntryRequest:
+      type: object
+      description: Weight serializer
+      properties:
+        date:
+          type: string
+          format: date
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+    PatchedWorkoutLogRequest:
+      type: object
+      description: Workout session serializer
+      properties:
+        date:
+          type: string
+          format: date-time
+        session:
+          type: integer
+          nullable: true
+        routine:
+          type: integer
+          nullable: true
+          title: Workout
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        slot_entry:
+          type: integer
+          nullable: true
+        next_log:
+          type: integer
+          nullable: true
+        exercise:
+          type: integer
+        repetitions_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        repetitions:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        repetitions_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+          title: Repetitions
+        weight_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        weight_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+          title: Weight
+        rir:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        rir_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        rest:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        rest_target:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+    PatchedWorkoutSessionRequest:
+      type: object
+      description: Workout session serializer
+      properties:
+        routine:
+          type: integer
+          nullable: true
+        day:
+          type: integer
+          nullable: true
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+          description: Any notes you might want to save about this workout session.
+        impression:
+          allOf:
+          - $ref: '#/components/schemas/ImpressionEnum'
+          title: General impression
+          description: |-
+            Your impression about this workout session. Did you exercise as well as you could?
+
+            * `1` - Bad
+            * `2` - Neutral
+            * `3` - Good
+        time_start:
+          type: string
+          format: time
+          nullable: true
+          title: Start time
+        time_end:
+          type: string
+          format: time
+          nullable: true
+          title: Finish time
+    PermissionResponse:
+      type: object
+      properties:
+        result:
+          type: boolean
+      required:
+      - result
+    RepetitionUnit:
+      type: object
+      description: Repetition unit serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    RepetitionsConfig:
+      type: object
+      description: Repetition Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    RepetitionsConfigRequest:
+      type: object
+      description: Repetition Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    RestConfig:
+      type: object
+      description: Rest Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 1800
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    RestConfigRequest:
+      type: object
+      description: Rest Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 1800
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    RiRConfig:
+      type: object
+      description: RiR Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    RiRConfigRequest:
+      type: object
+      description: RiR Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    Routine:
+      type: object
+      description: Routine serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 25
+        description:
+          type: string
+          maxLength: 1000
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Creation date
+        start:
+          type: string
+          format: date
+          title: Start date
+        end:
+          type: string
+          format: date
+          title: End date
+        fit_in_week:
+          type: boolean
+        is_template:
+          type: boolean
+          title: Workout template
+          description: Marking a workout as a template will freeze it and allow you
+            to make copies of it
+        is_public:
+          type: boolean
+          title: Public template
+          description: A public template is available to other users
+      required:
+      - created
+      - end
+      - id
+      - start
+    RoutineRequest:
+      type: object
+      description: Routine serializer
+      properties:
+        name:
+          type: string
+          maxLength: 25
+        description:
+          type: string
+          maxLength: 1000
+        start:
+          type: string
+          format: date
+          title: Start date
+        end:
+          type: string
+          format: date
+          title: End date
+        fit_in_week:
+          type: boolean
+        is_template:
+          type: boolean
+          title: Workout template
+          description: Marking a workout as a template will freeze it and allow you
+            to make copies of it
+        is_public:
+          type: boolean
+          title: Public template
+          description: A public template is available to other users
+      required:
+      - end
+      - start
+    RoutineWeightUnit:
+      type: object
+      description: Weight unit serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    SetNrConfig:
+      type: object
+      description: Set Nr config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 50
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    SetNrConfigRequest:
+      type: object
+      description: Set Nr config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: integer
+          maximum: 50
+          minimum: 0
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    Slot:
+      type: object
+      description: Slot
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        day:
+          type: integer
+          title: Exercise day
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        comment:
+          type: string
+          maxLength: 200
+        config:
+          nullable: true
+      required:
+      - day
+      - id
+    SlotEntry:
+      type: object
+      description: Slot entry serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot:
+          type: integer
+        exercise:
+          type: integer
+        type:
+          $ref: '#/components/schemas/SlotEntryTypeEnum'
+        repetition_unit:
+          type: integer
+          nullable: true
+        repetition_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        weight_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        weight_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        comment:
+          type: string
+          maxLength: 100
+        config:
+          nullable: true
+      required:
+      - exercise
+      - id
+      - slot
+    SlotEntryRequest:
+      type: object
+      description: Slot entry serializer
+      properties:
+        slot:
+          type: integer
+        exercise:
+          type: integer
+        type:
+          $ref: '#/components/schemas/SlotEntryTypeEnum'
+        repetition_unit:
+          type: integer
+          nullable: true
+        repetition_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        weight_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        weight_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        comment:
+          type: string
+          maxLength: 100
+        config:
+          nullable: true
+      required:
+      - exercise
+      - slot
+    SlotEntryTypeEnum:
+      enum:
+      - normal
+      - dropset
+      - myo
+      - partial
+      - forced
+      - tut
+      - iso
+      - jump
+      type: string
+      description: |-
+        * `normal` - Normal
+        * `dropset` - Dropset
+        * `myo` - Myo
+        * `partial` - Partial
+        * `forced` - Forced
+        * `tut` - Tut
+        * `iso` - Iso Hold
+        * `jump` - Jump
+    SlotRequest:
+      type: object
+      description: Slot
+      properties:
+        day:
+          type: integer
+          title: Exercise day
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        comment:
+          type: string
+          maxLength: 200
+        config:
+          nullable: true
+      required:
+      - day
+    StepEnum:
+      enum:
+      - na
+      - abs
+      - percent
+      type: string
+      description: |-
+        * `na` - Not Applicable
+        * `abs` - Absolute
+        * `percent` - Percent
+    StyleEnum:
+      enum:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+      - '5'
+      type: string
+      description: |-
+        * `1` - Line
+        * `2` - 3D
+        * `3` - Low-poly
+        * `4` - Photo
+        * `5` - Other
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+    Unit:
+      type: object
+      description: Measurement unit serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        unit:
+          type: string
+          maxLength: 30
+      required:
+      - id
+      - name
+      - unit
+    UnitRequest:
+      type: object
+      description: Measurement unit serializer
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        unit:
+          type: string
+          minLength: 1
+          maxLength: 30
+      required:
+      - name
+      - unit
+    UserLoginRequest:
+      type: object
+      description: Serializer to map to User model in relation to api user
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 8
+        email:
+          type: string
+          minLength: 1
+      required:
+      - password
+    UserRegistrationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    Userprofile:
+      type: object
+      description: Workout session serializer
+      properties:
+        username:
+          type: string
+          format: email
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        email_verified:
+          type: boolean
+        is_trustworthy:
+          type: boolean
+          description: |-
+            Flag indicating whether the user "is trustworthy" and can submit or edit exercises
+
+            At the moment the criteria are:
+            - the account has existed for 3 weeks
+            - the email address has been verified
+          readOnly: true
+        date_joined:
+          type: string
+          format: email
+          readOnly: true
+        gym:
+          type: integer
+          readOnly: true
+          nullable: true
+        weight_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        repetitions_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        is_temporary:
+          type: boolean
+          readOnly: true
+        show_comments:
+          type: boolean
+          title: Show exercise comments
+          description: Check to show exercise comments on the workout view
+        show_english_ingredients:
+          type: boolean
+          title: Also use ingredients in English
+          description: |-
+            Check to also show ingredients in English while creating
+            a nutritional plan. These ingredients are extracted from a list provided
+            by the US Department of Agriculture. It is extremely complete, with around
+            7000 entries, but can be somewhat overwhelming and make the search difficult.
+        workout_reminder_active:
+          type: boolean
+          title: Activate workout reminders
+          description: Check to activate automatic reminders for workouts. You need
+            to provide a valid email for this to work.
+        workout_reminder:
+          type: integer
+          maximum: 30
+          minimum: 1
+          title: Remind before expiration
+          description: The number of days you want to be reminded before a workout
+            expires.
+        workout_duration:
+          type: integer
+          maximum: 30
+          minimum: 1
+          title: Default duration of workouts
+          description: Default duration in weeks of workouts not in a schedule. Used
+            for email workout reminders.
+        last_workout_notification:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        notification_language:
+          type: integer
+          description: Language to use when sending you email notifications, e.g.
+            email reminders for workouts. This does not affect the language used on
+            the website.
+        age:
+          type: integer
+          maximum: 100
+          minimum: 10
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          title: Date of Birth
+        height:
+          type: integer
+          maximum: 230
+          minimum: 140
+          nullable: true
+          title: Height (cm)
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sleep_hours:
+          type: integer
+          maximum: 10
+          minimum: 4
+          nullable: true
+          title: Hours of sleep
+          description: The average hours of sleep per day
+        work_hours:
+          type: integer
+          maximum: 15
+          minimum: 1
+          nullable: true
+          title: Work
+          description: Average hours per day
+        work_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sport_hours:
+          type: integer
+          maximum: 30
+          minimum: 1
+          nullable: true
+          title: Sport
+          description: Average hours per week
+        sport_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        freetime_hours:
+          type: integer
+          maximum: 15
+          minimum: 1
+          nullable: true
+          title: Free time
+          description: Average hours per day
+        freetime_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        calories:
+          type: integer
+          maximum: 5000
+          minimum: 1500
+          nullable: true
+          title: Total daily calories
+          description: Total caloric intake, including e.g. any surplus
+        weight_unit:
+          $ref: '#/components/schemas/WeightUnitEnum'
+        ro_access:
+          type: boolean
+          title: Allow external access
+          description: Allow external users to access your workouts and logs in a
+            read-only mode. You need to set this before you can share links e.g. to
+            social media.
+        num_days_weight_reminder:
+          type: integer
+          maximum: 30
+          minimum: 0
+          title: Automatic reminders for weight entries
+          description: Number of days after the last weight entry (enter 0 to deactivate)
+      required:
+      - date_joined
+      - email
+      - gym
+      - is_temporary
+      - is_trustworthy
+      - last_workout_notification
+      - username
+    UserprofileRequest:
+      type: object
+      description: Workout session serializer
+      properties:
+        email_verified:
+          type: boolean
+        weight_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        repetitions_rounding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        show_comments:
+          type: boolean
+          title: Show exercise comments
+          description: Check to show exercise comments on the workout view
+        show_english_ingredients:
+          type: boolean
+          title: Also use ingredients in English
+          description: |-
+            Check to also show ingredients in English while creating
+            a nutritional plan. These ingredients are extracted from a list provided
+            by the US Department of Agriculture. It is extremely complete, with around
+            7000 entries, but can be somewhat overwhelming and make the search difficult.
+        workout_reminder_active:
+          type: boolean
+          title: Activate workout reminders
+          description: Check to activate automatic reminders for workouts. You need
+            to provide a valid email for this to work.
+        workout_reminder:
+          type: integer
+          maximum: 30
+          minimum: 1
+          title: Remind before expiration
+          description: The number of days you want to be reminded before a workout
+            expires.
+        workout_duration:
+          type: integer
+          maximum: 30
+          minimum: 1
+          title: Default duration of workouts
+          description: Default duration in weeks of workouts not in a schedule. Used
+            for email workout reminders.
+        notification_language:
+          type: integer
+          description: Language to use when sending you email notifications, e.g.
+            email reminders for workouts. This does not affect the language used on
+            the website.
+        age:
+          type: integer
+          maximum: 100
+          minimum: 10
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          title: Date of Birth
+        height:
+          type: integer
+          maximum: 230
+          minimum: 140
+          nullable: true
+          title: Height (cm)
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sleep_hours:
+          type: integer
+          maximum: 10
+          minimum: 4
+          nullable: true
+          title: Hours of sleep
+          description: The average hours of sleep per day
+        work_hours:
+          type: integer
+          maximum: 15
+          minimum: 1
+          nullable: true
+          title: Work
+          description: Average hours per day
+        work_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sport_hours:
+          type: integer
+          maximum: 30
+          minimum: 1
+          nullable: true
+          title: Sport
+          description: Average hours per week
+        sport_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        freetime_hours:
+          type: integer
+          maximum: 15
+          minimum: 1
+          nullable: true
+          title: Free time
+          description: Average hours per day
+        freetime_intensity:
+          nullable: true
+          title: Physical intensity
+          description: |-
+            Approximately
+
+            * `1` - Low
+            * `2` - Medium
+            * `3` - High
+          oneOf:
+          - $ref: '#/components/schemas/FreetimeIntensityEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        calories:
+          type: integer
+          maximum: 5000
+          minimum: 1500
+          nullable: true
+          title: Total daily calories
+          description: Total caloric intake, including e.g. any surplus
+        weight_unit:
+          $ref: '#/components/schemas/WeightUnitEnum'
+        ro_access:
+          type: boolean
+          title: Allow external access
+          description: Allow external users to access your workouts and logs in a
+            read-only mode. You need to set this before you can share links e.g. to
+            social media.
+        num_days_weight_reminder:
+          type: integer
+          maximum: 30
+          minimum: 0
+          title: Automatic reminders for weight entries
+          description: Number of days after the last weight entry (enter 0 to deactivate)
+    WeightConfig:
+      type: object
+      description: Weight Config serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - id
+      - iteration
+      - slot_entry
+      - value
+    WeightConfigRequest:
+      type: object
+      description: Weight Config serializer
+      properties:
+        slot_entry:
+          type: integer
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        repeat:
+          type: boolean
+        requirements:
+          nullable: true
+      required:
+      - iteration
+      - slot_entry
+      - value
+    WeightEntry:
+      type: object
+      description: Weight serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date:
+          type: string
+          format: date
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        user:
+          type: integer
+          readOnly: true
+      required:
+      - date
+      - id
+      - user
+      - weight
+    WeightEntryRequest:
+      type: object
+      description: Weight serializer
+      properties:
+        date:
+          type: string
+          format: date
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      required:
+      - date
+      - weight
+    WeightUnit:
+      type: object
+      description: WeightUnit serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        language:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+      required:
+      - id
+      - language
+      - name
+    WeightUnitEnum:
+      enum:
+      - kg
+      - lb
+      type: string
+      description: |-
+        * `kg` - Metric (kilogram)
+        * `lb` - Imperial (pound)
+    WorkoutLog:
+      type: object
+      description: Workout session serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date:
+          type: string
+          format: date-time
+        session:
+          type: integer
+          nullable: true
+        routine:
+          type: integer
+          nullable: true
+          title: Workout
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        slot_entry:
+          type: integer
+          nullable: true
+        next_log:
+          type: integer
+          nullable: true
+        exercise:
+          type: integer
+        repetitions_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        repetitions:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        repetitions_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+          title: Repetitions
+        weight_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        weight_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+          title: Weight
+        rir:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        rir_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        rest:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        rest_target:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+      required:
+      - exercise
+      - id
+    WorkoutLogRequest:
+      type: object
+      description: Workout session serializer
+      properties:
+        date:
+          type: string
+          format: date-time
+        session:
+          type: integer
+          nullable: true
+        routine:
+          type: integer
+          nullable: true
+          title: Workout
+        iteration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        slot_entry:
+          type: integer
+          nullable: true
+        next_log:
+          type: integer
+          nullable: true
+        exercise:
+          type: integer
+        repetitions_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        repetitions:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        repetitions_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+          title: Repetitions
+        weight_unit:
+          type: integer
+          nullable: true
+          title: Unit
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        weight_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+          title: Weight
+        rir:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        rir_target:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        rest:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        rest_target:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+      required:
+      - exercise
+    WorkoutSession:
+      type: object
+      description: Workout session serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        routine:
+          type: integer
+          nullable: true
+        day:
+          type: integer
+          nullable: true
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+          description: Any notes you might want to save about this workout session.
+        impression:
+          allOf:
+          - $ref: '#/components/schemas/ImpressionEnum'
+          title: General impression
+          description: |-
+            Your impression about this workout session. Did you exercise as well as you could?
+
+            * `1` - Bad
+            * `2` - Neutral
+            * `3` - Good
+        time_start:
+          type: string
+          format: time
+          nullable: true
+          title: Start time
+        time_end:
+          type: string
+          format: time
+          nullable: true
+          title: Finish time
+      required:
+      - id
+    WorkoutSessionRequest:
+      type: object
+      description: Workout session serializer
+      properties:
+        routine:
+          type: integer
+          nullable: true
+        day:
+          type: integer
+          nullable: true
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+          description: Any notes you might want to save about this workout session.
+        impression:
+          allOf:
+          - $ref: '#/components/schemas/ImpressionEnum'
+          title: General impression
+          description: |-
+            Your impression about this workout session. Did you exercise as well as you could?
+
+            * `1` - Bad
+            * `2` - Neutral
+            * `3` - Good
+        time_start:
+          type: string
+          format: time
+          nullable: true
+          title: Start time
+        time_end:
+          type: string
+          format: time
+          nullable: true
+          title: Finish time
+    login:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+      - token
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
