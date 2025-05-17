@@ -1,0 +1,21 @@
+[project]
+name = "agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncio>=3.4.3",
+    "email-validator>=2.2.0",
+    "fastapi>=0.115.12",
+    "googlemaps>=4.10.0",
+    "gradio>=5.29.1",
+    "httpx>=0.28.1",
+    "pydantic>=2.11.4",
+    "pydantic-ai>=0.2.4",
+    "pyowm>=3.3.0",
+    "python-dotenv>=1.1.0",
+    "python-multipart>=0.0.20",
+    "tavily-python>=0.7.2",
+    "uvicorn>=0.34.2",
+]
