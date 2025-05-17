@@ -83,14 +83,14 @@ The system follows a tool-based architecture where the LLM (GPT-4o) acts as the 
 
 2. Create and activate a virtual environment:
    ```bash
-   python -m venv agent/.venv
+   uv venv
    source agent/.venv/bin/activate  # On Windows: agent\.venv\Scripts\activate
    ```
 
 3. Install dependencies:
    ```bash
    cd agent
-   pip install -e .
+   uv sync
    ```
 
 ## Configuration
@@ -118,7 +118,7 @@ Run the agent in interactive mode:
 
 ```bash
 cd agent
-python agent.py
+uv run agent.py
 ```
 
 Commands:
@@ -132,7 +132,7 @@ Launch the web interface:
 
 ```bash
 cd agent
-python app.py
+uv run app.py
 ```
 
 The interface provides two tabs:
