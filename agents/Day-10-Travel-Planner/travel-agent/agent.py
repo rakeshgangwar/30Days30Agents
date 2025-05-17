@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 from pydantic_ai import Agent
+from pydantic_ai.mcp import MCPServerStdio
 from httpx import AsyncClient
 
 # Try to import ModelMessage from pydantic_ai.messages
@@ -28,7 +29,8 @@ from travel_tools import (
     get_attractions,
     get_restaurants,
     get_hotels,
-    get_local_tips
+    get_local_tips,
+    get_current_date
 )
 
 # Configure logging
@@ -62,6 +64,7 @@ class TravelAgent:
                 "- Sharing weather forecasts for travel destinations "
                 "- Recommending attractions, restaurants, and hotels "
                 "- Offering local tips and cultural insights "
+                "- Providing current date information for travel planning "
                 "- Answering general travel questions "
                 "Use the provided tools to gather information when needed. "
                 "Be conversational, helpful, and maintain context throughout the conversation. "
@@ -77,6 +80,7 @@ class TravelAgent:
         self.agent.tool(get_restaurants)
         self.agent.tool(get_hotels)
         self.agent.tool(get_local_tips)
+        self.agent.tool(get_current_date)
 
         # Store the API key
         self.openai_api_key = openai_api_key

@@ -1,7 +1,8 @@
 from typing import Dict, List, Optional, Union, Any
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import logging
 import json
+import requests
 from pydantic_ai import RunContext, ModelRetry
 from dependencies import TravelDependencies
 
@@ -28,8 +29,8 @@ async def get_transportation(
     logger.info(f"Fetching transportation options from {from_location} to {to_location} with mode {mode}")
 
     try:
-        gmaps = ctx.deps.get_google_maps_client()
-        if not gmaps:
+        api_key = ctx.deps.google_maps_api_key
+        if not api_key:
             # Return dummy data if no API key
             return [{
                 "type": "transportation",
@@ -59,52 +60,111 @@ async def get_transportation(
                 ]
             }]
 
-        # Define modes to check based on user preference
+        # We'll use the Distance Matrix API directly with location names
+        # This is part of the Maps Platform and is more likely to be enabled
+
+        # Define travel modes for the fallback approach
         if mode == "car":
-            modes_to_check = [("driving", None)]  # Only check driving routes
+            travel_mode = "driving"
         elif mode == "train":
-            modes_to_check = [("transit", ["rail", "train"])]  # Only check train routes
+            travel_mode = "transit"
         else:  # "mixed" or any other option
-            modes_to_check = [
-                ("transit", ["bus", "train", "subway"]),  # Public transit
-                ("driving", None),  # Driving option
-            ]
+            travel_mode = "driving"  # Default to driving for mixed mode
 
-        for travel_mode, transit_modes in modes_to_check:
-            try:
-                # Configure the request based on mode
-                params = {
-                    "mode": travel_mode,
-                    "alternatives": True,
-                }
-                if transit_modes:
-                    params["transit_mode"] = transit_modes
+        transportation_options = []
 
-                directions = gmaps.directions(
-                    from_location,
-                    to_location,
-                    **params
-                )
+        try:
+            # Use the Distance Matrix API which is part of the Places API suite
+            distance_matrix_url = "https://maps.googleapis.com/maps/api/distancematrix/json"
 
-                for route in directions[:2]:  # Limit to 2 routes per mode
-                    legs = route.get("legs", [])
-                    if not legs:
-                        continue
+            # Set up parameters
+            params = {
+                "origins": from_location,
+                "destinations": to_location,
+                "mode": travel_mode,
+                "key": api_key,
+                "units": "metric",
+                "language": "en"
+            }
 
-                    leg = legs[0]
-                    steps = []
-                    for step in leg.get("steps", [])[:5]:  # Limit to 5 steps
-                        instruction = step.get("html_instructions", "").replace("<b>", "").replace("</b>", "").replace("<div>", " ").replace("</div>", "")
-                        steps.append(instruction)
+            # Make the API request
+            response = requests.get(distance_matrix_url, params=params)
+            response.raise_for_status()
+            route_data = response.json()
 
-                    transportation_options.append({
-                        "type": "transportation",
-                        "title": f"{travel_mode.title()} from {from_location} to {to_location}",
-                        "description": f"Duration: {leg.get('duration', {}).get('text', 'Unknown')}",
-                        "steps": steps
-                    })
-            except Exception as e:
-                logger.error(f"Error getting {travel_mode} directions: {str(e)}", exc_info=True)
+            # Check if we got valid results
+            if route_data.get("status") == "OK":
+                rows = route_data.get("rows", [])
+                if rows and rows[0].get("elements"):
+                    element = rows[0]["elements"][0]
+
+                    if element.get("status") == "OK":
+                        # Extract duration and distance
+                        duration_text = element.get("duration", {}).get("text", "Unknown duration")
+                        distance_text = element.get("distance", {}).get("text", "Unknown distance")
+
+                        # Create steps based on the information we have
+                        steps = [
+                            f"Travel from {from_location} to {to_location}",
+                            f"Estimated travel time: {duration_text}",
+                            f"Estimated distance: {distance_text}"
+                        ]
+
+                        # Add additional information based on travel mode
+                        if travel_mode == "driving":
+                            steps.append("Travel by car following the fastest route")
+                        elif travel_mode == "transit":
+                            steps.append("Travel by public transportation")
+                            steps.append("Check local transit schedules for exact timings")
+
+                        # Add the route to transportation options
+                        transportation_options.append({
+                            "type": "transportation",
+                            "title": f"{travel_mode.title()} from {from_location} to {to_location}",
+                            "description": f"Duration: {duration_text}, Distance: {distance_text}",
+                            "steps": steps
+                        })
+
+            # If we're in mixed mode, try to get transit options as well
+            if mode == "mixed" and travel_mode == "driving":
+                # Try transit as well
+                params["mode"] = "transit"
+
+                try:
+                    transit_response = requests.get(distance_matrix_url, params=params)
+                    transit_response.raise_for_status()
+                    transit_data = transit_response.json()
+
+                    if transit_data.get("status") == "OK":
+                        rows = transit_data.get("rows", [])
+                        if rows and rows[0].get("elements"):
+                            element = rows[0]["elements"][0]
+
+                            if element.get("status") == "OK":
+                                # Extract duration and distance
+                                duration_text = element.get("duration", {}).get("text", "Unknown duration")
+                                distance_text = element.get("distance", {}).get("text", "Unknown distance")
+
+                                # Create steps for transit
+                                steps = [
+                                    f"Travel from {from_location} to {to_location} by public transportation",
+                                    f"Estimated travel time: {duration_text}",
+                                    f"Estimated distance: {distance_text}",
+                                    "Check local transit schedules for exact timings",
+                                    "Consider checking transit apps for real-time updates"
+                                ]
+
+                                # Add the transit route to transportation options
+                                transportation_options.append({
+                                    "type": "transportation",
+                                    "title": f"Transit from {from_location} to {to_location}",
+                                    "description": f"Duration: {duration_text}, Distance: {distance_text}",
+                                    "steps": steps
+                                })
+                except Exception as e:
+                    logger.error(f"Error getting transit directions: {str(e)}", exc_info=True)
+        except Exception as e:
+            logger.error(f"Error getting directions: {str(e)}", exc_info=True)
 
         # If no options found, provide a helpful message
         if not transportation_options:
@@ -149,16 +209,139 @@ async def get_weather_forecast(
     """
     logger.info(f"Fetching weather forecast for {location} on {date}")
 
-    # For now, return dummy data
-    # In a real implementation, we would use the OpenWeatherMap API
-    return {
-        "location": location,
-        "date": date,
-        "temperature": "24°C",
-        "condition": "Sunny",
-        "humidity": "60%",
-        "wind": "10 km/h"
-    }
+    try:
+        # Check if OpenWeatherMap API key is available
+        api_key = ctx.deps.openweathermap_api_key
+        if not api_key:
+            logger.warning("OpenWeatherMap API key not available, returning dummy data")
+            return {
+                "location": location,
+                "date": date,
+                "temperature": "24°C",
+                "condition": "Sunny",
+                "humidity": "60%",
+                "wind": "10 km/h"
+            }
+
+        # Parse the date string to a datetime object
+        target_date = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        current_date = datetime.now(timezone.utc)
+
+        # Determine if we need current weather or forecast
+        days_difference = (target_date.date() - current_date.date()).days
+
+        # Base URL for OpenWeatherMap API
+        base_url = "https://api.openweathermap.org/data/2.5"
+
+        if days_difference == 0:
+            # Get current weather
+            endpoint = f"{base_url}/weather"
+            params = {
+                "q": location,
+                "appid": api_key,
+                "units": "metric"  # Use metric units (Celsius)
+            }
+
+            response = requests.get(endpoint, params=params)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            data = response.json()
+
+            # Extract weather data
+            weather_data = {
+                "location": location,
+                "date": date,
+                "temperature": f"{data['main']['temp']:.1f}°C",
+                "condition": data['weather'][0]['description'].capitalize(),
+                "humidity": f"{data['main']['humidity']}%",
+                "wind": f"{data['wind']['speed']:.1f} m/s"
+            }
+
+        elif 0 < days_difference <= 5:  # OWM free tier supports 5-day forecast
+            # Get 5-day forecast with 3-hour intervals
+            endpoint = f"{base_url}/forecast"
+            params = {
+                "q": location,
+                "appid": api_key,
+                "units": "metric"  # Use metric units (Celsius)
+            }
+
+            response = requests.get(endpoint, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            # Find the forecast closest to the target date
+            # Set the target time to noon on the target date
+            target_datetime = target_date.replace(hour=12, minute=0, second=0)
+            target_timestamp = int(target_datetime.timestamp())
+
+            # Find the forecast item closest to the target time
+            closest_forecast = None
+            min_time_diff = float('inf')
+
+            for forecast_item in data['list']:
+                forecast_time = forecast_item['dt']
+                time_diff = abs(forecast_time - target_timestamp)
+
+                if time_diff < min_time_diff:
+                    min_time_diff = time_diff
+                    closest_forecast = forecast_item
+
+            if closest_forecast:
+                # Extract weather data from the closest forecast
+                weather_data = {
+                    "location": location,
+                    "date": date,
+                    "temperature": f"{closest_forecast['main']['temp']:.1f}°C",
+                    "condition": closest_forecast['weather'][0]['description'].capitalize(),
+                    "humidity": f"{closest_forecast['main']['humidity']}%",
+                    "wind": f"{closest_forecast['wind']['speed']:.1f} m/s"
+                }
+            else:
+                # This should not happen, but just in case
+                return {
+                    "location": location,
+                    "date": date,
+                    "temperature": "N/A",
+                    "condition": "No forecast data available for the specified date",
+                    "humidity": "N/A",
+                    "wind": "N/A"
+                }
+
+        else:
+            # Date is too far in the future for free API
+            logger.warning(f"Date {date} is beyond the 5-day forecast limit of the free OpenWeatherMap API")
+            return {
+                "location": location,
+                "date": date,
+                "temperature": "N/A",
+                "condition": "Forecast unavailable for dates beyond 5 days",
+                "humidity": "N/A",
+                "wind": "N/A"
+            }
+
+        logger.info(f"Successfully retrieved weather forecast for {location} on {date}")
+        return weather_data
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error making request to OpenWeatherMap API: {str(e)}", exc_info=True)
+        return {
+            "location": location,
+            "date": date,
+            "temperature": "N/A",
+            "condition": f"Error retrieving forecast: {str(e)}",
+            "humidity": "N/A",
+            "wind": "N/A"
+        }
+    except Exception as e:
+        logger.error(f"Error getting weather forecast: {str(e)}", exc_info=True)
+        return {
+            "location": location,
+            "date": date,
+            "temperature": "N/A",
+            "condition": f"Error retrieving forecast: {str(e)}",
+            "humidity": "N/A",
+            "wind": "N/A"
+        }
 
 
 async def get_attractions(
@@ -431,3 +614,65 @@ async def get_local_tips(
                 "content": "Always check local weather before planning your day."
             }
         ]
+
+
+async def get_current_date(
+    ctx: RunContext[TravelDependencies],  # ctx is required by the framework but not used in this function
+    format: str = "YYYY-MM-DD"
+) -> Dict[str, str]:
+    """Get the current date in the specified format.
+
+    Args:
+        ctx: The context with dependencies.
+        format: The format to return the date in. Options:
+               - "YYYY-MM-DD" (default): Returns date as 2024-05-15
+               - "DD-MM-YYYY": Returns date as 15-05-2024
+               - "MM-DD-YYYY": Returns date as 05-15-2024
+               - "full": Returns full date with day name, e.g., "Wednesday, May 15, 2024"
+
+    Returns:
+        A dictionary containing the current date in the requested format,
+        along with additional date information.
+    """
+    logger.info(f"Getting current date in format: {format}")
+
+    try:
+        # Get current date in UTC
+        current_date = datetime.now(timezone.utc)
+
+        # Format the date according to the requested format
+        if format == "YYYY-MM-DD":
+            formatted_date = current_date.strftime("%Y-%m-%d")
+        elif format == "DD-MM-YYYY":
+            formatted_date = current_date.strftime("%d-%m-%Y")
+        elif format == "MM-DD-YYYY":
+            formatted_date = current_date.strftime("%m-%d-%Y")
+        elif format == "full":
+            formatted_date = current_date.strftime("%A, %B %d, %Y")
+        else:
+            # Default to ISO format if an unknown format is requested
+            formatted_date = current_date.strftime("%Y-%m-%d")
+            logger.warning(f"Unknown date format '{format}', defaulting to YYYY-MM-DD")
+
+        # Calculate day of week, day of year, and week of year
+        day_of_week = current_date.strftime("%A")
+        day_of_year = current_date.strftime("%j")
+        week_of_year = current_date.strftime("%U")
+
+        # Return comprehensive date information
+        return {
+            "date": formatted_date,
+            "iso_date": current_date.strftime("%Y-%m-%d"),
+            "day_of_week": day_of_week,
+            "day_of_year": day_of_year,
+            "week_of_year": week_of_year,
+            "month": current_date.strftime("%B"),
+            "year": current_date.strftime("%Y"),
+            "timestamp": current_date.isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting current date: {str(e)}", exc_info=True)
+        return {
+            "date": "Error retrieving date",
+            "error": str(e)
+        }
