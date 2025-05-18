@@ -1,0 +1,50 @@
+{
+    "/api/utils/download": {
+      "get": {
+        "tags": [
+          "Utils"
+        ],
+        "summary": "Download File",
+        "description": "Uses a file token obtained by an active user to retrieve a file from the operating\nsystem.",
+        "operationId": "download_file_api_utils_download_get",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+}
