@@ -1,0 +1,220 @@
+{
+    "/api/media/recipes/{recipe_id}/images/{file_name}": {
+      "get": {
+        "tags": [
+          "Recipe: Images and Assets"
+        ],
+        "summary": "Get Recipe Img",
+        "description": "Takes in a recipe id, returns the static image. This route is proxied in the docker image\nand should not hit the API in production",
+        "operationId": "get_recipe_img_api_media_recipes__recipe_id__images__file_name__get",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "file_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ImageType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/media/recipes/{recipe_id}/images/timeline/{timeline_event_id}/{file_name}": {
+      "get": {
+        "tags": [
+          "Recipe: Images and Assets"
+        ],
+        "summary": "Get Recipe Timeline Event Img",
+        "description": "Takes in a recipe id and event timeline id, returns the static image. This route is proxied in the docker image\nand should not hit the API in production",
+        "operationId": "get_recipe_timeline_event_img_api_media_recipes__recipe_id__images_timeline__timeline_event_id___file_name__get",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "timeline_event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Timeline Event Id"
+            }
+          },
+          {
+            "name": "file_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ImageType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/media/recipes/{recipe_id}/assets/{file_name}": {
+      "get": {
+        "tags": [
+          "Recipe: Images and Assets"
+        ],
+        "summary": "Get Recipe Asset",
+        "description": "Returns a recipe asset",
+        "operationId": "get_recipe_asset_api_media_recipes__recipe_id__assets__file_name__get",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "file_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/media/users/{user_id}/{file_name}": {
+      "get": {
+        "tags": [
+          "Recipe: Images and Assets"
+        ],
+        "summary": "Get User Image",
+        "description": "Takes in a recipe slug, returns the static image. This route is proxied in the docker image\nand should not hit the API in production",
+        "operationId": "get_user_image_api_media_users__user_id___file_name__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "file_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/media/docker/validate.txt": {
+      "get": {
+        "tags": [
+          "Recipe: Images and Assets"
+        ],
+        "summary": "Get Validation Text",
+        "operationId": "get_validation_text_api_media_docker_validate_txt_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    }
+}

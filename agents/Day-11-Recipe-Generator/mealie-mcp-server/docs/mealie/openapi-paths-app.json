@@ -1,0 +1,68 @@
+{
+    "/api/app/about": {
+      "get": {
+        "tags": [
+          "App: About"
+        ],
+        "summary": "Get App Info",
+        "description": "Get general application information",
+        "operationId": "get_app_info_api_app_about_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app/about/startup-info": {
+      "get": {
+        "tags": [
+          "App: About"
+        ],
+        "summary": "Get Startup Info",
+        "description": "returns helpful startup information",
+        "operationId": "get_startup_info_api_app_about_startup_info_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppStartupInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app/about/theme": {
+      "get": {
+        "tags": [
+          "App: About"
+        ],
+        "summary": "Get App Theme",
+        "description": "Get's the current theme settings",
+        "operationId": "get_app_theme_api_app_about_theme_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppTheme"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+}

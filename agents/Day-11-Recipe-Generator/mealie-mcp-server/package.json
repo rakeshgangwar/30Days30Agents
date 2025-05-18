@@ -1,0 +1,32 @@
+{
+  "name": "mealie-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for Mealie recipe generation and meal planning",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:stdio": "node dist/index.js --stdio",
+    "dev": "ts-node-esm src/index.ts",
+    "dev:stdio": "ts-node-esm src/index.ts --stdio",
+    "start:modular": "MCP_TRANSPORT=http node dist/mealie/index.js",
+    "start:modular:stdio": "node dist/mealie/index.js --stdio",
+    "dev:modular": "MCP_TRANSPORT=http ts-node-esm src/mealie/index.ts",
+    "dev:modular:stdio": "ts-node-esm src/mealie/index.ts --stdio",
+    "test": "echo 'Error: no test specified' && exit 1"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.4",
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.3"
+  }
+}
