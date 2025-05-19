@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .message-content a {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+        .message-content ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+        }
+        .message-content ol {
+            list-style-type: decimal;
+            margin-left: 1.5rem;
+        }
+        .message-content h1, .message-content h2, .message-content h3 {
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .message-content h1 {
+            font-size: 1.5rem;
+        }
+        .message-content h2 {
+            font-size: 1.25rem;
+        }
+        .message-content h3 {
+            font-size: 1.125rem;
+        }
+        .message-content p {
+            margin-bottom: 0.75rem;
+        }
+        .message-content pre {
+            background-color: #f3f4f6;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            overflow-x: auto;
+            margin-bottom: 0.75rem;
+        }
+        .message-content code {
+            font-family: monospace;
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto p-4 max-w-4xl">
+        <header class="bg-white rounded-lg shadow p-4 mb-4">
+            <h1 class="text-2xl font-bold text-blue-600">News Agent</h1>
+            <p class="text-gray-600">Your personal assistant for finding news from your feeds</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h2 class="text-lg font-semibold mb-2">Example Commands</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <button class="example-command bg-blue-50 hover:bg-blue-100 p-2 rounded text-left text-sm">
+                    "Show me the latest news"
+                </button>
+                <button class="example-command bg-blue-50 hover:bg-blue-100 p-2 rounded text-left text-sm">
+                    "Search for articles about artificial intelligence"
+                </button>
+                <button class="example-command bg-blue-50 hover:bg-blue-100 p-2 rounded text-left text-sm">
+                    "What's the latest news on climate change?"
+                </button>
+                <button class="example-command bg-blue-50 hover:bg-blue-100 p-2 rounded text-left text-sm">
+                    "Find news from TechCrunch"
+                </button>
+            </div>
+        </div>
+
+        <div id="conversation" class="bg-white rounded-lg shadow p-4 mb-4 min-h-[400px] max-h-[600px] overflow-y-auto">
+            <div class="mb-4 p-3 rounded bg-blue-100 mr-12">
+                <p class="text-sm text-gray-500">assistant</p>
+                <div class="message-content">
+                    <p>👋 Hello! I'm your News Assistant. I can help you find news articles from your FreshRSS feeds.</p>
+                    <p>Here are some things you can ask me:</p>
+                    <ul>
+                        <li>Show me the latest news</li>
+                        <li>Search for articles about a subject</li>
+                        <li>Find news from specific sources</li>
+                    </ul>
+                    <p>What would you like to know about today?</p>
+                </div>
+            </div>
+        </div>
+
+        <form id="chat-form" class="flex gap-2">
+            <input
+                id="prompt-input"
+                type="text"
+                name="prompt"
+                placeholder="Ask about news, search for topics, or request a briefing..."
+                class="flex-1 p-2 border rounded"
+                required
+            >
+            <button
+                type="submit"
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+                Send
+            </button>
+        </form>
+
+        <div id="spinner" class="hidden mt-2 text-center">
+            <div class="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+            <span class="ml-2">Processing...</span>
+        </div>
+
+        <div id="error" class="hidden mt-2 p-2 bg-red-100 text-red-700 rounded">
+            An error occurred. Please try again.
+        </div>
+    </div>
+
+    <script>
+        const convElement = document.getElementById('conversation');
+        const promptInput = document.getElementById('prompt-input');
+        const spinner = document.getElementById('spinner');
+        const errorElement = document.getElementById('error');
+        const chatForm = document.getElementById('chat-form');
+        const exampleCommands = document.querySelectorAll('.example-command');
+
+        // Function to add a message to the conversation
+        function addMessage(message) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('mb-4', 'p-3', 'rounded');
+
+            if (message.role === 'user') {
+                msgDiv.classList.add('bg-gray-200', 'ml-12');
+            } else {
+                msgDiv.classList.add('bg-blue-100', 'mr-12');
+            }
+
+            // Use marked.js to render markdown
+            const content = message.role === 'assistant'
+                ? marked.parse(message.content)
+                : message.content;
+
+            msgDiv.innerHTML = `
+                <p class="text-sm text-gray-500">${message.role}</p>
+                <div class="message-content">${content}</div>
+            `;
+
+            convElement.appendChild(msgDiv);
+            convElement.scrollTop = convElement.scrollHeight;
+        }
+
+        // Function to handle form submission
+        async function handleSubmit(e) {
+            e.preventDefault();
+            errorElement.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            const prompt = promptInput.value;
+            if (!prompt.trim()) return;
+
+            promptInput.value = '';
+            promptInput.disabled = true;
+
+            // Add user message to conversation
+            addMessage({
+                role: 'user',
+                content: prompt,
+                timestamp: new Date().toISOString()
+            });
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get response');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let assistantMessage = '';
+                let assistantDiv = null;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const text = decoder.decode(value);
+                    assistantMessage += text;
+
+                    if (!assistantDiv) {
+                        assistantDiv = document.createElement('div');
+                        assistantDiv.classList.add('mb-4', 'p-3', 'rounded', 'bg-blue-100', 'mr-12');
+                        assistantDiv.innerHTML = `
+                            <p class="text-sm text-gray-500">assistant</p>
+                            <div class="message-content">${marked.parse(assistantMessage)}</div>
+                        `;
+                        convElement.appendChild(assistantDiv);
+                    } else {
+                        assistantDiv.querySelector('.message-content').innerHTML = marked.parse(assistantMessage);
+                    }
+
+                    convElement.scrollTop = convElement.scrollHeight;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorElement.classList.remove('hidden');
+            } finally {
+                spinner.classList.add('hidden');
+                promptInput.disabled = false;
+                promptInput.focus();
+            }
+        }
+
+        // Handle example command clicks
+        exampleCommands.forEach(button => {
+            button.addEventListener('click', () => {
+                promptInput.value = button.textContent.trim();
+                promptInput.focus();
+            });
+        });
+
+        chatForm.addEventListener('submit', handleSubmit);
+    </script>
+</body>
+</html>
