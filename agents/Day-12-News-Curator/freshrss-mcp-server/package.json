@@ -1,0 +1,44 @@
+{
+  "name": "freshrss-mcp-server",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server for interacting with FreshRSS feeds via the Fever API",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rakeshgangwar/freshrss-mcp-server.git"
+  },
+  "homepage": "https://github.com/rakeshgangwar/freshrss-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/rakeshgangwar/freshrss-mcp-server/issues"
+  },
+  "keywords": [
+    "freshrss",
+    "rss",
+    "mcp",
+    "model-context-protocol",
+    "llm",
+    "ai",
+    "assistant"
+  ],
+  "type": "module",
+  "bin": {
+    "freshrss-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "0.6.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}
