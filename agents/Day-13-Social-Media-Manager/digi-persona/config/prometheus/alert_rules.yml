@@ -1,0 +1,29 @@
+groups:
+  - name: digi-persona-alerts
+    rules:
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, sum(rate(digi_persona_request_latency_seconds_bucket[5m])) by (le, endpoint)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency on {{ $labels.endpoint }}"
+          description: "95th percentile request latency is above 1 second for endpoint {{ $labels.endpoint }}"
+
+      - alert: HighErrorRate
+        expr: sum(rate(digi_persona_request_count{status_code=~"5.."}[5m])) / sum(rate(digi_persona_request_count[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate"
+          description: "Error rate is above 5%"
+
+      - alert: HighActiveRequests
+        expr: digi_persona_active_requests > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of active requests"
+          description: "Number of active requests is above 100"

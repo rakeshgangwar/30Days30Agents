@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: digi-persona-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=/api/v1
+      - DOCKER_ENV=true
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: digi-persona-app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 ${RELOAD_FLAG:---reload}
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+  worker:
+    build: .
+    container_name: digi-persona-worker
+    command: celery -A app.scheduler.worker worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - app
+      - redis
+    env_file:
+      - .env
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+  scheduler:
+    build: .
+    container_name: digi-persona-scheduler
+    command: celery -A app.scheduler.worker beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - app
+      - redis
+    env_file:
+      - .env
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    container_name: digi-persona-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=digi_persona
+    ports:
+      - "5432:5432"
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: digi-persona-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    container_name: digi-persona-prometheus
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    container_name: digi-persona-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - digi-persona-network
+    restart: unless-stopped
+
+networks:
+  digi-persona-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
