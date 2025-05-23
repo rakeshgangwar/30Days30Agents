@@ -11,12 +11,12 @@ As a developer specializing in Week 3 advanced agents for the "30 Days 30 Agents
    - Emotional intelligence
    - Multi-turn reasoning
 
-2. **Image Generation Assistant** (Day 16)
-   - Text-to-image creation
-   - Image modification instructions
-   - Style guidance
-   - Visual concept exploration
-   - Creative collaboration
+2. **Voice Assistant** (Day 16)
+   - Voice-controlled interaction
+   - Natural language comprehension
+   - Voice-based search and execution
+   - Multi-modal response handling
+   - Ambient computing patterns
 
 3. **Music Recommendation Agent** (Day 17)
    - Personalized music discovery
@@ -46,12 +46,12 @@ As a developer specializing in Week 3 advanced agents for the "30 Days 30 Agents
    - Decision tracking
    - Meeting summarization
 
-7. **Voice Assistant** (Day 21)
-   - Voice-controlled interaction
-   - Natural language comprehension
-   - Voice-based search and execution
-   - Multi-modal response handling
-   - Ambient computing patterns
+7. **Image Generation Assistant** (Day 21)
+   - Text-to-image creation
+   - Image modification instructions
+   - Style guidance
+   - Visual concept exploration
+   - Creative collaboration
 
 ## Advanced Implementation Focus Areas
 

@@ -91,8 +91,8 @@ The tools in the list can be categorized into several groups based on their prim
 - **Recommended Tools**: Livekit/agents, Pipecat, AgentOps-AI
 - **Rationale**: These tools enable more complex agent capabilities like voice interaction and provide monitoring as complexity increases.
 - **Specific Applications**:
-  - Use Livekit for Voice Assistant (Day 21)
-  - Implement Image Generation Assistant (Day 16) with Vercel/AI
+  - Use Livekit for Image Generation Assistant (Day 21)
+  - Implement Voice Assistant (Day 16) with speech recognition and TTS APIs
   - Add AgentOps-AI monitoring to track performance across agents
 
 ### Week 4: Complex & Integration (Days 22-30)

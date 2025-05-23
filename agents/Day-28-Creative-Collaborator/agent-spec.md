@@ -30,7 +30,7 @@ Acts as a partner in creative processes, helping users brainstorm ideas, generat
 - **UI**: Streamlit, Gradio, or a simple text interface
 
 ## Possible Integrations
-- Image Generation Assistant (Day 16) for visual prompts or results
+- Image Generation Assistant (Day 21) for visual prompts or results
 - Writing Assistant (Day 4) for refining generated text
 - Document editors or writing software (e.g., export functionality)
 - Mind mapping tools (e.g., export to compatible formats)

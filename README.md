@@ -93,7 +93,7 @@ Each week consists of 6 agents followed by a break day.
 13. **Social Media Manager** - Content scheduling and analytics
 14. **Email Assistant** - Email summarization and response drafting
 15. **Conversational Agent** - Advanced dialogue capabilities
-16. **Image Generation Assistant** - Text-to-image creation
+16. **Voice Assistant** - Voice-controlled agent
 17. **Music Recommendation Agent** - Personalized music discovery
 18. **Language Translation Agent** - Real-time translation services
 
@@ -101,7 +101,7 @@ Each week consists of 6 agents followed by a break day.
 ### Week 4: Productivity & Analysis Agents
 19. **Document Analyzer** - Extract insights from documents
 20. **Meeting Assistant** - Meeting notes and action item tracking
-21. **Voice Assistant** - Voice-controlled agent
+21. **Image Generation Assistant** - Text-to-image creation
 22. **E-commerce Assistant** - Shopping recommendations
 23. **Job Search Assistant** - Job matching and application help
 24. **Study Buddy** - Interactive learning and quiz generation
