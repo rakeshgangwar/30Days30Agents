@@ -93,7 +93,7 @@ Each week consists of 6 agents followed by a break day.
 13. **Social Media Manager** - Content scheduling and analytics [Implemented](agents/Day-13-Social-Media-Manager)
 14. **Email Assistant** - Email summarization and response drafting [Implemented](agents/Day-14-Email-Assistant)
 15. **Conversational Agent** - Advanced dialogue capabilities
-16. **Voice Assistant** - Voice-controlled agent
+16. **Voice Assistant** - Voice-controlled agent [Implemented](agents/Day-16-Voice-Assistant)
 17. **Music Recommendation Agent** - Personalized music discovery
 18. **Language Translation Agent** - Real-time translation services
 
