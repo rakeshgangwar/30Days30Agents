@@ -81,17 +81,17 @@ Each week consists of 6 agents followed by a break day.
 
 
 ### Week 2: More Foundation & Specialized Agents
-7. **Task Automation Agent** - Automate repetitive workflows
-8. **Finance Tracker** - Personal finance monitoring and advice
-9. **Health & Wellness Coach** - Fitness and health recommendations
-10. **Travel Planner** - Trip planning and itinerary creation
-11. **Recipe Generator** - Personalized meal planning
-12. **News Curator** - Personalized news aggregation
+7. **Task Automation Agent** - Automate repetitive workflows [Partially Implemented](agents/Day-07-Task-Automation-Agent)
+8. **Finance Tracker** - Personal finance monitoring and advice [Implemented](agents/Day-08-Finance-Tracker)
+9. **Health & Wellness Coach** - Fitness and health recommendations [Implemented](agents/Day-09-Health-Wellness-Coach)
+10. **Travel Planner** - Trip planning and itinerary creation [Implemented](agents/Day-10-Travel-Planner)
+11. **Recipe Generator** - Personalized meal planning [Implemented](agents/Day-11-Recipe-Generator)
+12. **News Curator** - Personalized news aggregation [Implemented](agents/Day-12-News-Curator)
 
 
 ### Week 3: Specialized & Communication Agents
-13. **Social Media Manager** - Content scheduling and analytics
-14. **Email Assistant** - Email summarization and response drafting
+13. **Social Media Manager** - Content scheduling and analytics [Implemented](agents/Day-13-Social-Media-Manager)
+14. **Email Assistant** - Email summarization and response drafting [Implemented](agents/Day-14-Email-Assistant)
 15. **Conversational Agent** - Advanced dialogue capabilities
 16. **Voice Assistant** - Voice-controlled agent
 17. **Music Recommendation Agent** - Personalized music discovery
