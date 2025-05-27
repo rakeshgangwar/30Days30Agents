@@ -94,8 +94,8 @@ Each week consists of 6 agents followed by a break day.
 14. **Email Assistant** - Email summarization and response drafting [Implemented](agents/Day-14-Email-Assistant)
 15. **Conversational Agent** - Advanced dialogue capabilities
 16. **Voice Assistant** - Voice-controlled agent [Implemented](agents/Day-16-Voice-Assistant)
-17. **Music Recommendation Agent** - Personalized music discovery
-18. **Language Translation Agent** - Real-time translation services
+17. **Music Recommendation Agent** - Personalized music discovery [Implemented](agents/Day-17-Music-Recommendation-Agent)
+18. **Language Translation Agent** - Real-time translation services [Implemented](agents/Day-18-Language-Translation-Agent)
 
 
 ### Week 4: Productivity & Analysis Agents
