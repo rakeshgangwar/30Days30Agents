@@ -1,0 +1,43 @@
+[project]
+name = "meeting-assistant"
+version = "0.1.0"
+description = "AI-powered meeting assistant for virtual and physical meetings with transcription, speaker diarization, and intelligent summarization"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aiofiles>=24.1.0",
+    "alembic>=1.16.1",
+    "celery>=5.5.2",
+    "cryptography>=45.0.3",
+    "fastapi>=0.115.12",
+    "ffmpeg-python>=0.2.0",
+    "httpx>=0.28.1",
+    "huggingface-hub>=0.32.2",
+    "loguru>=0.7.3",
+    "ollama>=0.4.9",
+    "openai>=1.82.0",
+    "openai-whisper>=20240930",
+    "psycopg2-binary>=2.9.10",
+    "pyannote-audio>=3.3.2",
+    "pydantic-settings>=2.9.1",
+    "python-dotenv>=1.1.0",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.20",
+    "redis>=6.2.0",
+    "sqlalchemy>=2.0.41",
+    "torch>=2.7.0",
+    "torchaudio>=2.7.0",
+    "uvicorn[standard]>=0.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "flake8>=7.2.0",
+    "isort>=6.0.1",
+    "mypy>=1.15.0",
+    "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.1.1",
+]
