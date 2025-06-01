@@ -100,8 +100,8 @@ Each week consists of 6 agents followed by a break day.
 
 ### Week 4: Productivity & Analysis Agents
 19. **Document Analyzer** - Extract insights from documents [Implemented](agents/Day-19-Document-Analyzer)
-20. **Meeting Assistant** - Meeting notes and action item tracking
-21. **Image Generation Assistant** - Text-to-image creation
+20. **Meeting Assistant** - Meeting notes and action item tracking [Partially Implemented](agents/Day-20-Meeting-Assistant)
+21. **Image Generation Assistant** - Text-to-image creation [Implemented](agents/Day-21-Image-Generation-Assistant)
 22. **E-commerce Assistant** - Shopping recommendations
 23. **Job Search Assistant** - Job matching and application help
 24. **Study Buddy** - Interactive learning and quiz generation
